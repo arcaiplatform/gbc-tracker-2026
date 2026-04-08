@@ -204,7 +204,7 @@
     <div class="stat-row" id="statRow">
       <div class="stat-card"><div class="stat-label">Tournament</div><div class="stat-value" style="font-size:15px">The Masters</div><div class="stat-sub">Augusta National · 2026</div></div>
       <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value" id="statPlayers">28</div><div class="stat-sub">entries</div></div>
-      <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">15</div><div class="stat-sub">playing all 4 majors</div></div>
+      <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value" id="statGBC">–</div><div class="stat-sub">playing all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">$5,200</div><div class="stat-sub">26 × $200 entry</div></div>
     </div>
 
@@ -390,7 +390,7 @@ const BETTERS = [
   { name: "Rod Walters",           short: "Rod Walters",          gbc: false, paid: false, picks: ["Jon Rahm","Ludvig Aberg","Matt Fitzpatrick","Bryson DeChambeau"] },
 
   { name: "Anthony Mar",           short: "Anthony Mar",          gbc: false, paid: true,  picks: ["Xander Schauffele","Bryson DeChambeau","Ludvig Aberg","Jon Rahm"] },
-  { name: "Tim Walters",           short: "Tim Walters",          gbc: false, paid: false, picks: ["Jon Rahm","Ludvig Aberg","Scottie Scheffler","Matt Fitzpatrick"] },
+  { name: "Tim Walters",           short: "Tim Walters",          gbc: false, paid: true,  picks: ["Jon Rahm","Ludvig Aberg","Scottie Scheffler","Matt Fitzpatrick"] },
   { name: "Don Morris",            short: "Don Morris",           gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Bryson DeChambeau","Ludvig Aberg"] },
   { name: "Christian Fassari",     short: "Christian Fassari",    gbc: false, paid: false, picks: ["Scottie Scheffler","Ludvig Aberg","Bryson DeChambeau","Corey Conners"] },
   { name: "Scott Stevens",         short: "Scott Stevens",        gbc: true,  paid: true,  picks: ["Bryson DeChambeau","Scottie Scheffler","Xander Schauffele","Ludvig Aberg"] },
@@ -695,7 +695,11 @@ function renderLeaderboard() {
     tr.innerHTML = `
       <td class="rank-num">${displayRank}</td>
       <td>
-        <div class="better-name">${better.name}${better.gbc ? '<span class="gbc-tag">GBC</span>' : ''}</div>
+        <div class="better-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          ${better.name}
+          ${better.gbc ? '<span class="gbc-tag">GBC</span>' : ''}
+          ${!better.paid ? '<span style="font-size:10px;font-weight:700;background:var(--red-light);color:var(--red);padding:1px 6px;border-radius:3px;border:1px solid #fca5a5">NOT PAID</span>' : ''}
+        </div>
         ${pillsHTML}
       </td>
       <td class="num">${scoreHTML}</td>
@@ -711,6 +715,8 @@ function renderLeaderboard() {
 
   document.getElementById("loading").style.display = "none";
   document.getElementById("lbTable").style.display = "table";
+  document.getElementById("statPlayers").textContent = BETTERS.length;
+  document.getElementById("statGBC").textContent = BETTERS.filter(b => b.gbc).length;
 }
 
 // ============================================================
