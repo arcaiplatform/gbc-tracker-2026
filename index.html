@@ -299,7 +299,7 @@
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value" id="gbc26Count">–</div><div class="stat-sub">entered all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">Current Leader</div><div class="stat-value" style="font-size:15px" id="gbc26Leader">–</div><div class="stat-sub" id="gbc26LeaderScore">after Masters</div></div>
       <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters · PGA · US Open · The Open</div></div>
-      <div class="stat-card"><div class="stat-label">GBC Entry</div><div class="stat-value">$800</div><div class="stat-sub">$200 × 4 majors</div></div>
+      <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value" id="gbc26Pool">–</div><div class="stat-sub" id="gbc26PoolSub">players × $200</div></div>
     </div>
     <div class="card">
       <div class="card-header">
@@ -844,6 +844,9 @@ function renderGBC2026() {
 
   // Update header stats
   document.getElementById("gbc26Count").textContent = gbcBetters.length;
+  const gbcPool = gbcBetters.length * 200;
+  document.getElementById("gbc26Pool").textContent = "$" + gbcPool.toLocaleString();
+  document.getElementById("gbc26PoolSub").textContent = gbcBetters.length + " players × $200";
   const leader = rows.find(r => !r.eliminated && r.total !== null);
   if (leader) {
     document.getElementById("gbc26Leader").textContent = leader.better.name.split(" ").slice(-1)[0]; // last name
