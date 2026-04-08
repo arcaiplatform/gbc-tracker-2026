@@ -182,8 +182,9 @@
     <button class="tab-btn active" onclick="showTab('leaderboard', this)">🏆 Betters Leaderboard</button>
     <button class="tab-btn" onclick="showTab('golfers', this)">🏌️ Golfer Scores</button>
     <button class="tab-btn" onclick="showTab('picks', this)">📋 All Picks</button>
-    <button class="tab-btn" onclick="showTab('gbc', this)">📊 GBC Season</button>
+    <button class="tab-btn" onclick="showTab('gbc2026', this)">🏆 GBC 2026</button>
     <button class="tab-btn" onclick="showTab('records', this)">📖 Record Book</button>
+    <button class="tab-btn" onclick="showTab('gbc', this)">📊 GBC 2025</button>
     <button class="tab-btn" onclick="showTab('rules', this)">📜 Rules</button>
   </div>
 </nav>
@@ -204,7 +205,7 @@
       <div class="stat-card"><div class="stat-label">Tournament</div><div class="stat-value" style="font-size:15px">The Masters</div><div class="stat-sub">Augusta National · 2026</div></div>
       <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value" id="statPlayers">28</div><div class="stat-sub">entries</div></div>
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">15</div><div class="stat-sub">playing all 4 majors</div></div>
-      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">$5,600</div><div class="stat-sub">28 × $200 entry</div></div>
+      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">$5,200</div><div class="stat-sub">26 × $200 entry</div></div>
     </div>
 
     <div class="card">
@@ -286,6 +287,44 @@
     </div>
   </section>
 
+  <!-- GBC 2026 LIVE -->
+  <section class="section" id="sec-gbc2026">
+    <div class="status-bar" style="margin-bottom:16px">
+      <div>
+        <div class="status-text">GBC 2026 — Live Season Standings</div>
+        <div class="status-sub">Cumulative score across all 4 majors · Masters in progress · 3 majors remaining</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value" id="gbc26Count">–</div><div class="stat-sub">entered all 4 majors</div></div>
+      <div class="stat-card"><div class="stat-label">Current Leader</div><div class="stat-value" style="font-size:15px" id="gbc26Leader">–</div><div class="stat-sub" id="gbc26LeaderScore">after Masters</div></div>
+      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters · PGA · US Open · The Open</div></div>
+      <div class="stat-card"><div class="stat-label">GBC Entry</div><div class="stat-value">$800</div><div class="stat-sub">$200 × 4 majors</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">GBC 2026 Standings — After Masters</div>
+          <div class="card-sub">Live Masters score only · PGA Championship, US Open &amp; The Open scores TBD</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Better</th>
+            <th class="num">Total</th>
+            <th class="num">Masters</th>
+            <th class="num">PGA Champ</th>
+            <th class="num">US Open</th>
+            <th class="num">The Open</th>
+          </tr>
+        </thead>
+        <tbody id="gbc2026Body"></tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- RECORDS -->
   <section class="section" id="sec-records">
     <div class="records-grid" id="recordsGrid"></div>
@@ -341,7 +380,7 @@ const BETTERS = [
   { name: "Geoff White",           short: "Geoff White",          gbc: false, paid: false, picks: ["Bryson DeChambeau","Scottie Scheffler","Tommy Fleetwood","Jon Rahm"] },
   { name: "Anthony Fassari",       short: "Anthony Fassari",      gbc: true,  paid: true,  picks: ["Scottie Scheffler","Bryson DeChambeau","Cameron Young","Ludvig Aberg"] },
   { name: "Rod Walters",           short: "Rod Walters",          gbc: false, paid: false, picks: ["Jon Rahm","Ludvig Aberg","Matt Fitzpatrick","Bryson DeChambeau"] },
-  { name: "Mike Carpenter",        short: "Mike Carpenter",       gbc: false, paid: false, picks: [] },
+
   { name: "Anthony Mar",           short: "Anthony Mar",          gbc: false, paid: true,  picks: ["Xander Schauffele","Bryson DeChambeau","Ludvig Aberg","Jon Rahm"] },
   { name: "Tim Walters",           short: "Tim Walters",          gbc: false, paid: false, picks: ["Jon Rahm","Ludvig Aberg","Scottie Scheffler","Matt Fitzpatrick"] },
   { name: "Don Morris",            short: "Don Morris",           gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Bryson DeChambeau","Ludvig Aberg"] },
@@ -356,7 +395,7 @@ const BETTERS = [
   { name: "Jim Stankiwicz",        short: "Jim Stankiwicz",       gbc: true,  paid: true,  picks: ["Scottie Scheffler","Cameron Young","Bryson DeChambeau","Akshay Bhatia"] },
   { name: "Matt Mingrone",         short: "Matt Mingrone",        gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Ludvig Aberg","Cameron Young"] },
   { name: "Joe Cassele",           short: "Joe Cassele",          gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Hideki Matsuyama","Ludvig Aberg"] },
-  { name: "Larry Salus",           short: "Larry Salus",          gbc: false, paid: false, picks: [] },
+
 ];
 
 // Name normalization — ESPN uses different casings
@@ -580,15 +619,26 @@ function renderLeaderboard() {
     return { better: b, ...calc };
   });
 
-  // Sort: non-eliminated first, by score asc; eliminated last
-  rows.sort((a, b) => {
-    if (a.eliminated && !b.eliminated) return 1;
-    if (!a.eliminated && b.eliminated) return -1;
-    if (a.totalScore === null && b.totalScore !== null) return 1;
-    if (a.totalScore !== null && b.totalScore === null) return -1;
-    if (a.totalScore !== null && b.totalScore !== null) return a.totalScore - b.totalScore;
-    return 0;
-  });
+  // Detect if tournament has started (any golfer has moved off E or has thru > 0)
+  const tournamentStarted = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
+
+  if (tournamentStarted) {
+    // Sort by score during tournament: non-eliminated first, then by score asc
+    rows.sort((a, b) => {
+      if (a.eliminated && !b.eliminated) return 1;
+      if (!a.eliminated && b.eliminated) return -1;
+      if (a.totalScore === null && b.totalScore !== null) return 1;
+      if (a.totalScore !== null && b.totalScore === null) return -1;
+      if (a.totalScore !== null && b.totalScore !== null) return a.totalScore - b.totalScore;
+      return 0;
+    });
+  } else {
+    // Pre-tournament: sort alphabetically by last name
+    rows.sort((a, b) => {
+      const lastName = r => r.better.name.trim().split(" ").pop().toLowerCase();
+      return lastName(a).localeCompare(lastName(b));
+    });
+  }
 
   const tbody = document.getElementById("lbBody");
   tbody.innerHTML = "";
@@ -599,8 +649,7 @@ function renderLeaderboard() {
     const tr = document.createElement("tr");
     if (eliminated) tr.className = "elim-row";
 
-    const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "";
-    const displayRank = eliminated ? "–" : (medal || rank);
+    const displayRank = eliminated ? "–" : rank;
 
     // Build golfer pills for the name cell
     let pillsHTML = "";
@@ -635,7 +684,7 @@ function renderLeaderboard() {
 
     tr.dataset.search = (better.name + " " + (better.picks || []).join(" ")).toLowerCase();
     tr.innerHTML = `
-      <td class="rank-num">${medal || (eliminated ? "–" : rank)}</td>
+      <td class="rank-num">${displayRank}</td>
       <td>
         <div class="better-name">${better.name}${better.gbc ? '<span class="gbc-tag">GBC</span>' : ''}</div>
         ${pillsHTML}
@@ -751,9 +800,8 @@ function renderGBC() {
   tbody.innerHTML = "";
   GBC_2025.forEach((row, i) => {
     const tr = document.createElement("tr");
-    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "";
     tr.innerHTML = `
-      <td class="rank-num">${medal || i+1}</td>
+      <td class="rank-num">${i+1}</td>
       <td class="better-name">${row.name}</td>
       <td class="num ${scoreCls(row.total)}">${fmtScore(row.total)}</td>
       <td class="num ${scoreCls(row.masters)}">${fmtScore(row.masters)}</td>
@@ -765,8 +813,67 @@ function renderGBC() {
 }
 
 // ============================================================
-// RENDER RECORDS
+// RENDER GBC 2026 LIVE
 // ============================================================
+function renderGBC2026() {
+  const gbcBetters = BETTERS.filter(b => b.gbc);
+  const rows = gbcBetters.map(b => {
+    const calc = calcBetter(b);
+    const mastersScore = calc.eliminated ? null : calc.totalScore;
+    const total = mastersScore !== null ? mastersScore : null;
+    return { better: b, mastersScore, total, eliminated: calc.eliminated };
+  });
+
+  // Sort by masters score (total so far), alphabetical if all even
+  const tournamentStarted = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
+  if (tournamentStarted) {
+    rows.sort((a, b) => {
+      if (a.eliminated && !b.eliminated) return 1;
+      if (!a.eliminated && b.eliminated) return -1;
+      if (a.total === null && b.total !== null) return 1;
+      if (a.total !== null && b.total === null) return -1;
+      if (a.total !== null && b.total !== null) return a.total - b.total;
+      return 0;
+    });
+  } else {
+    rows.sort((a, b) => {
+      const lastName = r => r.better.name.trim().split(" ").pop().toLowerCase();
+      return lastName(a).localeCompare(lastName(b));
+    });
+  }
+
+  // Update header stats
+  document.getElementById("gbc26Count").textContent = gbcBetters.length;
+  const leader = rows.find(r => !r.eliminated && r.total !== null);
+  if (leader) {
+    document.getElementById("gbc26Leader").textContent = leader.better.name.split(" ").slice(-1)[0]; // last name
+    document.getElementById("gbc26LeaderScore").textContent = fmtScore(leader.total) + " (Masters)";
+  }
+
+  const tbody = document.getElementById("gbc2026Body");
+  tbody.innerHTML = "";
+  let rank = 1;
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    if (row.eliminated) tr.className = "elim-row";
+    const mastersDisp = row.eliminated ? '<span class="over">ELIM</span>' : fmtScore(row.mastersScore);
+    const mastersCls = row.eliminated ? "" : scoreCls(row.mastersScore);
+    const totalDisp = row.eliminated ? '<span class="over">ELIM</span>' : fmtScore(row.total);
+    const totalCls = row.eliminated ? "" : scoreCls(row.total);
+    tr.innerHTML = `
+      <td class="rank-num">${row.eliminated ? "–" : rank}</td>
+      <td class="better-name">${row.better.name}</td>
+      <td class="num ${totalCls}">${totalDisp}</td>
+      <td class="num ${mastersCls}">${mastersDisp}</td>
+      <td class="num even" style="color:var(--text-muted)">TBD</td>
+      <td class="num even" style="color:var(--text-muted)">TBD</td>
+      <td class="num even" style="color:var(--text-muted)">TBD</td>`;
+    tbody.appendChild(tr);
+    if (!row.eliminated) rank++;
+  });
+}
+
+
 function renderRecords() {
   const grid = document.getElementById("recordsGrid");
   grid.innerHTML = "";
@@ -811,6 +918,7 @@ function renderAll() {
   renderGolfers();
   renderPicks();
   renderGBC();
+  renderGBC2026();
   renderRecords();
   document.getElementById("statPlayers").textContent = BETTERS.length;
 }
