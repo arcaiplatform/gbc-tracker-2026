@@ -42,7 +42,7 @@
 
   /* TABS */
   .tabs-bar { background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-  .tabs-inner { max-width: 1100px; margin: 0 auto; display: flex; padding: 0 20px; gap: 0; overflow-x: auto; }
+  .tabs-inner { max-width: 1100px; margin: 0 auto; display: flex; padding: 0 20px; gap: 0; flex-wrap: wrap; }
   .tab-btn { padding: 14px 20px; font-size: 13px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-bottom: 2.5px solid transparent; white-space: nowrap; transition: all .15s; }
   .tab-btn:hover { color: var(--text); }
   .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
@@ -421,7 +421,7 @@
 const BETTERS = [
   { name: "Joseph Jamie Pehanick", short: "J.J. Pehanick",      gbc: true,  paid: true,  picks: ["Ludvig Aberg","Xander Schauffele","Bryson DeChambeau","Rory McIlroy"] },
   { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",    gbc: false, paid: true,  picks: ["Jon Rahm","Scottie Scheffler","Ludvig Aberg","Rory McIlroy"] },
-  { name: "Jason Henderstein",     short: "Jason Henderstein",  gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
+  { name: "Jason Henderstein",     short: "Jason Henderstein",  gbc: false, paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
   { name: "Doug Colliau",          short: "Doug Colliau",       gbc: true,  paid: true,  picks: ["Cameron Young","Chris Gotterup","Bryson DeChambeau","Ludvig Aberg"] },
   { name: "Brian McCarthy",        short: "Brian McCarthy",     gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Ludvig Aberg","Bryson DeChambeau"] },
   { name: "George Pehanick",       short: "George Pehanick",   gbc: true,  paid: true,  picks: ["Tommy Fleetwood","Justin Rose","Chris Gotterup","Hideki Matsuyama"] },
