@@ -681,11 +681,14 @@ function parseESPN(data) {
       const thru = c.status?.thru ?? null;
       const pos = c.status?.position?.displayName || c.status?.position?.shortDisplayName || "";
 
-      const rounds = c.linescores || c.rounds || [];
-      const r1 = rounds[0] ? (rounds[0].value ?? rounds[0].score ?? null) : null;
-      const r2 = rounds[1] ? (rounds[1].value ?? rounds[1].score ?? null) : null;
-      const r3 = rounds[2] ? (rounds[2].value ?? rounds[2].score ?? null) : null;
-      const r4 = rounds[3] ? (rounds[3].value ?? rounds[3].score ?? null) : null;
+      // Round scores — ESPN stores completed rounds in c.scores[] array (cumulative)
+      // and current round progress in linescores (hole by hole — NOT what we want)
+      // Use c.scores for completed round totals
+      const scores = c.scores || [];
+      const r1 = scores[0] != null ? parseInt(scores[0], 10) || null : null;
+      const r2 = scores[1] != null ? parseInt(scores[1], 10) || null : null;
+      const r3 = scores[2] != null ? parseInt(scores[2], 10) || null : null;
+      const r4 = scores[3] != null ? parseInt(scores[3], 10) || null : null;
 
       const isMC = status.toLowerCase().includes("cut") || toParStr === "MC"
         || (c.status?.type?.shortDetail || "").toUpperCase() === "MC";
@@ -771,7 +774,8 @@ function scoreCls(n) {
   return "even";
 }
 function fmtRound(r) {
-  return r !== null && r !== undefined ? r : "–";
+  if (r === null || r === undefined || isNaN(r) || r === 0) return "–";
+  return r; // raw stroke total for the round (e.g. 68, 71)
 }
 
 // ============================================================
