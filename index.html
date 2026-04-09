@@ -604,7 +604,8 @@ let refreshTimer = null;
 // ============================================================
 // ESPN API — multi-proxy fallback chain
 // ============================================================
-const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard?event=401580355";
+// Use generic PGA scoreboard — auto-serves current active tournament
+const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard";
 
 // Try multiple CORS proxies in order until one works
 const PROXIES = [
@@ -620,7 +621,6 @@ async function fetchWithProxy(url) {
       const res = await fetch(proxyUrl, { cache: "no-cache", signal: AbortSignal.timeout(8000) });
       if (!res.ok) continue;
       const text = await res.text();
-      // allorigins wraps in {contents:...}, others return raw
       try {
         const json = JSON.parse(text);
         if (json.contents) return JSON.parse(json.contents);
@@ -657,43 +657,52 @@ async function loadScores() {
 function parseESPN(data) {
   golferScores = {};
   try {
-    const competitors = data.events[0].competitions[0].competitors;
+    // Scoreboard returns events[], find the Masters (or first golf event)
+    const events = data.events || [];
+    // Prefer event with "Masters" in name, otherwise take first
+    const tourney = events.find(e => /masters/i.test(e.name || "")) || events[0];
+    if (!tourney) { console.warn("No golf events found in ESPN response"); return; }
+
+    const competition = tourney.competitions?.[0];
+    if (!competition) return;
+
+    const competitors = competition.competitors || [];
     for (const c of competitors) {
       const rawName = (c.athlete?.displayName || "").trim();
+      if (!rawName) continue;
       const name = normName(rawName);
-      const score = c.score?.value;         // overall toPar
-      const toParStr = c.score?.displayValue; // e.g. "-7" or "E"
+      const toParStr = c.score?.displayValue || c.linescores?.[0]?.displayValue || "E";
+
+      let toPar = 0;
+      if (toParStr === "E" || toParStr === "0") toPar = 0;
+      else toPar = parseInt(toParStr, 10) || 0;
+
       const status = c.status?.type?.name || "";
       const thru = c.status?.thru ?? null;
       const pos = c.status?.position?.displayName || c.status?.position?.shortDisplayName || "";
 
-      let toPar = 0;
-      if (toParStr === "E") toPar = 0;
-      else if (toParStr) toPar = parseInt(toParStr, 10) || 0;
+      const rounds = c.linescores || c.rounds || [];
+      const r1 = rounds[0] ? (rounds[0].value ?? rounds[0].score ?? null) : null;
+      const r2 = rounds[1] ? (rounds[1].value ?? rounds[1].score ?? null) : null;
+      const r3 = rounds[2] ? (rounds[2].value ?? rounds[2].score ?? null) : null;
+      const r4 = rounds[3] ? (rounds[3].value ?? rounds[3].score ?? null) : null;
 
-      // Round scores
-      const rounds = c.rounds || [];
-      const r1 = rounds[0] ? (rounds[0].score || null) : null;
-      const r2 = rounds[1] ? (rounds[1].score || null) : null;
-      const r3 = rounds[2] ? (rounds[2].score || null) : null;
-      const r4 = rounds[3] ? (rounds[3].score || null) : null;
-
-      const isMC = status.toLowerCase().includes("cut") || toParStr === "MC" || (c.status?.type?.shortDetail || "").toUpperCase() === "MC";
+      const isMC = status.toLowerCase().includes("cut") || toParStr === "MC"
+        || (c.status?.type?.shortDetail || "").toUpperCase() === "MC";
 
       golferScores[name.toLowerCase()] = { name, toPar, thru, pos, r1, r2, r3, r4, isMC, status };
-
-      // Also store raw name variant
       if (rawName.toLowerCase() !== name.toLowerCase()) {
         golferScores[rawName.toLowerCase()] = golferScores[name.toLowerCase()];
       }
     }
 
-    const tourney = data.events[0];
-    const detail = tourney?.competitions?.[0]?.status?.type?.shortDetail || "";
+    const detail = competition.status?.type?.shortDetail || competition.status?.type?.description || "";
     document.getElementById("roundInfo").textContent = detail;
-    const statusName = tourney?.competitions?.[0]?.status?.type?.name || "";
-    document.getElementById("statusText").textContent = tourney?.name || "Masters Tournament 2026";
-    document.getElementById("statusSub").textContent = detail || "Live data from ESPN";
+    document.getElementById("statusText").textContent = tourney.name || "Masters Tournament 2026";
+    document.getElementById("statusSub").textContent = detail
+      ? `${detail} · ${competitors.length} golfers`
+      : `${competitors.length} golfers loaded · Live from ESPN`;
+
   } catch (e) {
     console.warn("Parse error:", e);
   }
