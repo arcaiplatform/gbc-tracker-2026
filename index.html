@@ -602,12 +602,34 @@ let lastFetch = null;
 let refreshTimer = null;
 
 // ============================================================
-// ESPN API
+// ESPN API — multi-proxy fallback chain
 // ============================================================
-// CORS proxy — allorigins is a well-known free proxy
-const CORS = "https://api.allorigins.win/get?url=";
-// Masters 2026 event ID on ESPN
 const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard?event=401580355";
+
+// Try multiple CORS proxies in order until one works
+const PROXIES = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
+
+async function fetchWithProxy(url) {
+  for (const makeProxy of PROXIES) {
+    try {
+      const proxyUrl = makeProxy(url);
+      const res = await fetch(proxyUrl, { cache: "no-cache", signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const text = await res.text();
+      // allorigins wraps in {contents:...}, others return raw
+      try {
+        const json = JSON.parse(text);
+        if (json.contents) return JSON.parse(json.contents);
+        return json;
+      } catch { continue; }
+    } catch { continue; }
+  }
+  throw new Error("All proxies failed");
+}
 
 async function loadScores() {
   document.getElementById("statusText").textContent = "Fetching live scores...";
@@ -616,26 +638,21 @@ async function loadScores() {
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
   try {
-    const proxyUrl = CORS + encodeURIComponent(ESPN_URL);
-    const res = await fetch(proxyUrl, { cache: "no-cache" });
-    if (!res.ok) throw new Error("Proxy error: " + res.status);
-    const wrapper = await res.json();
-    const data = JSON.parse(wrapper.contents);
+    const data = await fetchWithProxy(ESPN_URL);
     parseESPN(data);
     lastFetch = new Date();
-    const ts = lastFetch.toLocaleTimeString();
-    document.getElementById("lastUpdated").textContent = "Updated " + ts;
+    document.getElementById("lastUpdated").textContent = "Updated " + lastFetch.toLocaleTimeString();
     renderAll();
   } catch (err) {
     console.error(err);
     document.getElementById("statusBar").className = "status-bar error-bar";
     document.getElementById("statusText").textContent = "⚠ Could not reach ESPN live data";
-    document.getElementById("statusSub").textContent = "Showing pre-tournament scores (E). Try refreshing or check your connection.";
-    document.getElementById("lastUpdated").textContent = "Failed — retry?";
-    // Render with all-even scores anyway
+    document.getElementById("statusSub").textContent = "All data sources failed. Scores shown as E. Will retry automatically.";
+    document.getElementById("lastUpdated").textContent = "Failed — retrying in 60s";
     renderAll();
   }
 }
+
 
 function parseESPN(data) {
   golferScores = {};
