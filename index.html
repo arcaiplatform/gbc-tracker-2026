@@ -205,7 +205,7 @@
       <div class="stat-card"><div class="stat-label">Tournament</div><div class="stat-value" style="font-size:15px">The Masters</div><div class="stat-sub">Augusta National · 2026</div></div>
       <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value" id="statPlayers">28</div><div class="stat-sub">entries</div></div>
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value" id="statGBC">–</div><div class="stat-sub">playing all 4 majors</div></div>
-      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">$5,200</div><div class="stat-sub">26 × $200 entry</div></div>
+      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value" id="statPool">–</div><div class="stat-sub" id="statPoolSub">entries × $200</div></div>
     </div>
 
     <div class="card">
@@ -263,18 +263,10 @@
 
   <!-- PICKS -->
   <section class="section" id="sec-picks">
-    <div id="picksLocked" style="display:none;text-align:center;padding:60px 20px;background:white;border:1px solid var(--border);border-radius:10px">
-      <div style="font-size:48px;margin-bottom:16px">🔒</div>
-      <div style="font-size:20px;font-weight:700;margin-bottom:8px">Picks locked until 5:00 PM PST</div>
-      <div style="font-size:14px;color:var(--text-muted)">Picks will be revealed once the first round is underway.<br>Check back after 5 PM Pacific time.</div>
-      <div style="margin-top:20px;font-size:13px;color:var(--text-muted)" id="picksCountdown"></div>
+    <div class="card-header" style="background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
+      <div><div class="card-title">All Picks — 2026 Masters</div><div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div></div>
     </div>
-    <div id="picksContent">
-      <div class="card-header" style="background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
-        <div><div class="card-title">All Picks — 2026 Masters</div><div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div></div>
-      </div>
-      <div class="picks-grid" id="picksGrid"></div>
-    </div>
+    <div class="picks-grid" id="picksGrid"></div>
   </section>
 
   <!-- GBC -->
@@ -715,6 +707,8 @@ function renderLeaderboard() {
   document.getElementById("lbTable").style.display = "table";
   document.getElementById("statPlayers").textContent = BETTERS.length;
   document.getElementById("statGBC").textContent = BETTERS.filter(b => b.gbc).length;
+  document.getElementById("statPool").textContent = "$" + (BETTERS.length * 200).toLocaleString();
+  document.getElementById("statPoolSub").textContent = BETTERS.length + " entries × $200";
 }
 
 // ============================================================
