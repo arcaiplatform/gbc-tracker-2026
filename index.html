@@ -88,8 +88,8 @@
   .cut-tag { display: inline-block; font-size: 10px; font-weight: 700; background: #fff7ed; color: #c2410c; padding: 1px 5px; border-radius: 3px; }
   .alt-tag { display: inline-block; font-size: 10px; font-weight: 700; background: #f0fdf4; color: #166534; padding: 1px 5px; border-radius: 3px; }
   .elim-row td { opacity: 0.4; }
-  .under { color: var(--blue); }
-  .over { color: var(--red); }
+  .under { color: var(--red); }
+  .over { color: var(--text); }
   .even { color: var(--text-muted); }
   .golfer-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
   .pill { font-size: 11px; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-muted); background: var(--gray-light); }
@@ -247,7 +247,7 @@
             <th style="width:36px">#</th>
             <th>Better</th>
             <th class="num">Score</th>
-            <th class="num" style="min-width:70px">Thru</th>
+            <th class="num" style="min-width:80px">Holes</th>
             <th class="num">R1</th>
             <th class="num">R2</th>
             <th class="num">R3</th>
@@ -752,9 +752,13 @@ function calcBetter(better) {
 
   const totalScore = eliminated ? null : usedGolfers.reduce((sum, g) => sum + (g.toPar || 0), 0);
 
-  // Thru info — show most advanced golfer's thru
-  const thruVals = usedGolfers.map(g => g.thru).filter(t => t !== null && t !== undefined);
-  const thruInfo = thruVals.length ? (Math.max(...thruVals) === 18 ? "F" : "Thru " + Math.max(...thruVals)) : "–";
+  // Thru info — sum holes completed across all 3 counting golfers (max 54 per round)
+  const thruVals = usedGolfers.map(g => {
+    if (g.isMC) return 18; // MC = finished their round
+    return (g.thru !== null && g.thru !== undefined) ? g.thru : 0;
+  });
+  const holesPlayed = thruVals.reduce((a, b) => a + b, 0);
+  const thruInfo = holesPlayed > 0 ? `${holesPlayed}/54` : "–";
 
   return { totalScore, eliminated, golferData, usedGolfers, thruInfo };
 }
@@ -862,7 +866,13 @@ function renderLeaderboard() {
         ${pillsHTML}
       </td>
       <td class="num">${scoreHTML}</td>
-      <td class="num" style="font-size:11px;color:var(--text-muted)">${thruInfo}</td>
+      <td class="num" style="font-size:11px;color:var(--text-muted);min-width:80px">
+        ${thruInfo !== "–" ? `
+          <div style="font-weight:600;margin-bottom:3px">${thruInfo}</div>
+          <div style="background:var(--border);border-radius:3px;height:4px;width:60px;margin-left:auto">
+            <div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((parseInt(thruInfo)||0)/54*100)}%"></div>
+          </div>` : "–"}
+      </td>
       <td class="num" style="font-size:12px">${hasR1 ? fmtScore(r1) : "–"}</td>
       <td class="num" style="font-size:12px">${hasR2 ? fmtScore(r2) : "–"}</td>
       <td class="num" style="font-size:12px">${hasR3 ? fmtScore(r3) : "–"}</td>
