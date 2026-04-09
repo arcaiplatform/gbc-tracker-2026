@@ -632,8 +632,8 @@ async function fetchWithProxy(url) {
 }
 
 async function loadScores() {
-  document.getElementById("statusText").textContent = "Fetching live scores...";
-  document.getElementById("statusSub").textContent = "Connecting to ESPN";
+  const btn = document.querySelector('.refresh-btn');
+  if (btn) { btn.textContent = "↻ Loading..."; btn.disabled = true; }
   document.getElementById("statusBar").className = "status-bar";
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
@@ -642,14 +642,18 @@ async function loadScores() {
     parseESPN(data);
     lastFetch = new Date();
     document.getElementById("lastUpdated").textContent = "Updated " + lastFetch.toLocaleTimeString();
+    const btn = document.querySelector('.refresh-btn');
+    if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     renderAll();
   } catch (err) {
     console.error(err);
+    const btn = document.querySelector('.refresh-btn');
+    if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     document.getElementById("statusBar").className = "status-bar error-bar";
     document.getElementById("statusText").textContent = "⚠ Could not reach ESPN live data";
-    document.getElementById("statusSub").textContent = "All data sources failed. Scores shown as E. Will retry automatically.";
+    document.getElementById("statusSub").textContent = "Showing last known scores. Will retry automatically.";
     document.getElementById("lastUpdated").textContent = "Failed — retrying in 60s";
-    renderAll();
+    // Do NOT re-render — keep existing scores on screen
   }
 }
 
