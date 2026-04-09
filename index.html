@@ -376,34 +376,33 @@
 // PLAYER DATA — 2026 MASTERS
 // ============================================================
 const BETTERS = [
-  { name: "Joseph Jamie Pehanick", short: "J.J. Pehanick",       gbc: true,  paid: true,  picks: ["Ludvig Aberg","Xander Schauffele","Bryson DeChambeau","Rory McIlroy"] },
-  { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",      gbc: false, paid: false, picks: ["Jon Rahm","Scottie Scheffler","Ludvig Aberg","Rory McIlroy"] },
-  { name: "Jason Henderstein",     short: "Jason Henderstein",    gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
-  { name: "Doug Colliau",          short: "Doug Colliau",         gbc: true,  paid: true,  picks: ["Cameron Young","Tommy Fleetwood","Jon Rahm","Scottie Scheffler"] },
-  { name: "Brian McCarthy",        short: "Brian McCarthy",       gbc: true,  paid: true,  picks: ["Scottie Scheffler","Bryson DeChambeau","Jon Rahm","Rory McIlroy"] },
-  { name: "George Pehanick",       short: "George Pehanick",      gbc: true,  paid: true,  picks: ["Tommy Fleetwood","Justin Rose","Ludvig Aberg","Cameron Young"] },
-  { name: "Greg Hawley",           short: "Greg Hawley",          gbc: false, paid: true,  picks: ["Rory McIlroy","Tommy Fleetwood","Ludvig Aberg","Jon Rahm"] },
-  { name: "Tom Van Ormer",         short: "Tom Van Ormer",        gbc: true,  paid: true,  picks: ["Bryson DeChambeau","Ludvig Aberg","Jon Rahm","Rory McIlroy"] },
-  { name: "Tom Counts",            short: "Tom Counts",           gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Jon Rahm","Bryson DeChambeau"] },
-  { name: "Geoff White",           short: "Geoff White",          gbc: false, paid: false, picks: ["Bryson DeChambeau","Scottie Scheffler","Tommy Fleetwood","Jon Rahm"] },
-  { name: "Anthony Fassari",       short: "Anthony Fassari",      gbc: true,  paid: true,  picks: ["Scottie Scheffler","Bryson DeChambeau","Cameron Young","Ludvig Aberg"] },
-  { name: "Rod Walters",           short: "Rod Walters",          gbc: false, paid: false, picks: ["Jon Rahm","Ludvig Aberg","Matt Fitzpatrick","Bryson DeChambeau"] },
-
-  { name: "Anthony Mar",           short: "Anthony Mar",          gbc: false, paid: true,  picks: ["Xander Schauffele","Bryson DeChambeau","Ludvig Aberg","Jon Rahm"] },
-  { name: "Tim Walters",           short: "Tim Walters",          gbc: false, paid: true,  picks: ["Jon Rahm","Ludvig Aberg","Scottie Scheffler","Matt Fitzpatrick"] },
-  { name: "Don Morris",            short: "Don Morris",           gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Bryson DeChambeau","Ludvig Aberg"] },
-  { name: "Christian Fassari",     short: "Christian Fassari",    gbc: false, paid: false, picks: ["Scottie Scheffler","Ludvig Aberg","Bryson DeChambeau","Corey Conners"] },
-  { name: "Scott Stevens",         short: "Scott Stevens",        gbc: true,  paid: true,  picks: ["Bryson DeChambeau","Scottie Scheffler","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Tony Quintong",         short: "Tony Quintong",        gbc: false, paid: true,  picks: ["Cameron Young","Sepp Straka","Justin Rose","Jon Rahm"] },
-  { name: "Jay Ress",              short: "Jay Ress",             gbc: false, paid: true,  picks: ["Jon Rahm","Bryson DeChambeau","Matt Fitzpatrick","Cameron Young"] },
-  { name: "Rob Law",               short: "Rob Law",              gbc: false, paid: true,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Bryson DeChambeau","Jon Rahm"] },
-  { name: "Scott Creighton",       short: "Scott Creighton",      gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Chris Gotterup","Justin Rose"] },
-  { name: "David Andres Morgan",   short: "David A. Morgan",      gbc: true,  paid: true,  picks: ["Scottie Scheffler","Xander Schauffele","Ludvig Aberg","Bryson DeChambeau"] },
-  { name: "Kevin Shinar",          short: "Kevin Shinar",         gbc: true,  paid: true,  picks: ["Ludvig Aberg","Jon Rahm","Justin Rose","Tommy Fleetwood"] },
-  { name: "Jim Stankiwicz",        short: "Jim Stankiwicz",       gbc: true,  paid: true,  picks: ["Scottie Scheffler","Cameron Young","Bryson DeChambeau","Akshay Bhatia"] },
-  { name: "Matt Mingrone",         short: "Matt Mingrone",        gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Ludvig Aberg","Cameron Young"] },
-  { name: "Joe Cassele",           short: "Joe Cassele",          gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Hideki Matsuyama","Ludvig Aberg"] },
-
+  { name: "Joseph Jamie Pehanick", short: "J.J. Pehanick",      gbc: true,  paid: true,  picks: ["Ludvig Aberg","Xander Schauffele","Bryson DeChambeau","Rory McIlroy"] },
+  { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",    gbc: false, paid: true,  picks: ["Jon Rahm","Scottie Scheffler","Ludvig Aberg","Rory McIlroy"] },
+  { name: "Jason Henderstein",     short: "Jason Henderstein",  gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
+  { name: "Doug Colliau",          short: "Doug Colliau",       gbc: true,  paid: true,  picks: ["Cameron Young","Chris Gotterup","Bryson DeChambeau","Ludvig Aberg"] },
+  { name: "Brian McCarthy",        short: "Brian McCarthy",     gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Ludvig Aberg","Bryson DeChambeau"] },
+  { name: "George Pehanick",       short: "George Pehanick",   gbc: true,  paid: true,  picks: ["Tommy Fleetwood","Justin Rose","Chris Gotterup","Hideki Matsuyama"] },
+  { name: "Greg Hawley",           short: "Greg Hawley",       gbc: false, paid: true,  picks: ["Rory McIlroy","Tommy Fleetwood","Jon Rahm","Chris Gotterup"] },
+  { name: "Tom Van Ormer",         short: "Tom Van Ormer",     gbc: true,  paid: true,  picks: ["Bryson DeChambeau","Scottie Scheffler","Jacob Bridgeman","Chris Gotterup"] },
+  { name: "Tom Counts",            short: "Tom Counts",        gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Jake Knapp","Xander Schauffele"] },
+  { name: "Geoff White",           short: "Geoff White",       gbc: true,  paid: true,  picks: ["Bryson DeChambeau","Scottie Scheffler","Tommy Fleetwood","Jon Rahm"] },
+  { name: "Anthony Fassari",       short: "Anthony Fassari",   gbc: true,  paid: true,  picks: ["Scottie Scheffler","Bryson DeChambeau","Cameron Young","Ludvig Aberg"] },
+  { name: "Rod Walters",           short: "Rod Walters",       gbc: true,  paid: true,  picks: ["Matt Fitzpatrick","Robert Macintyre","Jon Rahm","Ludvig Aberg"] },
+  { name: "Anthony Mar",           short: "Anthony Mar",       gbc: false, paid: true,  picks: ["Xander Schauffele","Scottie Scheffler","Ludvig Aberg","Bryson DeChambeau"] },
+  { name: "Tim Walters",           short: "Tim Walters",       gbc: false, paid: true,  picks: ["Jon Rahm","Ludvig Aberg","Scottie Scheffler","Matt Fitzpatrick"] },
+  { name: "Don Morris",            short: "Don Morris",        gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Bryson DeChambeau","Ludvig Aberg"] },
+  { name: "Christian Fassari",     short: "Christian Fassari", gbc: true,  paid: true,  picks: ["Scottie Scheffler","Ludvig Aberg","Bryson DeChambeau","Corey Conners"] },
+  { name: "Scott Stevens",         short: "Scott Stevens",     gbc: true,  paid: true,  picks: ["Bryson DeChambeau","Scottie Scheffler","Xander Schauffele","Ludvig Aberg"] },
+  { name: "Tony Quintong",         short: "Tony Quintong",     gbc: false, paid: true,  picks: ["Cameron Young","Sepp Straka","Justin Rose","Jon Rahm"] },
+  { name: "Jay Ress",              short: "Jay Ress",          gbc: false, paid: true,  picks: ["Matt Fitzpatrick","Cameron Young","Bryson DeChambeau","Jon Rahm"] },
+  { name: "Rob Law",               short: "Rob Law",           gbc: false, paid: true,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Bryson DeChambeau","Jon Rahm"] },
+  { name: "Scott Creighton",       short: "Scott Creighton",   gbc: false, paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Chris Gotterup","Justin Rose"] },
+  { name: "David Andres Morgan",   short: "David A. Morgan",   gbc: true,  paid: true,  picks: ["Scottie Scheffler","Xander Schauffele","Ludvig Aberg","Bryson DeChambeau"] },
+  { name: "Kevin Shinar",          short: "Kevin Shinar",      gbc: true,  paid: true,  picks: ["Ludvig Aberg","Justin Rose","Tommy Fleetwood","Jon Rahm"] },
+  { name: "Jim Stankiwicz",        short: "Jim Stankiwicz",    gbc: true,  paid: true,  picks: ["Scottie Scheffler","Cameron Young","Bryson DeChambeau","Akshay Bhatia"] },
+  { name: "Matt Mingrone",         short: "Matt Mingrone",     gbc: true,  paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Ludvig Aberg","Cameron Young"] },
+  { name: "Joe Cassele",           short: "Joe Cassele",       gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Hideki Matsuyama","Ludvig Aberg"] },
+  { name: "Mike Adams",            short: "Mike Adams",        gbc: false, paid: true,  picks: ["Jon Rahm","Bryson DeChambeau","Ludvig Aberg","Cameron Young"] },
 ];
 
 // Name normalization — ESPN uses different casings
@@ -659,10 +658,9 @@ function renderLeaderboard() {
 
     const displayRank = eliminated ? "–" : rank;
 
-    // Build golfer pills for the name cell — hidden until picks reveal at 5PM PST April 8
-    const picksRevealed = new Date() >= new Date("2026-04-09T00:00:00Z");
+    // Build golfer pills for the name cell
     let pillsHTML = "";
-    if (picksRevealed && golferData && golferData.length > 0) {
+    if (golferData && golferData.length > 0) {
       pillsHTML = '<div class="golfer-pills">';
       golferData.forEach((g, idx) => {
         let cls = "pill";
@@ -773,43 +771,6 @@ function renderPicks() {
   const container = document.getElementById("picksGrid");
   container.innerHTML = "";
 
-  // Hidden until 5:00 PM PST (UTC-7 during PDT) on April 8, 2026
-  // 5PM PDT = midnight UTC April 9
-  const revealTime = new Date("2026-04-09T00:00:00Z");
-  const now = new Date();
-  if (now < revealTime) {
-    const diff = revealTime - now;
-    const hrs = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
-    container.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px">
-        <div style="font-size:40px;margin-bottom:16px">🔒</div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px">Picks locked until 5:00 PM PST</div>
-        <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px">April 8, 2026 · Reveals when the deadline hits</div>
-        <div style="font-size:36px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--green);letter-spacing:2px" id="pickCountdown">${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px">hours : minutes : seconds</div>
-      </div>`;
-    // Tick the countdown every second
-    if (!window._pickCountdownTimer) {
-      window._pickCountdownTimer = setInterval(() => {
-        const el = document.getElementById("pickCountdown");
-        if (!el) { clearInterval(window._pickCountdownTimer); window._pickCountdownTimer = null; return; }
-        const rem = revealTime - new Date();
-        if (rem <= 0) {
-          clearInterval(window._pickCountdownTimer);
-          window._pickCountdownTimer = null;
-          renderPicks();
-          return;
-        }
-        const h = Math.floor(rem / 3600000);
-        const m = Math.floor((rem % 3600000) / 60000);
-        const s = Math.floor((rem % 60000) / 1000);
-        el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      }, 1000);
-    }
-    return;
-  }
   BETTERS.forEach(b => {
     const calc = calcBetter(b);
     const { totalScore, eliminated, golferData } = calc;
