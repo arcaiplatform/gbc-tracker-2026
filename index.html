@@ -601,23 +601,33 @@ const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderb
 
 // Try multiple CORS proxies in order until one works
 const PROXIES = [
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
   url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
   url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
 ];
 
 async function fetchWithProxy(url) {
   for (const makeProxy of PROXIES) {
     try {
       const proxyUrl = makeProxy(url);
-      const res = await fetch(proxyUrl, { cache: "no-cache", signal: AbortSignal.timeout(6000) });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 7000);
+      const res = await fetch(proxyUrl, { cache: "no-cache", signal: controller.signal });
+      clearTimeout(timer);
       if (!res.ok) continue;
       const text = await res.text();
       try {
         const json = JSON.parse(text);
-        if (json.contents) return JSON.parse(json.contents);
-        if (json.events) return json; // direct response
-        return json;
+        // allorigins wraps in {contents:...}
+        if (json.contents) {
+          const inner = JSON.parse(json.contents);
+          if (inner.events || inner.sports) return inner;
+          continue;
+        }
+        // direct response
+        if (json.events || json.sports) return json;
+        continue;
       } catch { continue; }
     } catch { continue; }
   }
@@ -654,34 +664,27 @@ async function loadScores() {
 function parseESPN(data) {
   golferScores = {};
   try {
-    const events = data.events || [];
+    // Handle both {events:[]} and {sports:[{leagues:[{events:[]}]}]} shapes
+    let events = data.events || [];
+    if (!events.length && data.sports) {
+      data.sports.forEach(s => s.leagues?.forEach(l => l.events?.forEach(e => events.push(e))));
+    }
+
     const tourney = events.find(e => /masters/i.test(e.name || "")) || events[0];
-    if (!tourney) { console.warn("No golf events found"); return; }
+    if (!tourney) { console.warn("No golf events found. Keys:", Object.keys(data)); return; }
 
     const competition = tourney.competitions?.[0];
     if (!competition) return;
 
     const competitors = competition.competitors || [];
-    console.log("ESPN competitors count:", competitors.length);
-    if (competitors.length > 0) {
-      const sample = competitors[0];
-      console.log("Sample competitor:", JSON.stringify({
-        name: sample.athlete?.displayName,
-        score: sample.score,
-        status: sample.status,
-        linescores: sample.linescores?.slice(0,3),
-        scores: sample.scores
-      }));
-    }
+    console.log("ESPN loaded:", competitors.length, "golfers, event:", tourney.name);
+
     for (const c of competitors) {
       const rawName = (c.athlete?.displayName || "").trim();
       if (!rawName) continue;
       const name = normName(rawName);
 
-      // Overall score to par — try multiple fields
-      const toParStr = c.score?.displayValue 
-        || c.statistics?.find?.(s => s.name === "scoreToPar")?.displayValue
-        || "E";
+      const toParStr = c.score?.displayValue || "E";
       let toPar = 0;
       if (toParStr === "E" || toParStr === "--" || toParStr === "0") toPar = 0;
       else if (toParStr === "MC" || toParStr === "WD" || toParStr === "DQ") toPar = 999;
@@ -693,29 +696,7 @@ function parseESPN(data) {
       const isMC = status.toLowerCase().includes("cut") || toParStr === "MC"
         || (c.status?.type?.shortDetail || "").toUpperCase() === "MC";
 
-      // Round scores — linescores[] has one entry per round with a period number
-      // Each entry: { period: 1, value: 68 } or { period: 1, displayValue: "68" }
-      const rounds = {};
-      (c.linescores || []).forEach(ls => {
-        const period = ls.period || ls.periodNumber;
-        const val = ls.value ?? parseInt(ls.displayValue, 10);
-        if (period && val && val > 40) rounds[period] = val; // >40 = round total not hole score
-      });
-
-      // Also try c.scores[] which some endpoints populate
-      if (Object.keys(rounds).length === 0 && c.scores) {
-        c.scores.forEach((s, i) => {
-          const v = parseInt(s, 10);
-          if (!isNaN(v) && v > 40) rounds[i + 1] = v;
-        });
-      }
-
-      const r1 = rounds[1] || null;
-      const r2 = rounds[2] || null;
-      const r3 = rounds[3] || null;
-      const r4 = rounds[4] || null;
-
-      golferScores[name.toLowerCase()] = { name, toPar, thru, pos, r1, r2, r3, r4, isMC, status };
+      golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status };
       if (rawName.toLowerCase() !== name.toLowerCase()) {
         golferScores[rawName.toLowerCase()] = golferScores[name.toLowerCase()];
       }
@@ -727,6 +708,7 @@ function parseESPN(data) {
     document.getElementById("statusSub").textContent = detail
       ? `${detail} · ${competitors.length} golfers`
       : `${competitors.length} golfers loaded · Live from ESPN`;
+    document.getElementById("statusBar").className = "status-bar";
 
   } catch (e) {
     console.warn("Parse error:", e);
