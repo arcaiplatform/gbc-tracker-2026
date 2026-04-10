@@ -236,7 +236,7 @@
       <div class="card-header">
         <div>
           <div class="card-title">Betters Leaderboard</div>
-          <div class="card-sub">Lowest collective score of top 3 golfers wins · Alternate used if 1 player MCs · 2 MCs = eliminated</div>
+          <div class="card-sub">Lowest collective score of top 3 golfers wins · Alternate used if 1 player MCs · 2 MCs = greyed out (non-GBC) or GBC penalty applied</div>
         </div>
         <input class="search-input" style="width:180px;flex:none" placeholder="Search..." oninput="filterLeaderboard(this.value)" />
       </div>
@@ -379,6 +379,7 @@
         <li><span class="rule-icon">03</span><span>You may pick a maximum of <strong>2 of the top-10 OWGR players</strong> (as ranked the Monday of tournament week). You must pick at least 2 outside the top 10.</span></li>
         <li><span class="rule-icon">04</span><span>If <strong>1 of your 3 picks misses the cut</strong>, your alternate (4th pick) is used in that player's position.</span></li>
         <li><span class="rule-icon">05</span><span>If <strong>2 or more picks miss the cut</strong>, you are eliminated from the event.</span></li>
+        <li><span class="rule-icon">06</span><span><strong>GBC players only:</strong> If 2+ picks miss the cut, instead of elimination your score uses the <em>worst score among all golfers picked by any GBC better + 1 stroke</em> as a penalty alternate. You stay in the GBC standings but can never score better than last place among GBC picks.</span></li>
         <li><span class="rule-icon">06</span><span>If duplicate picks occur (same order submitted), the <strong>earlier timestamp wins</strong>. The second better must resubmit.</span></li>
         <li><span class="rule-icon">07</span><span>In case of a <strong>tie on total score</strong>, it reverts to the finishing order of your individual golfers.</span></li>
       </ul>
@@ -750,9 +751,21 @@ function getGolferScore(name) {
 // ============================================================
 // SCORE CALCULATION
 // ============================================================
+function getWorstGBCPickScore() {
+  // Find the worst (highest) toPar among all golfers picked by any GBC better who are still active
+  let worst = -99;
+  BETTERS.filter(b => b.gbc).forEach(b => {
+    (b.picks || []).forEach(pick => {
+      const g = golferScores[normName(pick).toLowerCase()];
+      if (g && !g.isMC && g.toPar > worst) worst = g.toPar;
+    });
+  });
+  return worst === -99 ? 10 : worst;
+}
+
 function calcBetter(better) {
   if (!better.picks || better.picks.length === 0) {
-    return { totalScore: null, eliminated: false, golferData: [], thruInfo: "—" };
+    return { totalScore: null, twoMC: false, gbcPenalty: false, golferData: [], usedGolfers: [], thruInfo: "—" };
   }
 
   const golferData = better.picks.map((pick, idx) => ({
@@ -764,34 +777,52 @@ function calcBetter(better) {
 
   const main3 = golferData.slice(0, 3);
   const alt = golferData[3];
-
-  // Identify MCs among main 3
   const mcCount = main3.filter(g => g.isMC).length;
 
   let usedGolfers;
-  let eliminated = false;
+  let twoMC = false;
+  let gbcPenalty = false;
 
   if (mcCount >= 2) {
-    eliminated = true;
-    usedGolfers = main3; // show them even if eliminated
+    twoMC = true;
+    if (better.gbc) {
+      // GBC rule: penalty = worst toPar among any GBC better's picks + 1
+      gbcPenalty = true;
+      const penaltyScore = getWorstGBCPickScore() + 1;
+      const phantom = {
+        name: "GBC Penalty",
+        toPar: penaltyScore,
+        thru: 18,
+        pos: "–",
+        isMC: false,
+        isPhantom: true,
+        replacedMC: true
+      };
+      const active = main3.filter(g => !g.isMC);
+      // If 2 MCs: use 1 active + phantom. If 3 MCs: use phantom only (padded)
+      usedGolfers = [...active, phantom, phantom].slice(0, 3);
+    } else {
+      // Non-GBC: greyed out on leaderboard, no score
+      usedGolfers = main3;
+    }
   } else if (mcCount === 1) {
-    // Replace MC with alt
     usedGolfers = main3.map(g => g.isMC && alt ? { ...alt, isAlt: false, replacedMC: true } : g);
   } else {
     usedGolfers = main3;
   }
 
-  const totalScore = eliminated ? null : usedGolfers.reduce((sum, g) => sum + (g.toPar || 0), 0);
+  // Only compute score if not a non-GBC 2MC
+  const totalScore = (twoMC && !better.gbc) ? null
+    : usedGolfers.reduce((sum, g) => sum + (g.toPar || 0), 0);
 
-  // Thru info — sum holes completed across all 3 counting golfers (max 54 per round)
   const thruVals = usedGolfers.map(g => {
-    if (g.isMC) return 18; // MC = finished their round
+    if (g.isMC) return 18;
     return (g.thru !== null && g.thru !== undefined) ? g.thru : 0;
   });
   const holesPlayed = thruVals.reduce((a, b) => a + b, 0);
   const thruInfo = holesPlayed > 0 ? `${holesPlayed}/54` : "–";
 
-  return { totalScore, eliminated, golferData, usedGolfers, thruInfo };
+  return { totalScore, twoMC, gbcPenalty, golferData, usedGolfers, thruInfo };
 }
 
 // ============================================================
@@ -828,8 +859,8 @@ function renderLeaderboard() {
   if (tournamentStarted) {
     // Sort by score during tournament: non-eliminated first, then by score asc
     rows.sort((a, b) => {
-      if (a.eliminated && !b.eliminated) return 1;
-      if (!a.eliminated && b.eliminated) return -1;
+      if (a.twoMC && !b.twoMC) return 1;
+      if (!a.twoMC && b.twoMC) return -1;
       if (a.totalScore === null && b.totalScore !== null) return 1;
       if (a.totalScore !== null && b.totalScore === null) return -1;
       if (a.totalScore !== null && b.totalScore !== null) return a.totalScore - b.totalScore;
@@ -848,32 +879,41 @@ function renderLeaderboard() {
   let rank = 1;
 
   rows.forEach((row, i) => {
-    const { better, totalScore, eliminated, usedGolfers, golferData, thruInfo } = row;
+    const { better, totalScore, twoMC, gbcPenalty, usedGolfers, golferData, thruInfo } = row;
     const tr = document.createElement("tr");
-    if (eliminated) tr.className = "elim-row";
+    if (twoMC && !better.gbc) tr.style.opacity = "0.45"; // grey out non-GBC 2MC
 
-    const displayRank = eliminated ? "–" : rank;
+    const displayRank = (twoMC && !better.gbc) ? "–" : rank;
 
-    // Build golfer pills for the name cell
+    // Build golfer pills — always show ALL 4 picks
     let pillsHTML = "";
     if (golferData && golferData.length > 0) {
       pillsHTML = '<div class="golfer-pills">';
       golferData.forEach((g, idx) => {
         let cls = "pill";
+        const isUsedAsScoring = usedGolfers && usedGolfers.some(u => u.name === g.name && !u.isPhantom);
         if (idx === 3) cls += " alt";
-        if (g.replacedMC) cls += " alt-used";
         if (g.isMC) cls += " mc";
-        else if (!g.isAlt && !g.replacedMC) cls += " scoring";
+        else if (isUsedAsScoring && !g.isAlt) cls += " scoring";
+        if (g.replacedMC) cls += " alt-used";
         const scoreStr = g.isMC ? "MC" : fmtScore(g.toPar);
-        const prefix = idx === 3 ? "ALT: " : g.replacedMC ? "SUB: " : "";
+        const prefix = idx === 3 ? "ALT: " : "";
         pillsHTML += `<span class="${cls}">${prefix}${g.name} (${scoreStr})</span>`;
       });
+      if (gbcPenalty) {
+        const phantom = usedGolfers?.find(g => g.isPhantom);
+        if (phantom) {
+          pillsHTML += `<span class="pill" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa" title="GBC penalty: worst GBC pick still active +1">⚠ GBC Penalty (${fmtScore(phantom.toPar)})</span>`;
+        }
+      }
       pillsHTML += "</div>";
     }
 
-    const scoreHTML = totalScore !== null
-      ? `<span class="${scoreCls(totalScore)}">${fmtScore(totalScore)}</span>`
-      : eliminated ? '<span class="over">ELIM</span>' : '<span class="even">–</span>';
+    const scoreHTML = (twoMC && !better.gbc)
+      ? '<span style="color:var(--text-muted)">2MC</span>'
+      : totalScore !== null
+        ? `<span class="${scoreCls(totalScore)}">${fmtScore(totalScore)}</span>`
+        : '<span class="even">–</span>';
 
     // Use usedGolfers rounds for display
     const r1 = usedGolfers ? usedGolfers.reduce((s,g)=>s+(g.r1||0),0) : null;
@@ -904,7 +944,7 @@ function renderLeaderboard() {
       <td class="num" style="min-width:70px" id="wp_${betterKey}">–</td>`;
     tbody.appendChild(tr);
 
-    if (!eliminated) rank++;
+    if (!row.twoMC || row.better?.gbc) rank++;
   });
 
   // ── Monte Carlo pool win probability ──────────────────────────
@@ -951,7 +991,7 @@ function renderLeaderboard() {
 
       BETTERS.forEach(b => {
         const calc = calcBetter(b);
-        if (calc.eliminated) return;
+        if (calc.twoMC) return;
 
         // Sum top 3 sampled scores
         const picks = (b.picks || []).slice(0, 3);
@@ -981,7 +1021,7 @@ function renderLeaderboard() {
       if (!el) return;
       const pct = Math.round(prob * 100);
       const calc = calcBetter(b);
-      if (calc.eliminated) { el.innerHTML = '<span style="color:var(--text-muted)">0%</span>'; return; }
+      if (calc.twoMC) { el.innerHTML = '<span style="color:var(--text-muted)">0%</span>'; return; }
       el.innerHTML = prob === 0 ? '<span style="color:var(--text-muted)">0%</span>'
         : prob >= 0.20 ? `<span style="color:var(--red);font-weight:700">${pct}%</span>`
         : prob >= 0.10 ? `<span style="color:var(--green);font-weight:700">${pct}%</span>`
@@ -1050,7 +1090,7 @@ function renderPicks() {
 
   BETTERS.forEach(b => {
     const calc = calcBetter(b);
-    const { totalScore, eliminated, golferData } = calc;
+    const { totalScore, twoMC: eliminated, golferData } = calc;
 
     const card = document.createElement("div");
     card.className = "pick-card";
@@ -1257,14 +1297,14 @@ function renderGBCSeason() {
     const gbcBetters = BETTERS.filter(b => b.gbc);
     const rows = gbcBetters.map(b => {
       const calc = calcBetter(b);
-      const mastersScore = calc.eliminated ? null : calc.totalScore;
-      return { name: b.name, mastersScore, total: mastersScore, eliminated: calc.eliminated };
+      const mastersScore = calc.twoMC ? null : calc.totalScore;
+      return { name: b.name, mastersScore, total: mastersScore, eliminated: calc.twoMC };
     });
     const started = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
     if (started) {
       rows.sort((a, b) => {
-        if (a.eliminated && !b.eliminated) return 1;
-        if (!a.eliminated && b.eliminated) return -1;
+        if (a.twoMC && !b.twoMC) return 1;
+        if (!a.twoMC && b.twoMC) return -1;
         if (a.total === null && b.total !== null) return 1;
         if (a.total !== null && b.total === null) return -1;
         return (a.total ?? 999) - (b.total ?? 999);
@@ -1275,14 +1315,14 @@ function renderGBCSeason() {
     let rank = 1;
     rows.forEach(row => {
       const tr = document.createElement("tr");
-      if (row.eliminated) tr.className = "elim-row";
-      const mDisp = row.eliminated ? '<span class="over">ELIM</span>' : fmtScore(row.mastersScore);
-      const mCls = row.eliminated ? "" : scoreCls(row.mastersScore);
-      const tDisp = row.eliminated ? '<span class="over">ELIM</span>' : fmtScore(row.total);
-      const tCls = row.eliminated ? "" : scoreCls(row.total);
-      tr.innerHTML = `<td class="rank-num">${row.eliminated ? "–" : rank}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
+      if (row.twoMC) tr.className = "elim-row";
+      const mDisp = row.twoMC ? '<span class="over">ELIM</span>' : fmtScore(row.mastersScore);
+      const mCls = row.twoMC ? "" : scoreCls(row.mastersScore);
+      const tDisp = row.twoMC ? '<span class="over">ELIM</span>' : fmtScore(row.total);
+      const tCls = row.twoMC ? "" : scoreCls(row.total);
+      tr.innerHTML = `<td class="rank-num">${row.twoMC ? "–" : rank}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
       tbody.appendChild(tr);
-      if (!row.eliminated) rank++;
+      if (!row.twoMC) rank++;
     });
   } else {
     data.rows.forEach((row, i) => {
