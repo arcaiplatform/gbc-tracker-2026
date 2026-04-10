@@ -882,29 +882,7 @@ function renderLeaderboard() {
     const r4 = usedGolfers ? usedGolfers.reduce((s,g)=>s+(g.r4||0),0) : null;
     tr.dataset.search = (better.name + " " + (better.picks || []).join(" ")).toLowerCase();
 
-    // Win prob = best single golfer win% among scoring picks
-    // (pool winner needs their best golfer to win the tournament)
-    const scoringGolfers = usedGolfers ? usedGolfers.filter((g, i) => i < 3 && !g.isMC) : [];
-    let winProb = null;
-    if (scoringGolfers.length > 0 && !eliminated) {
-      // Find best win prob among scoring golfers
-      const probs = scoringGolfers.map(g => DG_DATA[g.name]?.win || 0);
-      // Combined: 1 - product of (1-p) but weighted — best golfer dominates
-      // Use sum capped at 1 (approximation that avoids double-counting)
-      const combined = Math.min(probs.reduce((s, p) => s + p, 0), 0.99);
-      winProb = combined;
-    } else if (eliminated) {
-      winProb = 0;
-    }
-
-    const winProbStr = winProb === null ? '–'
-      : winProb === 0 ? '<span style="color:var(--text-muted)">0%</span>'
-      : winProb < 0.005 ? `<span style="color:var(--text-muted)">${(winProb*100).toFixed(1)}%</span>`
-      : winProb >= 0.30 ? `<span style="color:var(--red);font-weight:700">${Math.round(winProb*100)}%</span>`
-      : winProb >= 0.15 ? `<span style="color:var(--green);font-weight:700">${Math.round(winProb*100)}%</span>`
-      : winProb >= 0.05 ? `<span style="color:var(--green)">${Math.round(winProb*100)}%</span>`
-      : `<span style="color:var(--text-muted)">${Math.round(winProb*100)}%</span>`;
-
+    const betterKey = better.name.replace(/[^a-z0-9]/gi,'_');
     tr.innerHTML = `
       <td class="rank-num">${displayRank}</td>
       <td>
@@ -923,11 +901,94 @@ function renderLeaderboard() {
             <div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((parseInt(thruInfo)||0)/54*100)}%"></div>
           </div>` : "–"}
       </td>
-      <td class="num" style="min-width:70px">${winProbStr}</td>`;
+      <td class="num" style="min-width:70px" id="wp_${betterKey}">–</td>`;
     tbody.appendChild(tr);
 
     if (!eliminated) rank++;
   });
+
+  // ── Monte Carlo pool win probability ──────────────────────────
+  // For each of N simulations: sample a final score for each golfer
+  // based on their current score + expected remaining strokes (from DG),
+  // compute each better's total, find the winner, tally.
+  setTimeout(() => {
+    const N = 5000;
+    const wins = {};
+    BETTERS.forEach(b => wins[b.name] = 0);
+
+    // Build golfer distributions: mean = current toPar, std dev based on holes remaining
+    const golferDist = {};
+    Object.values(golferScores).forEach(g => {
+      if (golferDist[g.name]) return;
+      const holesLeft = 72 - ((g.thru || 0) + 18); // holes remaining after R2 (approx)
+      const strokesPerHole = 0.072; // ~Augusta std dev per hole
+      const std = Math.sqrt(Math.max(holesLeft, 0)) * strokesPerHole;
+      golferDist[g.name] = { mean: g.toPar, std: Math.max(std, 0.5) };
+    });
+
+    function randn() {
+      // Box-Muller
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function sampleScore(name) {
+      const d = golferDist[name];
+      if (!d) return 10; // unknown golfer — assume over par
+      return d.mean + randn() * d.std;
+    }
+
+    for (let i = 0; i < N; i++) {
+      // Sample final scores for all golfers
+      const sampled = {};
+      Object.keys(golferDist).forEach(name => { sampled[name] = sampleScore(name); });
+
+      // Compute each better's simulated total
+      let bestScore = Infinity;
+      let poolWinner = null;
+
+      BETTERS.forEach(b => {
+        const calc = calcBetter(b);
+        if (calc.eliminated) return;
+
+        // Sum top 3 sampled scores
+        const picks = (b.picks || []).slice(0, 3);
+        let mcCount = 0;
+        let total = 0;
+        picks.forEach(p => {
+          const g = golferScores[normName(p).toLowerCase()];
+          if (g?.isMC) { mcCount++; return; }
+          total += sampled[normName(p)] ?? sampleScore(normName(p));
+        });
+        if (mcCount >= 2) return; // eliminated
+
+        if (total < bestScore) {
+          bestScore = total;
+          poolWinner = b.name;
+        }
+      });
+
+      if (poolWinner) wins[poolWinner]++;
+    }
+
+    // Update cells
+    BETTERS.forEach(b => {
+      const prob = wins[b.name] / N;
+      const key = b.name.replace(/[^a-z0-9]/gi,'_');
+      const el = document.getElementById('wp_' + key);
+      if (!el) return;
+      const pct = Math.round(prob * 100);
+      const calc = calcBetter(b);
+      if (calc.eliminated) { el.innerHTML = '<span style="color:var(--text-muted)">0%</span>'; return; }
+      el.innerHTML = prob === 0 ? '<span style="color:var(--text-muted)">0%</span>'
+        : prob >= 0.20 ? `<span style="color:var(--red);font-weight:700">${pct}%</span>`
+        : prob >= 0.10 ? `<span style="color:var(--green);font-weight:700">${pct}%</span>`
+        : prob >= 0.03 ? `<span style="color:var(--green)">${pct}%</span>`
+        : `<span style="color:var(--text-muted)">${pct}%</span>`;
+    });
+  }, 50); // slight delay so DOM is ready
 
   document.getElementById("loading").style.display = "none";
   document.getElementById("lbTable").style.display = "table";
