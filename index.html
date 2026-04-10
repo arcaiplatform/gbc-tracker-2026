@@ -599,12 +599,11 @@ let refreshTimer = null;
 // Use leaderboard endpoint — richer round data than scoreboard
 const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard";
 
-// Try multiple CORS proxies in order until one works
 const PROXIES = [
-  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
   url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://proxy.cors.sh/${url}`,
+  url => `https://crossorigin.me/${url}`,
   url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  url => `https://thingproxy.freeboard.io/fetch/${url}`,
 ];
 
 async function fetchWithProxy(url) {
@@ -613,23 +612,26 @@ async function fetchWithProxy(url) {
       const proxyUrl = makeProxy(url);
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 7000);
-      const res = await fetch(proxyUrl, { cache: "no-cache", signal: controller.signal });
+      const res = await fetch(proxyUrl, {
+        cache: "no-cache",
+        signal: controller.signal,
+        headers: { "x-requested-with": "XMLHttpRequest" }
+      });
       clearTimeout(timer);
-      if (!res.ok) continue;
+      if (!res.ok) { console.log("Proxy failed:", proxyUrl, res.status); continue; }
       const text = await res.text();
       try {
         const json = JSON.parse(text);
-        // allorigins wraps in {contents:...}
         if (json.contents) {
           const inner = JSON.parse(json.contents);
-          if (inner.events || inner.sports) return inner;
+          if (inner.events) return inner;
           continue;
         }
-        // direct response
-        if (json.events || json.sports) return json;
+        if (json.events) return json;
+        console.log("Proxy returned unexpected shape, keys:", Object.keys(json).slice(0,5));
         continue;
-      } catch { continue; }
-    } catch { continue; }
+      } catch (e) { console.log("JSON parse failed:", e.message); continue; }
+    } catch (e) { console.log("Proxy fetch error:", e.message); continue; }
   }
   throw new Error("All proxies failed");
 }
