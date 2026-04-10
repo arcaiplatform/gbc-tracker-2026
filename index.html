@@ -601,8 +601,6 @@ const DG_LIVE_URL = "https://feeds.datagolf.com/preds/in-play?tour=pga&dead_heat
 const MASTERS_URL = "https://www.masters.com/en_US/scores/feeds/2026/scores.json";
 
 async function fetchWithProxy(url) {
-  // Both sources go through the Cloudflare Worker
-  // Pass the target URL as a query param
   const targets = [
     WORKER_URL + "?src=datagolf",
     WORKER_URL + "?src=masters",
@@ -614,11 +612,17 @@ async function fetchWithProxy(url) {
       const timer = setTimeout(() => controller.abort(), 8000);
       const res = await fetch(target, { cache: "no-cache", signal: controller.signal });
       clearTimeout(timer);
-      if (!res.ok) { console.log("Worker non-ok:", res.status); continue; }
+      if (!res.ok) { console.log("Worker non-ok:", res.status, target); continue; }
       const json = await res.json();
-      console.log("Worker response keys:", Object.keys(json));
-      return json;
-    } catch (e) { console.log("Fetch error:", e.message); continue; }
+      // Validate we got something useful
+      const isDG = json.data && Array.isArray(json.data) && json.data[0]?.player_name;
+      const isMasters = json.data && typeof json.data === 'object' && !Array.isArray(json.data);
+      if (isDG || isMasters) {
+        console.log("Got data from:", target, isDG ? "DataGolf" : "Masters.com");
+        return json;
+      }
+      console.log("Response had no usable data from:", target);
+    } catch (e) { console.log("Fetch error:", e.message, target); }
   }
   throw new Error("All sources failed");
 }
