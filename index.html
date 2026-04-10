@@ -248,6 +248,7 @@
             <th>Better</th>
             <th class="num">Score</th>
             <th class="num" style="min-width:80px">Holes</th>
+            <th class="num" style="min-width:70px">Win Prob</th>
           </tr>
         </thead>
         <tbody id="lbBody"></tbody>
@@ -880,6 +881,25 @@ function renderLeaderboard() {
     const r3 = usedGolfers ? usedGolfers.reduce((s,g)=>s+(g.r3||0),0) : null;
     const r4 = usedGolfers ? usedGolfers.reduce((s,g)=>s+(g.r4||0),0) : null;
     tr.dataset.search = (better.name + " " + (better.picks || []).join(" ")).toLowerCase();
+
+    // Win prob = 1 - product of (1 - each scoring golfer's win prob)
+    // Uses top 3 scoring golfers (not alt unless used)
+    const scoringGolfers = usedGolfers ? usedGolfers.filter((g, i) => i < 3 && !g.eliminated) : [];
+    let winProb = null;
+    if (scoringGolfers.length > 0) {
+      const probNone = scoringGolfers.reduce((prod, g) => {
+        const dg = DG_DATA[g.name];
+        return prod * (1 - (dg?.win || 0));
+      }, 1);
+      winProb = eliminated ? 0 : (1 - probNone);
+    }
+    const winProbStr = winProb === null ? '–'
+      : winProb === 0 ? '<span style="color:var(--text-muted)">0%</span>'
+      : winProb < 0.01 ? `<span style="color:var(--text-muted)">${(winProb*100).toFixed(1)}%</span>`
+      : winProb >= 0.20 ? `<span style="color:var(--green);font-weight:700">${Math.round(winProb*100)}%</span>`
+      : winProb >= 0.10 ? `<span style="color:var(--green)">${Math.round(winProb*100)}%</span>`
+      : `<span>${Math.round(winProb*100)}%</span>`;
+
     tr.innerHTML = `
       <td class="rank-num">${displayRank}</td>
       <td>
@@ -897,7 +917,8 @@ function renderLeaderboard() {
           <div style="background:var(--border);border-radius:3px;height:4px;width:60px;margin-left:auto">
             <div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((parseInt(thruInfo)||0)/54*100)}%"></div>
           </div>` : "–"}
-      </td>`;
+      </td>
+      <td class="num" style="min-width:70px">${winProbStr}</td>`;
     tbody.appendChild(tr);
 
     if (!eliminated) rank++;
