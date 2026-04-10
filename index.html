@@ -248,7 +248,7 @@
             <th>Better</th>
             <th class="num">Score</th>
             <th class="num" style="min-width:80px">Holes</th>
-            <th class="num" style="min-width:70px">Win Prob</th>
+            <th class="num" style="min-width:70px" title="Sum of live win probabilities for scoring golfers (DataGolf)">🏆 Win%</th>
           </tr>
         </thead>
         <tbody id="lbBody"></tbody>
@@ -882,23 +882,28 @@ function renderLeaderboard() {
     const r4 = usedGolfers ? usedGolfers.reduce((s,g)=>s+(g.r4||0),0) : null;
     tr.dataset.search = (better.name + " " + (better.picks || []).join(" ")).toLowerCase();
 
-    // Win prob = 1 - product of (1 - each scoring golfer's win prob)
-    // Uses top 3 scoring golfers (not alt unless used)
-    const scoringGolfers = usedGolfers ? usedGolfers.filter((g, i) => i < 3 && !g.eliminated) : [];
+    // Win prob = best single golfer win% among scoring picks
+    // (pool winner needs their best golfer to win the tournament)
+    const scoringGolfers = usedGolfers ? usedGolfers.filter((g, i) => i < 3 && !g.isMC) : [];
     let winProb = null;
-    if (scoringGolfers.length > 0) {
-      const probNone = scoringGolfers.reduce((prod, g) => {
-        const dg = DG_DATA[g.name];
-        return prod * (1 - (dg?.win || 0));
-      }, 1);
-      winProb = eliminated ? 0 : (1 - probNone);
+    if (scoringGolfers.length > 0 && !eliminated) {
+      // Find best win prob among scoring golfers
+      const probs = scoringGolfers.map(g => DG_DATA[g.name]?.win || 0);
+      // Combined: 1 - product of (1-p) but weighted — best golfer dominates
+      // Use sum capped at 1 (approximation that avoids double-counting)
+      const combined = Math.min(probs.reduce((s, p) => s + p, 0), 0.99);
+      winProb = combined;
+    } else if (eliminated) {
+      winProb = 0;
     }
+
     const winProbStr = winProb === null ? '–'
       : winProb === 0 ? '<span style="color:var(--text-muted)">0%</span>'
-      : winProb < 0.01 ? `<span style="color:var(--text-muted)">${(winProb*100).toFixed(1)}%</span>`
-      : winProb >= 0.20 ? `<span style="color:var(--green);font-weight:700">${Math.round(winProb*100)}%</span>`
-      : winProb >= 0.10 ? `<span style="color:var(--green)">${Math.round(winProb*100)}%</span>`
-      : `<span>${Math.round(winProb*100)}%</span>`;
+      : winProb < 0.005 ? `<span style="color:var(--text-muted)">${(winProb*100).toFixed(1)}%</span>`
+      : winProb >= 0.30 ? `<span style="color:var(--red);font-weight:700">${Math.round(winProb*100)}%</span>`
+      : winProb >= 0.15 ? `<span style="color:var(--green);font-weight:700">${Math.round(winProb*100)}%</span>`
+      : winProb >= 0.05 ? `<span style="color:var(--green)">${Math.round(winProb*100)}%</span>`
+      : `<span style="color:var(--text-muted)">${Math.round(winProb*100)}%</span>`;
 
     tr.innerHTML = `
       <td class="rank-num">${displayRank}</td>
