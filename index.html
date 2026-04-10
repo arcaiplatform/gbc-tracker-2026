@@ -646,32 +646,68 @@ async function loadScores() {
 function parseESPN(data) {
   golferScores = {};
   try {
-    // Masters.com format: data.data array of player objects
-    const players = data.data || [];
-    if (!players.length) { console.warn("No players in Masters data"); return; }
+    console.log("Masters data keys:", Object.keys(data));
 
-    console.log("Masters.com loaded:", players.length, "players");
+    // Masters.com wraps in different structures — dig for the player array
+    let players = [];
+
+    if (Array.isArray(data.data)) {
+      players = data.data;
+    } else if (data.data && Array.isArray(data.data.player)) {
+      players = data.data.player;
+    } else if (Array.isArray(data.player)) {
+      players = data.player;
+    } else {
+      // Log full structure to find where players are
+      console.log("Full data:", JSON.stringify(data).slice(0, 500));
+      // Try to find any array with player-like objects
+      for (const key of Object.keys(data)) {
+        const val = data[key];
+        if (Array.isArray(val) && val.length > 0 && (val[0].full_name || val[0].last_name || val[0].display_name)) {
+          players = val;
+          console.log("Found players under key:", key);
+          break;
+        }
+        if (val && typeof val === 'object') {
+          for (const subkey of Object.keys(val)) {
+            const subval = val[subkey];
+            if (Array.isArray(subval) && subval.length > 0 && (subval[0].full_name || subval[0].last_name)) {
+              players = subval;
+              console.log("Found players under:", key, subkey);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!players.length) {
+      console.warn("No players found. Keys:", JSON.stringify(Object.keys(data)));
+      return;
+    }
+
+    console.log("Masters.com loaded:", players.length, "players. Sample:", JSON.stringify(players[0]).slice(0,200));
 
     players.forEach(p => {
-      const rawName = p.full_name || `${p.first_name} ${p.last_name}`;
-      if (!rawName || rawName.trim() === ' ') return;
+      const rawName = p.full_name || p.display_name || `${p.first_name || ''} ${p.last_name || ''}`.trim();
+      if (!rawName) return;
       const name = normName(rawName.trim());
 
-      // topar: masters uses "topar" field, negative = under par
       let toPar = 0;
-      if (p.topar !== undefined && p.topar !== null && p.topar !== '') {
-        toPar = parseInt(p.topar, 10) || 0;
+      const toparVal = p.topar ?? p.total_under_par ?? p.totalUnderPar;
+      if (toparVal !== undefined && toparVal !== null && toparVal !== '') {
+        toPar = parseInt(toparVal, 10) || 0;
       }
 
-      // thru holes
       let thru = null;
-      if (p.thru !== undefined && p.thru !== null && p.thru !== '') {
-        thru = p.thru === 'F' ? 18 : (parseInt(p.thru, 10) || null);
+      const thruVal = p.thru ?? p.holeProgress;
+      if (thruVal !== undefined && thruVal !== null && thruVal !== '') {
+        thru = thruVal === 'F' || thruVal === 18 ? 18 : (parseInt(thruVal, 10) || null);
       }
 
-      const pos = p.pos || '';
-      const status = p.status || '';
-      const isMC = status === 'C' || pos === 'MC' || p.roundStatus === 'Cut';
+      const pos = p.pos || p.position || '';
+      const status = p.status || p.roundStatus || '';
+      const isMC = status === 'C' || pos === 'MC' || String(status).toLowerCase().includes('cut');
 
       golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status };
       if (rawName.toLowerCase() !== name.toLowerCase()) {
@@ -679,7 +715,7 @@ function parseESPN(data) {
       }
     });
 
-    const round = data.currentRound || '';
+    const round = data.currentRound || data.roundNumber || '';
     const detail = round ? `Round ${round} · In Progress` : 'In Progress';
     document.getElementById("roundInfo").textContent = detail;
     document.getElementById("statusText").textContent = "Masters Tournament 2026";
