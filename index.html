@@ -219,8 +219,8 @@
   <section class="section active" id="sec-leaderboard">
     <div id="statusBar" class="status-bar">
       <div>
-        <div class="status-text" id="statusText">Fetching live scores...</div>
-        <div class="status-sub" id="statusSub">Connecting to ESPN</div>
+        <div class="status-text" id="statusText">Masters Tournament 2026</div>
+        <div class="status-sub" id="statusSub">Loading live scores...</div>
       </div>
       <div style="font-size:11px;color:var(--text-muted)" id="roundInfo"></div>
     </div>
@@ -610,12 +610,13 @@ async function fetchWithProxy(url) {
   for (const makeProxy of PROXIES) {
     try {
       const proxyUrl = makeProxy(url);
-      const res = await fetch(proxyUrl, { cache: "no-cache", signal: AbortSignal.timeout(8000) });
+      const res = await fetch(proxyUrl, { cache: "no-cache", signal: AbortSignal.timeout(6000) });
       if (!res.ok) continue;
       const text = await res.text();
       try {
         const json = JSON.parse(text);
         if (json.contents) return JSON.parse(json.contents);
+        if (json.events) return json; // direct response
         return json;
       } catch { continue; }
     } catch { continue; }
@@ -623,10 +624,11 @@ async function fetchWithProxy(url) {
   throw new Error("All proxies failed");
 }
 
+let firstLoad = true;
+
 async function loadScores() {
   const btn = document.querySelector('.refresh-btn');
   if (btn) { btn.textContent = "↻ Loading..."; btn.disabled = true; }
-  document.getElementById("statusBar").className = "status-bar";
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
   try {
@@ -634,18 +636,17 @@ async function loadScores() {
     parseESPN(data);
     lastFetch = new Date();
     document.getElementById("lastUpdated").textContent = "Updated " + lastFetch.toLocaleTimeString();
-    const btn = document.querySelector('.refresh-btn');
     if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
+    firstLoad = false;
     renderAll();
   } catch (err) {
     console.error(err);
-    const btn = document.querySelector('.refresh-btn');
     if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     document.getElementById("statusBar").className = "status-bar error-bar";
     document.getElementById("statusText").textContent = "⚠ Could not reach ESPN live data";
-    document.getElementById("statusSub").textContent = "Showing last known scores. Will retry automatically.";
+    document.getElementById("statusSub").textContent = firstLoad ? "Could not load scores. Try refreshing." : "Showing last known scores. Will retry automatically.";
     document.getElementById("lastUpdated").textContent = "Failed — retrying in 60s";
-    // Do NOT re-render — keep existing scores on screen
+    if (firstLoad) { firstLoad = false; renderAll(); } // show E scores on first failure
   }
 }
 
