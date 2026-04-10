@@ -188,6 +188,7 @@
     <div class="header-meta">
       <div class="live-badge"><div class="live-dot"></div>LIVE</div>
       <button class="refresh-btn" onclick="loadScores()">↻ Refresh</button>
+      <button onclick="openManualEntry()" style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:white">✏️ Manual</button>
       <div class="last-updated" id="lastUpdated">Loading...</div>
     </div>
   </div>
@@ -1332,11 +1333,64 @@ function startAutoRefresh() {
   refreshTimer = setInterval(loadScores, 60000);
 }
 
+// ============================================================
+// MANUAL SCORE OVERRIDE — paste scores when proxies are down
+// ============================================================
+function applyManualScores(text) {
+  // Parse lines like "Rory McIlroy -6 F" or "Scottie Scheffler -1 12"
+  const lines = text.trim().split('\n');
+  let count = 0;
+  lines.forEach(line => {
+    line = line.trim();
+    if (!line) return;
+    // Match: Name ... score thru
+    // e.g. "Rory McIlroy -6 F" or "Scheffler -1 12" or "Jon Rahm +2 9"
+    const m = line.match(/^(.+?)\s+([-+]?\d+|E)\s+(\d+|F)?\s*$/i);
+    if (!m) return;
+    let name = m[1].trim();
+    const scoreStr = m[2];
+    const thruStr = m[3] || null;
+    let toPar = scoreStr === 'E' ? 0 : parseInt(scoreStr, 10);
+    let thru = thruStr === 'F' ? 18 : (thruStr ? parseInt(thruStr) : null);
+    const normalized = normName(name).toLowerCase();
+    golferScores[normalized] = { name: normName(name), toPar, thru, pos: '', isMC: false, status: '' };
+    count++;
+  });
+  if (count > 0) {
+    document.getElementById("statusText").textContent = "Masters Tournament 2026";
+    document.getElementById("statusSub").textContent = `Manual scores — ${count} golfers updated`;
+    document.getElementById("statusBar").className = "status-bar";
+    document.getElementById("lastUpdated").textContent = "Manual @ " + new Date().toLocaleTimeString();
+    renderAll();
+  }
+  return count;
+}
+
 // BOOT
 renderAll();
 updatePicksTabLabel();
 loadScores();
 startAutoRefresh();
+  const existing = Object.values(golferScores).map(g =>
+    `${g.name} ${g.toPar === 0 ? 'E' : (g.toPar > 0 ? '+'+g.toPar : g.toPar)} ${g.thru === 18 ? 'F' : (g.thru || '')}`
+  ).join('\n');
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:12px;padding:24px;width:500px;max-height:80vh;display:flex;flex-direction:column;gap:12px">
+      <div style="font-weight:700;font-size:16px">📝 Manual Score Entry</div>
+      <div style="font-size:12px;color:#666">One golfer per line: <code>Name Score Thru</code><br>
+      Examples: <code>Rory McIlroy -6 F</code> &nbsp; <code>Scottie Scheffler -1 12</code> &nbsp; <code>Jon Rahm E 9</code></div>
+      <textarea id="manualScoreInput" style="width:100%;height:300px;font-family:monospace;font-size:12px;border:1px solid #ddd;border-radius:6px;padding:8px;resize:vertical" placeholder="Rory McIlroy -6 F&#10;Scottie Scheffler -1 12&#10;Jon Rahm E 9">${existing}</textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="this.closest('div[style]').remove()" style="padding:8px 16px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white">Cancel</button>
+        <button onclick="const n=applyManualScores(document.getElementById('manualScoreInput').value);this.closest('div[style]').remove();alert(n+' scores applied!')" style="padding:8px 16px;background:#166534;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600">Apply Scores</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
 </script>
 </body>
 </html>
