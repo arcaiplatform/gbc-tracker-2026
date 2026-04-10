@@ -631,7 +631,7 @@ async function loadScores() {
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
   try {
-    const data = await fetchWithProxy(ESPN_URL);
+    const data = await fetchWithProxy(WORKER_URL);
     parseESPN(data);
     lastFetch = new Date();
     document.getElementById("lastUpdated").textContent = "Updated " + lastFetch.toLocaleTimeString();
