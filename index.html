@@ -661,15 +661,30 @@ function parseESPN(data) {
     if (!competition) return;
 
     const competitors = competition.competitors || [];
+    console.log("ESPN competitors count:", competitors.length);
+    if (competitors.length > 0) {
+      const sample = competitors[0];
+      console.log("Sample competitor:", JSON.stringify({
+        name: sample.athlete?.displayName,
+        score: sample.score,
+        status: sample.status,
+        linescores: sample.linescores?.slice(0,3),
+        scores: sample.scores
+      }));
+    }
     for (const c of competitors) {
       const rawName = (c.athlete?.displayName || "").trim();
       if (!rawName) continue;
       const name = normName(rawName);
 
-      // Overall score to par
-      const toParStr = c.score?.displayValue || "E";
+      // Overall score to par — try multiple fields
+      const toParStr = c.score?.displayValue 
+        || c.statistics?.find?.(s => s.name === "scoreToPar")?.displayValue
+        || "E";
       let toPar = 0;
-      if (toParStr !== "E" && toParStr !== "--") toPar = parseInt(toParStr, 10) || 0;
+      if (toParStr === "E" || toParStr === "--" || toParStr === "0") toPar = 0;
+      else if (toParStr === "MC" || toParStr === "WD" || toParStr === "DQ") toPar = 999;
+      else toPar = parseInt(toParStr, 10) || 0;
 
       const status = c.status?.type?.name || "";
       const thru = c.status?.thru ?? null;
