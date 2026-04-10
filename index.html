@@ -646,53 +646,44 @@ async function loadScores() {
 function parseESPN(data) {
   golferScores = {};
   try {
-    // Handle both {events:[]} and {sports:[{leagues:[{events:[]}]}]} shapes
-    let events = data.events || [];
-    if (!events.length && data.sports) {
-      data.sports.forEach(s => s.leagues?.forEach(l => l.events?.forEach(e => events.push(e))));
-    }
-    if (!events.length && data.content?.leaderboard?.events) {
-      events = data.content.leaderboard.events;
-    }
+    // Masters.com format: data.data array of player objects
+    const players = data.data || [];
+    if (!players.length) { console.warn("No players in Masters data"); return; }
 
-    const tourney = events.find(e => /masters/i.test(e.name || "")) || events[0];
-    if (!tourney) { console.warn("No golf events found. Keys:", Object.keys(data)); return; }
+    console.log("Masters.com loaded:", players.length, "players");
 
-    const competition = tourney.competitions?.[0];
-    if (!competition) return;
+    players.forEach(p => {
+      const rawName = p.full_name || `${p.first_name} ${p.last_name}`;
+      if (!rawName || rawName.trim() === ' ') return;
+      const name = normName(rawName.trim());
 
-    const competitors = competition.competitors || [];
-    console.log("ESPN loaded:", competitors.length, "golfers, event:", tourney.name);
-
-    for (const c of competitors) {
-      const rawName = (c.athlete?.displayName || "").trim();
-      if (!rawName) continue;
-      const name = normName(rawName);
-
-      const toParStr = c.score?.displayValue || "E";
+      // topar: masters uses "topar" field, negative = under par
       let toPar = 0;
-      if (toParStr === "E" || toParStr === "--" || toParStr === "0") toPar = 0;
-      else if (toParStr === "MC" || toParStr === "WD" || toParStr === "DQ") toPar = 999;
-      else toPar = parseInt(toParStr, 10) || 0;
+      if (p.topar !== undefined && p.topar !== null && p.topar !== '') {
+        toPar = parseInt(p.topar, 10) || 0;
+      }
 
-      const status = c.status?.type?.name || "";
-      const thru = c.status?.thru ?? null;
-      const pos = c.status?.position?.displayName || c.status?.position?.shortDisplayName || "";
-      const isMC = status.toLowerCase().includes("cut") || toParStr === "MC"
-        || (c.status?.type?.shortDetail || "").toUpperCase() === "MC";
+      // thru holes
+      let thru = null;
+      if (p.thru !== undefined && p.thru !== null && p.thru !== '') {
+        thru = p.thru === 'F' ? 18 : (parseInt(p.thru, 10) || null);
+      }
+
+      const pos = p.pos || '';
+      const status = p.status || '';
+      const isMC = status === 'C' || pos === 'MC' || p.roundStatus === 'Cut';
 
       golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status };
       if (rawName.toLowerCase() !== name.toLowerCase()) {
         golferScores[rawName.toLowerCase()] = golferScores[name.toLowerCase()];
       }
-    }
+    });
 
-    const detail = competition.status?.type?.shortDetail || competition.status?.type?.description || "";
+    const round = data.currentRound || '';
+    const detail = round ? `Round ${round} · In Progress` : 'In Progress';
     document.getElementById("roundInfo").textContent = detail;
-    document.getElementById("statusText").textContent = tourney.name || "Masters Tournament 2026";
-    document.getElementById("statusSub").textContent = detail
-      ? `${detail} · ${competitors.length} golfers`
-      : `${competitors.length} golfers loaded · Live from ESPN`;
+    document.getElementById("statusText").textContent = "Masters Tournament 2026";
+    document.getElementById("statusSub").textContent = `${detail} · ${players.length} golfers`;
     document.getElementById("statusBar").className = "status-bar";
 
   } catch (e) {
@@ -1329,6 +1320,8 @@ renderAll();
 updatePicksTabLabel();
 loadScores();
 startAutoRefresh();
+
+window.openManualEntry = function() {
   const existing = Object.values(golferScores).map(g =>
     `${g.name} ${g.toPar === 0 ? 'E' : (g.toPar > 0 ? '+'+g.toPar : g.toPar)} ${g.thru === 18 ? 'F' : (g.thru || '')}`
   ).join('\n');
