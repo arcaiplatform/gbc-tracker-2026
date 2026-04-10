@@ -604,8 +604,8 @@ let refreshTimer = null;
 // ============================================================
 // ESPN API — multi-proxy fallback chain
 // ============================================================
-// Use generic PGA scoreboard — auto-serves current active tournament
-const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard";
+// Use leaderboard endpoint — richer round data than scoreboard
+const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard";
 
 // Try multiple CORS proxies in order until one works
 const PROXIES = [
@@ -661,11 +661,9 @@ async function loadScores() {
 function parseESPN(data) {
   golferScores = {};
   try {
-    // Scoreboard returns events[], find the Masters (or first golf event)
     const events = data.events || [];
-    // Prefer event with "Masters" in name, otherwise take first
     const tourney = events.find(e => /masters/i.test(e.name || "")) || events[0];
-    if (!tourney) { console.warn("No golf events found in ESPN response"); return; }
+    if (!tourney) { console.warn("No golf events found"); return; }
 
     const competition = tourney.competitions?.[0];
     if (!competition) return;
@@ -675,27 +673,39 @@ function parseESPN(data) {
       const rawName = (c.athlete?.displayName || "").trim();
       if (!rawName) continue;
       const name = normName(rawName);
-      const toParStr = c.score?.displayValue || c.linescores?.[0]?.displayValue || "E";
 
+      // Overall score to par
+      const toParStr = c.score?.displayValue || "E";
       let toPar = 0;
-      if (toParStr === "E" || toParStr === "0") toPar = 0;
-      else toPar = parseInt(toParStr, 10) || 0;
+      if (toParStr !== "E" && toParStr !== "--") toPar = parseInt(toParStr, 10) || 0;
 
       const status = c.status?.type?.name || "";
       const thru = c.status?.thru ?? null;
       const pos = c.status?.position?.displayName || c.status?.position?.shortDisplayName || "";
-
-      // Round scores — ESPN stores completed rounds in c.scores[] array (cumulative)
-      // and current round progress in linescores (hole by hole — NOT what we want)
-      // Use c.scores for completed round totals
-      const scores = c.scores || [];
-      const r1 = scores[0] != null ? parseInt(scores[0], 10) || null : null;
-      const r2 = scores[1] != null ? parseInt(scores[1], 10) || null : null;
-      const r3 = scores[2] != null ? parseInt(scores[2], 10) || null : null;
-      const r4 = scores[3] != null ? parseInt(scores[3], 10) || null : null;
-
       const isMC = status.toLowerCase().includes("cut") || toParStr === "MC"
         || (c.status?.type?.shortDetail || "").toUpperCase() === "MC";
+
+      // Round scores — linescores[] has one entry per round with a period number
+      // Each entry: { period: 1, value: 68 } or { period: 1, displayValue: "68" }
+      const rounds = {};
+      (c.linescores || []).forEach(ls => {
+        const period = ls.period || ls.periodNumber;
+        const val = ls.value ?? parseInt(ls.displayValue, 10);
+        if (period && val && val > 40) rounds[period] = val; // >40 = round total not hole score
+      });
+
+      // Also try c.scores[] which some endpoints populate
+      if (Object.keys(rounds).length === 0 && c.scores) {
+        c.scores.forEach((s, i) => {
+          const v = parseInt(s, 10);
+          if (!isNaN(v) && v > 40) rounds[i + 1] = v;
+        });
+      }
+
+      const r1 = rounds[1] || null;
+      const r2 = rounds[2] || null;
+      const r3 = rounds[3] || null;
+      const r4 = rounds[4] || null;
 
       golferScores[name.toLowerCase()] = { name, toPar, thru, pos, r1, r2, r3, r4, isMC, status };
       if (rawName.toLowerCase() !== name.toLowerCase()) {
