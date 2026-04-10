@@ -857,14 +857,18 @@ function renderLeaderboard() {
   const tournamentStarted = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
 
   if (tournamentStarted) {
-    // Sort by score during tournament: non-eliminated first, then by score asc
     rows.sort((a, b) => {
-      if (a.twoMC && !b.twoMC) return 1;
-      if (!a.twoMC && b.twoMC) return -1;
+      const aOut = a.twoMC && !a.better.gbc;
+      const bOut = b.twoMC && !b.better.gbc;
+      // Non-GBC 2MC always go to the bottom
+      if (aOut && !bOut) return 1;
+      if (!aOut && bOut) return -1;
+      // Both at bottom — sort by score among them
+      if (aOut && bOut) return (a.totalScore ?? 999) - (b.totalScore ?? 999);
+      // Everyone else sorts by score
       if (a.totalScore === null && b.totalScore !== null) return 1;
       if (a.totalScore !== null && b.totalScore === null) return -1;
-      if (a.totalScore !== null && b.totalScore !== null) return a.totalScore - b.totalScore;
-      return 0;
+      return (a.totalScore ?? 0) - (b.totalScore ?? 0);
     });
   } else {
     // Pre-tournament: sort alphabetically by last name
@@ -945,6 +949,14 @@ function renderLeaderboard() {
     tbody.appendChild(tr);
 
     if (!row.twoMC || row.better?.gbc) rank++;
+
+    // Add a divider before the first greyed-out non-GBC 2MC row
+    const nextRow = rows[rows.indexOf(row) + 1];
+    if (nextRow && (nextRow.twoMC && !nextRow.better.gbc) && !(row.twoMC && !row.better.gbc)) {
+      const divider = document.createElement("tr");
+      divider.innerHTML = `<td colspan="5" style="padding:6px 12px;font-size:11px;font-weight:600;color:var(--text-muted);background:var(--gray-light);border-top:2px solid var(--border);letter-spacing:.05em;text-transform:uppercase">Missed Cut (2+ picks)</td>`;
+      tbody.appendChild(divider);
+    }
   });
 
   // ── Monte Carlo pool win probability ──────────────────────────
