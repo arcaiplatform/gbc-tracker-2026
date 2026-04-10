@@ -1017,8 +1017,13 @@ function renderField() {
   if (fieldFilter === 'main') rows = rows.filter(r => r.mainCount > 0);
   if (fieldFilter === 'alt')  rows = rows.filter(r => r.altCount > 0);
 
-  // Sort by total picks desc
-  rows.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+  // Sort by win probability desc, then pick count
+  rows.sort((a, b) => {
+    const dgA = DG_DATA[a.name]?.win || 0;
+    const dgB = DG_DATA[b.name]?.win || 0;
+    if (dgB !== dgA) return dgB - dgA;
+    return b.total - a.total;
+  });
 
   const totalBetters = BETTERS.length;
   const maxPicks = rows[0]?.total || 1;
