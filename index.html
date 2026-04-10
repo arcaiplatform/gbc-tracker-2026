@@ -653,11 +653,12 @@ async function loadScores() {
 function parseESPN(json) {
   golferScores = {};
   try {
-    // Detect DataGolf format: has {data: [{player_name, current_score, ...}]}
+    console.log("Data keys:", Object.keys(json));
+
+    // DataGolf format: {data: [{player_name, current_score}]}
     if (json.data && Array.isArray(json.data) && json.data[0]?.player_name) {
       const players = json.data;
       console.log("Parsing DataGolf:", players.length, "players");
-
       players.forEach(p => {
         const raw = p.player_name || '';
         const parts = raw.split(',');
@@ -668,62 +669,69 @@ function parseESPN(json) {
         const thru = p.thru === 18 ? 18 : (parseInt(p.thru, 10) || null);
         const pos = String(p.current_pos || '');
         const isMC = pos === 'MC' || pos === 'WD' || pos === 'DQ';
-
-        // Update DG predictions live
-        DG_DATA[name] = {
-          win: p.win || 0,
-          top5: p.top_5 || 0,
-          top10: p.top_10 || 0,
-          makeCut: p.make_cut || 0,
-        };
-
+        DG_DATA[name] = { win: p.win||0, top5: p.top_5||0, top10: p.top_10||0, makeCut: p.make_cut||0 };
         golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status: '' };
-        if (rawName.toLowerCase() !== name.toLowerCase()) {
+        if (rawName.toLowerCase() !== name.toLowerCase())
           golferScores[rawName.toLowerCase()] = golferScores[name.toLowerCase()];
-        }
       });
-
       const round = players[0]?.round || '';
-      const detail = `Round ${round} · In Progress`;
-      document.getElementById("roundInfo").textContent = detail;
+      document.getElementById("roundInfo").textContent = `Round ${round} · In Progress`;
       document.getElementById("statusText").textContent = "Masters Tournament 2026";
-      document.getElementById("statusSub").textContent = `${detail} · ${players.length} golfers · DataGolf Live`;
+      document.getElementById("statusSub").textContent = `Round ${round} · ${players.length} golfers · DataGolf Live`;
       document.getElementById("statusBar").className = "status-bar";
       return;
     }
 
-    // Masters.com format — dig for player array
-    console.log("Trying Masters.com format, keys:", Object.keys(json));
+    // Masters.com format: {data: {currentRound, "FPNN": ..., player objects by id}}
+    // Players are stored as objects keyed by numeric ID inside json.data
     let players = [];
-    const search = (obj, depth = 0) => {
-      if (depth > 3) return;
-      if (Array.isArray(obj) && obj.length > 0 && (obj[0].full_name || obj[0].last_name || obj[0].display_name)) {
-        players = obj;
-        return;
-      }
-      if (obj && typeof obj === 'object') {
-        for (const val of Object.values(obj)) search(val, depth + 1);
-      }
-    };
-    search(json);
+    const data = json.data || json;
 
-    if (!players.length) { console.warn("No players found in either format"); return; }
-    console.log("Parsing Masters.com:", players.length, "players");
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      // Each numeric key is a player
+      Object.entries(data).forEach(([key, val]) => {
+        if (val && typeof val === 'object' && (val.full_name || val.last_name || val.display_name)) {
+          players.push(val);
+        }
+      });
+    }
+
+    // Also search nested
+    if (!players.length) {
+      const search = (obj, depth = 0) => {
+        if (depth > 2 || players.length > 0) return;
+        if (Array.isArray(obj) && obj.length > 0 && (obj[0]?.full_name || obj[0]?.last_name)) {
+          players = obj; return;
+        }
+        if (obj && typeof obj === 'object') {
+          for (const val of Object.values(obj)) search(val, depth + 1);
+        }
+      };
+      search(json);
+    }
+
+    if (!players.length) { console.warn("No players found"); return; }
+    console.log("Parsing Masters.com:", players.length, "players. Sample:", JSON.stringify(players[0]).slice(0,150));
 
     players.forEach(p => {
-      const rawName = (p.full_name || `${p.first_name||''} ${p.last_name||''}`).trim();
+      const rawName = (p.full_name || p.display_name || `${p.first_name||''} ${p.last_name||''}`).trim();
       if (!rawName) return;
       const name = normName(rawName);
-      const toPar = parseInt(p.topar ?? p.totalUnderPar ?? 0, 10) || 0;
-      const thruVal = p.thru ?? p.holeProgress;
+      // Masters uses totalUnderPar (negative = under par)
+      const toPar = parseInt(p.totalUnderPar ?? p.topar ?? 0, 10) || 0;
+      const thruVal = p.holeProgress ?? p.thru;
       const thru = thruVal === 'F' || thruVal === 18 ? 18 : (parseInt(thruVal, 10) || null);
-      const pos = String(p.pos || '');
+      const pos = String(p.pos || p.position || '');
       const isMC = p.status === 'C' || pos === 'MC';
       golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status: '' };
+      if (rawName.toLowerCase() !== name.toLowerCase())
+        golferScores[rawName.toLowerCase()] = golferScores[name.toLowerCase()];
     });
 
+    const round = json.currentRound || data.currentRound || '';
+    document.getElementById("roundInfo").textContent = round ? `Round ${round} · In Progress` : 'In Progress';
     document.getElementById("statusText").textContent = "Masters Tournament 2026";
-    document.getElementById("statusSub").textContent = `In Progress · ${players.length} golfers`;
+    document.getElementById("statusSub").textContent = `Round ${round} · ${players.length} golfers · Masters.com`;
     document.getElementById("statusBar").className = "status-bar";
 
   } catch (e) { console.warn("Parse error:", e); }
