@@ -597,65 +597,23 @@ let refreshTimer = null;
 // ============================================================
 // ESPN API — multi-proxy fallback chain
 // ============================================================
-const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard";
-const ESPN_CDN = "https://cdn.espn.com/core/golf/leaderboard?league=pga&render=false&device=desktop&country=us&lang=en&region=us&requestedstate=full";
-
-const PROXIES = [
-  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-];
+// Cloudflare Worker proxy — reliable, no CORS issues
+const ESPN_URL = "https://gbc-espn-proxy.jpehanick.workers.dev";
 
 async function fetchWithProxy(url) {
-  // First try direct fetch — ESPN CDN endpoint allows CORS from browsers
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
     const res = await fetch(url, { cache: "no-cache", signal: controller.signal });
     clearTimeout(timer);
-    if (res.ok) {
-      const json = await res.json();
-      if (json.events) { console.log("Direct fetch worked!"); return json; }
-    }
-  } catch (e) { console.log("Direct fetch failed:", e.message); }
-
-  // Try CDN URL directly (different CORS policy)
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
-    const res = await fetch(ESPN_CDN, { cache: "no-cache", signal: controller.signal });
+    if (!res.ok) throw new Error("Worker returned " + res.status);
+    const json = await res.json();
+    console.log("Worker fetch succeeded, keys:", Object.keys(json).slice(0,5));
+    return json;
+  } catch (e) {
     clearTimeout(timer);
-    if (res.ok) {
-      const json = await res.json();
-      // CDN wraps data differently
-      const events = json?.content?.leaderboard?.events || json?.events || [];
-      if (events.length) { console.log("CDN fetch worked!"); return { events }; }
-    }
-  } catch (e) { console.log("CDN fetch failed:", e.message); }
-
-  // Try proxies
-  for (const makeProxy of PROXIES) {
-    try {
-      const proxyUrl = makeProxy(url);
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 6000);
-      const res = await fetch(proxyUrl, { cache: "no-cache", signal: controller.signal });
-      clearTimeout(timer);
-      if (!res.ok) { console.log("Proxy non-ok:", res.status); continue; }
-      const text = await res.text();
-      try {
-        const json = JSON.parse(text);
-        if (json.contents) {
-          const inner = JSON.parse(json.contents);
-          if (inner.events) return inner;
-          continue;
-        }
-        if (json.events) return json;
-        continue;
-      } catch { continue; }
-    } catch (e) { console.log("Proxy error:", e.message); continue; }
+    throw e;
   }
-  throw new Error("All sources failed");
 }
 
 let firstLoad = true;
@@ -690,11 +648,11 @@ function parseESPN(data) {
   try {
     // Handle both {events:[]} and {sports:[{leagues:[{events:[]}]}]} shapes
     let events = data.events || [];
-    if (!events.length && data.content?.leaderboard?.events) {
-      events = data.content.leaderboard.events;
-    }
     if (!events.length && data.sports) {
       data.sports.forEach(s => s.leagues?.forEach(l => l.events?.forEach(e => events.push(e))));
+    }
+    if (!events.length && data.content?.leaderboard?.events) {
+      events = data.content.leaderboard.events;
     }
 
     const tourney = events.find(e => /masters/i.test(e.name || "")) || events[0];
