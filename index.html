@@ -95,7 +95,8 @@
   .pill { font-size: 11px; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-muted); background: var(--gray-light); }
   .pill.scoring { background: var(--green-light); color: var(--green); border-color: #a7f3d0; font-weight: 600; }
   .pill.mc { background: var(--red-light); color: var(--red); border-color: #fca5a5; }
-  .pill.alt-used { background: #f0fdf4; color: #166534; border-color: #86efac; font-weight: 600; }
+  .pill.alt { color: var(--text-muted); font-style: italic; }
+  .pill.alt-used { background: #166534; color: white; border-color: #14532d; font-weight: 700; box-shadow: 0 0 0 2px #bbf7d0; }
 
   /* GOLFER SCORES PANEL */
   .golfer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
@@ -923,7 +924,7 @@ function renderLeaderboard() {
         else if (isUsedAsScoring && !g.isAlt) cls += " scoring";
         if (g.replacedMC) cls += " alt-used";
         const scoreStr = g.isMC ? "MC" : fmtScore(g.toPar);
-        const prefix = idx === 3 ? "ALT: " : "";
+        const prefix = idx === 3 ? (g.replacedMC ? "🟢 ALT IN: " : "ALT: ") : "";
         pillsHTML += `<span class="${cls}">${prefix}${g.name} (${scoreStr})</span>`;
       });
       if (gbcPenalty) {
@@ -1017,7 +1018,7 @@ function renderLeaderboard() {
     for (let i = 0; i < N; i++) {
       // Sample final scores for all golfers
       const sampled = {};
-      Object.keys(golferDist).forEach(name => { sampled[name] = sampleScore(name); });
+      Object.keys(golferDist).forEach(name => { sampled[name.toLowerCase()] = sampleScore(name); });
 
       // Compute each better's simulated total
       let bestScore = Infinity;
@@ -1025,18 +1026,17 @@ function renderLeaderboard() {
 
       BETTERS.forEach(b => {
         const calc = calcBetter(b);
-        if (calc.twoMC) return;
+        if (calc.twoMC && !b.gbc) return; // skip non-GBC 2MC
 
-        // Sum top 3 sampled scores
-        const picks = (b.picks || []).slice(0, 3);
-        let mcCount = 0;
+        // Use the actual scoring golfers (handles alt substitutions)
+        const used = (calc.usedGolfers || []).slice(0, 3);
         let total = 0;
-        picks.forEach(p => {
-          const g = golferScores[normName(p).toLowerCase()];
-          if (g?.isMC) { mcCount++; return; }
-          total += sampled[normName(p)] ?? sampleScore(normName(p));
+        used.forEach(g => {
+          if (g.isPhantom) { total += g.toPar; return; } // GBC penalty
+          if (g.isMC) { total += 8; return; } // MC = heavy penalty in simulation
+          const key = normName(g.name).toLowerCase();
+          total += sampled[key] !== undefined ? sampled[key] : sampleScore(key);
         });
-        if (mcCount >= 2) return; // eliminated
 
         if (total < bestScore) {
           bestScore = total;
