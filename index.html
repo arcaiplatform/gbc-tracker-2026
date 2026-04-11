@@ -809,25 +809,23 @@ function calcBetter(better) {
   if (mcCount >= 2) {
     twoMC = true;
     if (better.gbc) {
-      // GBC rule: penalty = worst toPar among any GBC better's picks + 1
       gbcSub = true;
       const penaltyScore = getWorstGBCPickScore() + 1;
-      const phantom = {
-        name: "GBC Sub",
-        toPar: penaltyScore,
-        thru: 18,
-        pos: "–",
-        isMC: false,
-        isPhantom: true,
-        replacedMC: true
-      };
+      const phantom = { name: "GBC Sub", toPar: penaltyScore, thru: 18, pos: "–", isMC: false, isPhantom: true, replacedMC: false };
       const active = main3.filter(g => !g.isMC);
-      // One GBC Sub replaces ALL missing picks — only one penalty score total
-      // Active picks + one phantom, padded with E (0) if needed to reach 3
-      const pad = { name: 'E', toPar: 0, thru: 18, pos: '–', isMC: false };
-      usedGolfers = [...active, phantom, pad, pad].slice(0, 3);
+      // Alt plays for one MC slot, GBC Sub fills remaining empty slot(s)
+      const altEntry = alt && !alt.isMC ? { ...alt, isAlt: false, replacedMC: true } : null;
+      if (active.length === 1) {
+        // 2 MCs: active + alt + GBC Sub (or active + Sub + Sub if no alt)
+        usedGolfers = altEntry ? [active[0], altEntry, phantom] : [active[0], phantom, phantom];
+      } else if (active.length === 0) {
+        // All 3 MCs: alt + Sub + Sub (or all Subs)
+        usedGolfers = altEntry ? [altEntry, phantom, phantom] : [phantom, phantom, phantom];
+      } else {
+        // 2 active, 1 MC (shouldn't reach mcCount>=2 here, but safety)
+        usedGolfers = altEntry ? [...active, altEntry].slice(0,3) : [...active, phantom].slice(0,3);
+      }
     } else {
-      // Non-GBC: greyed out on leaderboard, no score
       usedGolfers = main3;
     }
   } else if (mcCount === 1) {
@@ -837,8 +835,9 @@ function calcBetter(better) {
       if (better.gbc) {
         gbcSub = true;
         const penaltyScore = getWorstGBCPickScore() + 1;
-        const phantom = { name: "GBC Sub", toPar: penaltyScore, thru: 18, pos: "–", isMC: false, isPhantom: true, replacedMC: true };
+        const phantom = { name: "GBC Sub", toPar: penaltyScore, thru: 18, pos: "–", isMC: false, isPhantom: true, replacedMC: false };
         const active = main3.filter(g => !g.isMC);
+        // No usable alt (alt also MC'd) — active + Sub fills remaining
         usedGolfers = [...active, phantom, phantom].slice(0, 3);
       } else {
         usedGolfers = main3;
