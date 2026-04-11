@@ -266,6 +266,33 @@
 
   <!-- GOLFER SCORES -->
   <section class="section" id="sec-golfers">
+
+    <!-- WIN PROBABILITY TRACKER — hidden for now, enable when ready -->
+    <div id="winProbTracker" style="display:none;margin-bottom:16px">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Win Probability Tracker</div>
+            <div class="card-sub">Live win% tracked each refresh · Golfer = DataGolf model · Better = GBC pool simulation</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;gap:4px">
+              <button id="wpModeGolfer" onclick="setWpMode('golfer')" class="flt-btn flt-active" style="font-size:11px">🏌️ Golfer</button>
+              <button id="wpModeBetter" onclick="setWpMode('better')" class="flt-btn" style="font-size:11px">👤 Better</button>
+            </div>
+            <select id="winProbPlayer" onchange="renderWinProbChart()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border)">
+              <option value="">Select...</option>
+            </select>
+            <button onclick="document.getElementById('winProbTracker').style.display='none'" style="font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:white;cursor:pointer;color:var(--text-muted)">Hide</button>
+          </div>
+        </div>
+        <div style="padding:16px">
+          <canvas id="winProbCanvas" height="160" style="width:100%;display:none"></canvas>
+          <div id="winProbEmpty" style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px">Tracking begins on next refresh — data accumulates throughout the round</div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-header">
         <div><div class="card-title">Masters Golfer Scores</div><div class="card-sub">Live scores from ESPN · Used to calculate betters' standings</div></div>
@@ -843,6 +870,7 @@ async function loadScores() {
     document.getElementById("lastUpdated").textContent = "Updated " + lastFetch.toLocaleTimeString();
     if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     firstLoad = false;
+    snapshotWinProbs();
     renderAll();
   } catch (err) {
     console.error(err);
@@ -1094,6 +1122,167 @@ function togglePills(td) {
   if (nameDiv) nameDiv.classList.toggle('open', !isOpen);
 }
 
+// ============================================================
+// WIN PROBABILITY TRACKER
+// ============================================================
+const WIN_PROB_HISTORY = {}; // golfer win% from DataGolf { name: [{t, w}] }
+const BETTER_WIN_HISTORY = {}; // pool win% from Monte Carlo { name: [{t, w}] }
+
+function snapshotBetterWinProbs(winCounts, N) {
+  const now = Date.now();
+  BETTERS.forEach(b => {
+    const prob = (winCounts[b.name] || 0) / N;
+    if (!BETTER_WIN_HISTORY[b.name]) BETTER_WIN_HISTORY[b.name] = [];
+    BETTER_WIN_HISTORY[b.name].push({ t: now, w: prob });
+    if (BETTER_WIN_HISTORY[b.name].length > 200) BETTER_WIN_HISTORY[b.name].shift();
+  });
+}
+
+function snapshotWinProbs() {
+  const now = Date.now();
+  // Snapshot win% for all golfers in DG_DATA
+  Object.entries(DG_DATA).forEach(([key, dg]) => {
+    if (!dg.win || dg.win === 0) return;
+    const name = golferScores[key]?.name || key;
+    if (!WIN_PROB_HISTORY[name]) WIN_PROB_HISTORY[name] = [];
+    WIN_PROB_HISTORY[name].push({ t: now, w: dg.win });
+    // Keep last 200 snapshots per player
+    if (WIN_PROB_HISTORY[name].length > 200) WIN_PROB_HISTORY[name].shift();
+  });
+
+  // Update player dropdown if tracker is visible
+  updateWinProbDropdown();
+  renderWinProbChart();
+}
+
+let wpMode = 'golfer'; // 'golfer' or 'better'
+
+function setWpMode(mode) {
+  wpMode = mode;
+  document.getElementById('wpModeGolfer').classList.toggle('flt-active', mode === 'golfer');
+  document.getElementById('wpModeBetter').classList.toggle('flt-active', mode === 'better');
+  updateWinProbDropdown();
+  renderWinProbChart();
+}
+
+function updateWinProbDropdown() {
+  const sel = document.getElementById('winProbPlayer');
+  if (!sel) return;
+  const current = sel.value;
+
+  if (wpMode === 'golfer') {
+    const picks = new Set();
+    BETTERS.forEach(b => (b.picks || []).forEach(p => picks.add(normName(p).toLowerCase())));
+    const options = Object.keys(WIN_PROB_HISTORY)
+      .filter(n => picks.has(normName(n).toLowerCase()) && WIN_PROB_HISTORY[n].length > 0)
+      .sort((a, b) => (WIN_PROB_HISTORY[b].at(-1)?.w || 0) - (WIN_PROB_HISTORY[a].at(-1)?.w || 0));
+    sel.innerHTML = '<option value="">Select a golfer...</option>' +
+      options.map(n => `<option value="${n}" ${n === current ? 'selected' : ''}>${n} (${Math.round((WIN_PROB_HISTORY[n].at(-1)?.w || 0) * 100)}%)</option>`).join('');
+  } else {
+    const options = Object.keys(BETTER_WIN_HISTORY)
+      .filter(n => BETTER_WIN_HISTORY[n].length > 0)
+      .sort((a, b) => (BETTER_WIN_HISTORY[b].at(-1)?.w || 0) - (BETTER_WIN_HISTORY[a].at(-1)?.w || 0));
+    sel.innerHTML = '<option value="">Select a better...</option>' +
+      options.map(n => `<option value="${n}" ${n === current ? 'selected' : ''}>${n} (${Math.round((BETTER_WIN_HISTORY[n].at(-1)?.w || 0) * 100)}%)</option>`).join('');
+  }
+  if (!sel.value && sel.options.length > 1) sel.selectedIndex = 1;
+}
+
+function renderWinProbChart() {
+  const canvas = document.getElementById('winProbCanvas');
+  const empty = document.getElementById('winProbEmpty');
+  const sel = document.getElementById('winProbPlayer');
+  if (!canvas || !sel) return;
+
+  const name = sel.value;
+  const history = name ? (wpMode === 'golfer' ? WIN_PROB_HISTORY[name] : BETTER_WIN_HISTORY[name]) : null;
+  const lineColor = wpMode === 'better' ? '#185fa5' : '#166534';
+  const fillColor = wpMode === 'better' ? 'rgba(24,95,165,0.08)' : 'rgba(22,101,52,0.08)';
+
+  if (!history || history.length < 2) {
+    canvas.style.display = 'none';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+
+  canvas.style.display = 'block';
+  if (empty) empty.style.display = 'none';
+
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 600;
+  const H = 160;
+  canvas.width = W;
+  canvas.height = H;
+
+  const pad = { top: 16, right: 16, bottom: 28, left: 48 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const vals = history.map(d => d.w);
+  const maxW = Math.max(...vals, 0.1);
+  const minW = Math.min(...vals, 0);
+  const range = maxW - minW || 0.1;
+
+  const tMin = history[0].t;
+  const tMax = history.at(-1).t;
+  const tRange = tMax - tMin || 1;
+
+  const toX = t => pad.left + ((t - tMin) / tRange) * chartW;
+  const toY = w => pad.top + chartH - ((w - minW) / range) * chartH;
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 0.5;
+  [0.25, 0.5, 0.75].forEach(frac => {
+    const y = pad.top + chartH * (1 - frac);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y); ctx.stroke();
+    const pct = Math.round((minW + frac * range) * 100);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(pct + '%', pad.left - 6, y + 3);
+  });
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(toX(history[0].t), toY(history[0].w));
+  history.forEach(d => ctx.lineTo(toX(d.t), toY(d.w)));
+  ctx.lineTo(toX(history.at(-1).t), pad.top + chartH);
+  ctx.lineTo(toX(history[0].t), pad.top + chartH);
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  history.forEach((d, i) => i === 0 ? ctx.moveTo(toX(d.t), toY(d.w)) : ctx.lineTo(toX(d.t), toY(d.w)));
+  ctx.stroke();
+
+  // Current value dot
+  const last = history.at(-1);
+  ctx.beginPath();
+  ctx.arc(toX(last.t), toY(last.w), 4, 0, Math.PI * 2);
+  ctx.fillStyle = lineColor;
+  ctx.fill();
+  ctx.fillStyle = lineColor;
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(Math.round(last.w * 100) + '%', toX(last.t) + 8, toY(last.w) + 4);
+
+  // Time labels
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.font = '10px sans-serif';
+  ctx.textAlign = 'center';
+  const fmt = t => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  ctx.fillText(fmt(history[0].t), toX(history[0].t), H - 6);
+  ctx.fillText(fmt(last.t), toX(last.t), H - 6);
+}
+
 function renderLeaderboard() {
   const rows = BETTERS.map(b => {
     const calc = calcBetter(b);
@@ -1294,7 +1483,10 @@ function renderLeaderboard() {
       if (poolWinner) wins[poolWinner]++;
     }
 
-    // Update cells — use decimal precision for low probs, show at least 1% if >0
+    // Snapshot better pool win% history
+    snapshotBetterWinProbs(wins, N);
+
+    // Update cells
     BETTERS.forEach(b => {
       const prob = wins[b.name] / N;
       const key = b.name.replace(/[^a-z0-9]/gi,'_');
