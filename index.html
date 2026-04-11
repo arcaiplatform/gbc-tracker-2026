@@ -919,12 +919,14 @@ function renderLeaderboard() {
       golferData.forEach((g, idx) => {
         let cls = "pill";
         const isUsedAsScoring = usedGolfers && usedGolfers.some(u => u.name === g.name && !u.isPhantom);
+        // Alt is "in play" if it appears in usedGolfers (substituting for an MC)
+        const altInPlay = idx === 3 && usedGolfers && usedGolfers.some(u => u.name === g.name && u.replacedMC);
         if (idx === 3) cls += " alt";
         if (g.isMC) cls += " mc";
         else if (isUsedAsScoring && !g.isAlt) cls += " scoring";
-        if (g.replacedMC) cls += " alt-used";
+        if (altInPlay) cls += " alt-used";
         const scoreStr = g.isMC ? "MC" : fmtScore(g.toPar);
-        const prefix = idx === 3 ? (g.replacedMC ? "🟢 ALT IN: " : "ALT: ") : "";
+        const prefix = idx === 3 ? (altInPlay ? "🟢 ALT IN: " : "ALT: ") : "";
         pillsHTML += `<span class="${cls}">${prefix}${g.name} (${scoreStr})</span>`;
       });
       if (gbcPenalty) {
