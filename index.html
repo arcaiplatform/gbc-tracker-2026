@@ -213,15 +213,7 @@
     <button class="tab-btn" onclick="showTab('golfers', this)">🏌️ Golfer Scores</button>
     <button class="tab-btn" id="picksTabBtn" onclick="showTab('picks', this)">📋 All Picks</button>
     <button class="tab-btn" onclick="showTab('field', this); renderField()">📊 Field Breakdown</button>
-    <div class="tab-dropdown" id="gbcDropdownWrap">
-      <button class="tab-btn" id="gbcDropdownBtn" onclick="toggleGBCDropdown(event)">🏆 GBC Season ▾</button>
-      <div class="tab-dropdown-menu" id="gbcDropdownMenu" style="display:none">
-        <button onclick="showGBCYear('2026', event)">2026 Season (live)</button>
-        <button onclick="showGBCYear('2025', event)">2025 Final</button>
-        <button onclick="showGBCYear('2024', event)">2024 Final</button>
-        <button onclick="showGBCYear('2023', event)">2023 Final</button>
-      </div>
-    </div>
+    <button class="tab-btn" id="gbcDropdownBtn" onclick="currentGBCYear=2026; showTab('gbcseason', this); renderGBCSeason()">🏆 GBC Season</button>
     <button class="tab-btn" onclick="showTab('records', this)">📖 Record Book</button>
     <button class="tab-btn" onclick="showTab('schedule', this)">📅 Schedule</button>
     <button class="tab-btn" onclick="showTab('rules', this)">📜 Rules</button>
