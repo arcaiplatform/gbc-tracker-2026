@@ -29,9 +29,10 @@
   .site-header { background: var(--green); color: white; padding: 0; }
   .header-inner { max-width: 1100px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
   .logo { display: flex; align-items: center; gap: 10px; }
+  .logo { display: flex; align-items: center; gap: 14px; }
   .logo-icon { font-size: 28px; line-height: 1; }
-  .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-  .logo-sub { font-size: 12px; opacity: 0.7; margin-top: 1px; }
+  .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; font-family: Georgia, serif; }
+  .logo-sub { font-size: 12px; opacity: 0.7; margin-top: 1px; letter-spacing: 0.5px; }
   .header-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .live-badge { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; }
   .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
@@ -183,9 +184,18 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="logo">
-      <div class="logo-icon">⛳</div>
+      <svg width="38" height="44" viewBox="0 0 84 96" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <path d="M22 20 L62 20 L66 42 Q78 48 78 60 Q78 80 62 88 Q52 92 42 92 Q32 92 22 88 Q6 80 6 60 Q6 48 18 42 Z" fill="none" stroke="#c8a84b" stroke-width="4"/>
+        <path d="M24 22 L60 22 L64 43 Q75 49 75 60 Q75 78 60 86 Q51 90 42 90 Q33 90 24 86 Q9 78 9 60 Q9 49 20 43Z" fill="#c8a84b" opacity="0.12"/>
+        <path d="M64 45 Q82 45 82 62 Q82 78 64 82" fill="none" stroke="#c8a84b" stroke-width="5" stroke-linecap="round"/>
+        <rect x="24" y="13" width="36" height="9" rx="4.5" fill="#c8a84b"/>
+        <ellipse cx="42" cy="10" rx="10" ry="6" fill="#c8a84b"/>
+        <rect x="28" y="90" width="28" height="6" rx="2" fill="#c8a84b"/>
+        <rect x="20" y="90" width="44" height="5" rx="2" fill="#c8a84b" opacity="0.7"/>
+        <text x="42" y="68" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#c8a84b" text-anchor="middle" letter-spacing="1">GBC</text>
+      </svg>
       <div>
-        <div class="logo-text">Golf Betters Cup 2026</div>
+        <div class="logo-text">Golf Betters Cup</div>
         <div class="logo-sub">Live Masters Tracker · Augusta National</div>
       </div>
     </div>
