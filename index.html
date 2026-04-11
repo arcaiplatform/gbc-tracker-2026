@@ -298,13 +298,12 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Pick Popularity &amp; DataGolf Odds</div>
-          <div class="card-sub">How many betters picked each golfer · DataGolf win probability &amp; make cut % · sorted by pick count</div>
+          <div class="card-title">Full Field · DataGolf Live Odds</div>
+          <div class="card-sub">All golfers in the field · Live win probability, top 5, top 10, make cut · sorted by win prob</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="fieldFilterBtns">
-          <button onclick="setFieldFilter('all',this)" class="flt-btn flt-active">All picks</button>
-          <button onclick="setFieldFilter('main',this)" class="flt-btn">Picks 1–3 only</button>
-          <button onclick="setFieldFilter('alt',this)" class="flt-btn">Alternates only</button>
+          <button onclick="setFieldFilter('all',this)" class="flt-btn flt-active">Full Field</button>
+          <button onclick="setFieldFilter('picked',this)" class="flt-btn">Picks Only</button>
         </div>
       </div>
       <table id="fieldTable">
@@ -312,22 +311,15 @@
           <tr>
             <th style="width:36px">#</th>
             <th>Golfer</th>
-            <th class="num">Picked by</th>
-            <th class="num">% of field</th>
-            <th class="num">Win prob</th>
+            <th class="num">Win Prob</th>
             <th class="num">Top 5</th>
             <th class="num">Top 10</th>
-            <th class="num">Make cut</th>
+            <th class="num">Make Cut</th>
             <th>Betters who picked</th>
           </tr>
         </thead>
         <tbody id="fieldBody"></tbody>
       </table>
-    </div>
-
-    <div class="card" style="margin-top:16px">
-      <div class="card-header"><div class="card-title">Exposure heatmap</div><div class="card-sub">Which golfers are most &amp; least covered across the field</div></div>
-      <div id="heatmapGrid" style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px"></div>
     </div>
   </section>
 
@@ -1201,403 +1193,75 @@ function renderPicks() {
 // RENDER FIELD BREAKDOWN
 // ============================================================
 function renderField() {
-  // Build pick counts
-  const pickMap = {}; // golferName -> { mainCount, altCount, betters: [{name, isAlt}] }
+  // Build pick map for betters-who-picked lookup
+  const pickMap = {};
   BETTERS.forEach(b => {
     (b.picks || []).forEach((p, idx) => {
       const isAlt = idx === 3;
-      if (!pickMap[p]) pickMap[p] = { mainCount: 0, altCount: 0, betters: [] };
-      if (isAlt) pickMap[p].altCount++;
-      else pickMap[p].mainCount++;
-      pickMap[p].betters.push({ name: b.name, isAlt });
+      const key = normName(p).toLowerCase();
+      if (!pickMap[key]) pickMap[key] = { name: p, betters: [] };
+      pickMap[key].betters.push({ name: b.name, isAlt });
     });
+  });
+
+  // Full field from DG_DATA
+  let allRows = Object.entries(DG_DATA).map(([key, dg]) => {
+    const liveScore = golferScores[key] || null;
+    const pickedEntry = pickMap[key] || null;
+    return { key, dg, liveScore, pickedEntry };
   });
 
   // Filter
-  let rows = Object.entries(pickMap).map(([name, d]) => ({ name, ...d, total: d.mainCount + d.altCount }));
-  if (fieldFilter === 'main') rows = rows.filter(r => r.mainCount > 0);
-  if (fieldFilter === 'alt')  rows = rows.filter(r => r.altCount > 0);
+  if (fieldFilter === 'picked') allRows = allRows.filter(r => r.pickedEntry);
 
-  // Sort by win probability desc, then pick count
-  rows.sort((a, b) => {
-    const dgA = DG_DATA[a.name.toLowerCase()]?.win || 0;
-    const dgB = DG_DATA[b.name.toLowerCase()]?.win || 0;
-    if (dgB !== dgA) return dgB - dgA;
-    return b.total - a.total;
-  });
-
-  const totalBetters = BETTERS.length;
-  const maxPicks = rows[0]?.total || 1;
+  // Sort by win prob desc
+  allRows.sort((a, b) => (b.dg.win || 0) - (a.dg.win || 0));
 
   // Stat cards
-  const uniqueGolfers = Object.keys(pickMap).length;
-  const mostPicked = rows[0];
-  const leastPickedMain = [...rows].filter(r => r.mainCount > 0).sort((a,b) => a.mainCount - b.mainCount)[0];
-  document.getElementById("fieldStats").innerHTML = `
-    <div class="stat-card"><div class="stat-label">Unique golfers picked</div><div class="stat-value">${uniqueGolfers}</div><div class="stat-sub">across all 27 betters</div></div>
-    <div class="stat-card"><div class="stat-label">Most picked</div><div class="stat-value" style="font-size:15px">${mostPicked?.name.split(' ').pop() || '–'}</div><div class="stat-sub">${mostPicked?.total || 0} betters (${pct(mostPicked?.mainCount||0, totalBetters)} in main picks)</div></div>
-    <div class="stat-card"><div class="stat-label">Highest win prob (picked)</div><div class="stat-value" style="font-size:15px">${getTopDGPick(pickMap)}</div><div class="stat-sub">per DataGolf model</div></div>
-    <div class="stat-card"><div class="stat-label">Consensus win prob</div><div class="stat-value">${getConsensusWin(pickMap)}</div><div class="stat-sub">avg of field's picks (main only)</div></div>`;
+  const pickedRows = Object.values(pickMap).length;
+  const topRow = allRows[0];
+  const topPicked = allRows.filter(r => r.pickedEntry)[0];
+  const consensusArr = allRows.filter(r => r.pickedEntry);
+  const consensus = consensusArr.length ? consensusArr.reduce((s,r) => s + (r.dg.win||0), 0) / consensusArr.length : 0;
 
-  // Table
+  document.getElementById("fieldStats").innerHTML = `
+    <div class="stat-card"><div class="stat-label">Field size</div><div class="stat-value">${allRows.length}</div><div class="stat-sub">${fieldFilter === 'picked' ? 'golfers picked' : 'golfers in field'}</div></div>
+    <div class="stat-card"><div class="stat-label">Leader win prob</div><div class="stat-value" style="font-size:15px">${topRow ? (topRow.liveScore?.name || topRow.key).split(' ').pop() : '–'}</div><div class="stat-sub">${topRow ? pct(topRow.dg.win, 1) : '–'} to win</div></div>
+    <div class="stat-card"><div class="stat-label">Top picked win prob</div><div class="stat-value" style="font-size:15px">${topPicked ? (topPicked.liveScore?.name || topPicked.key).split(' ').pop() : '–'}</div><div class="stat-sub">${topPicked ? pct(topPicked.dg.win, 1) : '–'} per DataGolf</div></div>
+    <div class="stat-card"><div class="stat-label">Consensus win prob</div><div class="stat-value">${pct(consensus, 1)}</div><div class="stat-sub">avg across picked golfers</div></div>`;
+
   const tbody = document.getElementById("fieldBody");
   tbody.innerHTML = "";
-  rows.forEach((row, i) => {
-    const liveScore = getGolferScore(row.name);
-    const dg = DG_DATA[row.name.toLowerCase()] || null;
-    const pos = liveScore.isMC ? 'MC' : (liveScore.pos || '–');
-    const scoreDisp = liveScore.isMC
-      ? '<span class="mc-tag">MC</span>'
-      : `<span class="${scoreCls(liveScore.toPar)}" style="font-weight:700">${fmtScore(liveScore.toPar)}</span>`;
-    const todayDisp = dg?.today !== undefined && dg?.today !== null
-      ? `<span class="${scoreCls(dg.today)}" style="font-size:11px">${fmtScore(dg.today)}</span>`
-      : '–';
-    const pickerNames = row.betters.map(b => `<span style="white-space:nowrap">${b.name.split(' ').pop()}${b.isAlt ? '<span style="font-size:9px;color:var(--text-muted)"> (alt)</span>' : ''}</span>`).join(', ');
-    const barPct = Math.round((row.total / maxPicks) * 100);
+
+  if (allRows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">Loading — click Refresh</td></tr>';
+    return;
+  }
+
+  allRows.forEach((row, i) => {
+    const { dg, liveScore, pickedEntry } = row;
+    const isMC = liveScore?.isMC || false;
+    const pos = isMC ? 'MC' : (liveScore?.pos || '–');
+    const name = liveScore?.name || row.key.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    const score = liveScore ? (isMC ? '<span class="mc-tag">MC</span>' : `<span class="${scoreCls(liveScore.toPar)}" style="font-weight:700">${fmtScore(liveScore.toPar)}</span>`) : '';
+    const today = (dg.today !== null && dg.today !== undefined) ? `<span class="${scoreCls(dg.today)}">${fmtScore(dg.today)}</span>` : '–';
+    const pickerNames = pickedEntry
+      ? pickedEntry.betters.map(b => `<span style="white-space:nowrap">${b.name.split(' ').pop()}${b.isAlt ? '<span style="font-size:9px;color:var(--text-muted)"> (alt)</span>' : ''}</span>`).join(', ')
+      : '<span style="color:var(--border)">–</span>';
     const tr = document.createElement("tr");
+    if (isMC) tr.style.opacity = "0.45";
+    if (pickedEntry) tr.style.background = "#f0fdf4";
     tr.innerHTML = `
-      <td class="rank-num">${i + 1}</td>
+      <td class="rank-num" style="color:var(--text-muted)">${i + 1}</td>
       <td>
-        <div style="font-weight:700;font-size:13px">${row.name} ${scoreDisp}</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Pos: ${pos} · Today: ${todayDisp}</div>
-        <div class="bar-wrap" style="margin-top:4px">
-          <div class="bar-bg"><div class="bar-fill" style="width:${barPct}%"></div></div>
-        </div>
+        <div style="font-weight:${pickedEntry ? '700' : '500'};font-size:13px">${name} ${score}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:1px">Pos: ${pos} · Today: ${today}</div>
       </td>
-      <td class="num">
-        <span style="font-size:16px;font-weight:700">${row.total}</span>
-        ${row.altCount > 0 ? `<div style="font-size:10px;color:var(--text-muted)">${row.mainCount} main · ${row.altCount} alt</div>` : ''}
-      </td>
-      <td class="num" style="font-size:12px">${pct(row.mainCount, totalBetters)}</td>
-      <td class="num" style="font-weight:700;color:${dg ? winColor(dg.win) : 'var(--text-muted)'}">${dg ? pct(dg.win, 1) : '–'}</td>
-      <td class="num" style="font-size:12px">${dg ? pct(dg.top5, 1) : '–'}</td>
-      <td class="num" style="font-size:12px">${dg ? pct(dg.top10, 1) : '–'}</td>
-      <td class="num" style="font-size:12px;color:${dg ? cutColor(dg.makeCut) : 'var(--text-muted)'}">${dg ? pct(dg.makeCut, 1) : '–'}</td>
+      <td class="num" style="font-weight:700;color:${winColor(dg.win)}">${pct(dg.win, 1)}</td>
+      <td class="num" style="font-size:12px">${pct(dg.top5, 1)}</td>
+      <td class="num" style="font-size:12px">${pct(dg.top10, 1)}</td>
+      <td class="num" style="font-size:12px;color:${cutColor(dg.makeCut)}">${pct(dg.makeCut, 1)}</td>
       <td><div class="picker-list">${pickerNames}</div></td>`;
     tbody.appendChild(tr);
   });
-
-  // Heatmap
-  const heatGrid = document.getElementById("heatmapGrid");
-  heatGrid.innerHTML = "";
-  rows.forEach(row => {
-    const pctVal = row.mainCount / totalBetters;
-    const intensity = Math.min(pctVal * 2.5, 1);
-    const bg = pctVal === 0 ? '#f9fafb'
-      : pctVal < 0.15 ? '#dcfce7'
-      : pctVal < 0.30 ? '#86efac'
-      : pctVal < 0.50 ? '#22c55e'
-      : '#15803d';
-    const textColor = pctVal >= 0.30 ? 'white' : 'var(--text)';
-    const dg = DG_DATA[row.name.toLowerCase()];
-    const el = document.createElement("div");
-    el.className = "heat-card";
-    el.style.cssText = `background:${bg};color:${textColor}`;
-    el.innerHTML = `
-      <div class="heat-name">${row.name}</div>
-      <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px">
-        <div class="heat-count">${row.mainCount}</div>
-        <div class="heat-sub">${pct(row.mainCount, totalBetters)} of field</div>
-      </div>
-      ${dg ? `<div style="font-size:10px;margin-top:4px;opacity:.85">Win: ${pct(dg.win,1)} · Cut: ${pct(dg.makeCut,1)}</div>` : ''}`;
-    heatGrid.appendChild(el);
-  });
 }
-
-function pct(val, denom) {
-  if (denom === 1) return Math.round(val * 100) + '%';
-  if (!denom) return '–';
-  return Math.round((val / denom) * 100) + '%';
-}
-function winColor(w) {
-  if (w >= 0.10) return '#15803d';
-  if (w >= 0.05) return '#1d4ed8';
-  if (w >= 0.02) return 'var(--text)';
-  return 'var(--text-muted)';
-}
-function cutColor(c) {
-  if (c >= 0.85) return '#15803d';
-  if (c >= 0.70) return 'var(--text)';
-  return '#b91c1c';
-}
-function getTopDGPick(pickMap) {
-  let best = null, bestWin = 0;
-  Object.keys(pickMap).forEach(name => {
-    const dg = DG_DATA[name.toLowerCase()];
-    if (dg && dg.win > bestWin) { bestWin = dg.win; best = name; }
-  });
-  return best ? best.split(' ').pop() + ' (' + pct(bestWin, 1) + ')' : '–';
-}
-function getConsensusWin(pickMap) {
-  let total = 0, count = 0;
-  Object.entries(pickMap).forEach(([name, d]) => {
-    if (d.mainCount > 0) {
-      const dg = DG_DATA[name.toLowerCase()];
-      if (dg) { total += dg.win * d.mainCount; count += d.mainCount; }
-    }
-  });
-  return count ? pct(total / count, 1) : '–';
-}
-
-// ============================================================
-// RENDER GBC UNIFIED
-// ============================================================
-function renderGBCSeason() {
-  const yr = currentGBCYear;
-  const data = GBC_DATA[yr];
-
-  document.getElementById("gbcYearTitle").textContent = data.label;
-  document.getElementById("gbcYearSub").textContent = data.sub;
-  document.getElementById("gbcTableTitle").textContent = data.label;
-
-  // Stat row
-  const statRow = document.getElementById("gbcStatRow");
-  if (yr === 2026) {
-    const gbcBetters = BETTERS.filter(b => b.gbc);
-    const gbcPool = gbcBetters.length * 200;
-    statRow.innerHTML = `
-      <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
-      <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters · PGA · US Open · The Open</div></div>
-      <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value" style="font-size:14px;color:var(--green)">In Progress</div><div class="stat-sub">Masters live</div></div>`;
-  } else {
-    const [w1,w2,w3] = data.winners;
-    statRow.innerHTML = `
-      <div class="stat-card"><div class="stat-label">Winner</div><div class="stat-value" style="font-size:14px">${w1}</div><div class="stat-sub">GBC Champion</div></div>
-      <div class="stat-card"><div class="stat-label">2nd Place</div><div class="stat-value" style="font-size:14px">${w2}</div><div class="stat-sub"></div></div>
-      <div class="stat-card"><div class="stat-label">3rd Place</div><div class="stat-value" style="font-size:14px">${w3}</div><div class="stat-sub"></div></div>
-      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">${data.pool}</div><div class="stat-sub">entry fees</div></div>`;
-  }
-
-  // Table
-  const tbody = document.getElementById("gbcUnifiedBody");
-  tbody.innerHTML = "";
-
-  if (yr === 2026) {
-    // Build live rows from BETTERS
-    const gbcBetters = BETTERS.filter(b => b.gbc);
-    const rows = gbcBetters.map(b => {
-      const calc = calcBetter(b);
-      // GBC players always have a score (sub fills in for 2MC)
-      const mastersScore = calc.totalScore;
-      return { name: b.name, mastersScore, total: mastersScore, twoMC: calc.twoMC, gbcSub: calc.gbcSub };
-    });
-    const started = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
-    if (started) {
-      rows.sort((a, b) => (a.total ?? 999) - (b.total ?? 999));
-    } else {
-      rows.sort((a, b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
-    }
-    let rank = 1;
-    rows.forEach(row => {
-      const tr = document.createElement("tr");
-      const mCls = scoreCls(row.mastersScore);
-      const mDisp = row.mastersScore !== null ? fmtScore(row.mastersScore) : '–';
-      const subTag = '';
-      tr.innerHTML = `<td class="rank-num">${rank}</td><td class="better-name">${row.name}${subTag}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
-      tbody.appendChild(tr);
-      rank++;
-    });
-  } else {
-    data.rows.forEach((row, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${scoreCls(row.total)}">${fmtScore(row.total)}</td><td class="num ${scoreCls(row.masters)}">${fmtScore(row.masters)}</td><td class="num ${scoreCls(row.pga)}">${fmtScore(row.pga)}</td><td class="num ${scoreCls(row.usOpen)}">${fmtScore(row.usOpen)}</td><td class="num ${scoreCls(row.theOpen)}">${fmtScore(row.theOpen)}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-}
-
-function showGBCYear(yr, evt, btn) {
-  if (evt) evt.stopPropagation();
-  currentGBCYear = parseInt(yr);
-  // Update year buttons
-  document.querySelectorAll('#sec-gbcseason .flt-btn').forEach(b => b.classList.remove('flt-active'));
-  if (btn) btn.classList.add('flt-active');
-  // Activate the section/tab
-  showTab('gbcseason', document.getElementById('gbcDropdownBtn'));
-  document.getElementById('gbcDropdownBtn').classList.add('gbc-active');
-  document.getElementById('gbcDropdownMenu').style.display = 'none';
-  renderGBCSeason();
-}
-
-function toggleGBCDropdown(evt) {
-  evt.stopPropagation();
-  const menu = document.getElementById('gbcDropdownMenu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
-document.addEventListener('click', () => {
-  const m = document.getElementById('gbcDropdownMenu');
-  if (m) m.style.display = 'none';
-});
-
-
-
-function renderRecords() {
-  const grid = document.getElementById("recordsGrid");
-  grid.innerHTML = "";
-  Object.entries(RECORDS).forEach(([title, entries]) => {
-    const card = document.createElement("div");
-    card.className = "rec-card";
-    card.innerHTML = `<div class="rec-title">${title}</div>` +
-      entries.map(e => `<div class="rec-row"><span class="rec-year">${e.y}</span><span class="rec-name">${e.n}</span></div>`).join("");
-    grid.appendChild(card);
-  });
-}
-
-// ============================================================
-// PICKS LOCK — hidden until 5PM PST April 9 2026
-// ============================================================
-// 5PM PST = UTC-8, so 5PM PST = 01:00 UTC April 10
-const PICKS_UNLOCK_UTC = new Date('2026-04-10T01:00:00Z');
-
-function picksLocked() {
-  return new Date() < PICKS_UNLOCK_UTC;
-}
-
-function showPicksTab(btn) {
-  if (picksLocked()) {
-    showTab('picks', btn);
-    document.getElementById('picksLocked').style.display = 'block';
-    document.getElementById('picksContent').style.display = 'none';
-    startPicksCountdown();
-  } else {
-    showTab('picks', btn);
-    document.getElementById('picksLocked').style.display = 'none';
-    document.getElementById('picksContent').style.display = 'block';
-  }
-}
-
-function startPicksCountdown() {
-  const el = document.getElementById('picksCountdown');
-  if (!el) return;
-  function tick() {
-    const now = new Date();
-    const diff = PICKS_UNLOCK_UTC - now;
-    if (diff <= 0) {
-      el.textContent = 'Picks are now available — refresh the page!';
-      return;
-    }
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    el.textContent = `Unlocks in ${h}h ${m}m ${s}s`;
-    setTimeout(tick, 1000);
-  }
-  tick();
-}
-
-// Hide picks tab label if locked
-function updatePicksTabLabel() {
-  const btn = document.getElementById('picksTabBtn');
-  if (btn) btn.textContent = picksLocked() ? '🔒 Picks' : '📋 All Picks';
-}
-
-
-function filterLeaderboard(q) {
-  document.querySelectorAll("#lbBody tr").forEach(tr => {
-    tr.style.display = (!q || (tr.dataset.search || "").includes(q.toLowerCase())) ? "" : "none";
-  });
-}
-function filterGolfers(q) {
-  document.querySelectorAll("#golferBody tr").forEach(tr => {
-    tr.style.display = (!q || (tr.dataset.name || "").includes(q.toLowerCase())) ? "" : "none";
-  });
-}
-
-// ============================================================
-// TAB SWITCHING
-// ============================================================
-function showTab(id, btn) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(b => { b.classList.remove("active"); b.classList.remove("gbc-active"); });
-  const sec = document.getElementById("sec-" + id);
-  if (sec) sec.classList.add("active");
-  if (btn) btn.classList.add("active");
-  document.getElementById('gbcDropdownMenu').style.display = 'none';
-}
-
-// ============================================================
-// RENDER ALL
-// ============================================================
-function renderAll() {
-  renderLeaderboard();
-  renderGolfers();
-  renderPicks();
-  renderField();
-  renderGBCSeason();
-  renderRecords();
-  document.getElementById("statPlayers").textContent = BETTERS.length;
-}
-
-// ============================================================
-// AUTO-REFRESH every 60 seconds
-// ============================================================
-function startAutoRefresh() {
-  if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(loadScores, 60000);
-}
-
-// ============================================================
-// MANUAL SCORE OVERRIDE — paste scores when proxies are down
-// ============================================================
-function applyManualScores(text) {
-  // Parse lines like "Rory McIlroy -6 F" or "Scottie Scheffler -1 12"
-  const lines = text.trim().split('\n');
-  let count = 0;
-  lines.forEach(line => {
-    line = line.trim();
-    if (!line) return;
-    // Match: Name ... score thru
-    // e.g. "Rory McIlroy -6 F" or "Scheffler -1 12" or "Jon Rahm +2 9"
-    const m = line.match(/^(.+?)\s+([-+]?\d+|E)\s+(\d+|F)?\s*$/i);
-    if (!m) return;
-    let name = m[1].trim();
-    const scoreStr = m[2];
-    const thruStr = m[3] || null;
-    let toPar = scoreStr === 'E' ? 0 : parseInt(scoreStr, 10);
-    let thru = thruStr === 'F' ? 18 : (thruStr ? parseInt(thruStr) : null);
-    const normalized = normName(name).toLowerCase();
-    golferScores[normalized] = { name: normName(name), toPar, thru, pos: '', isMC: false, status: '' };
-    count++;
-  });
-  if (count > 0) {
-    document.getElementById("statusText").textContent = "Masters Tournament 2026";
-    document.getElementById("statusSub").textContent = `Manual scores — ${count} golfers updated`;
-    document.getElementById("statusBar").className = "status-bar";
-    document.getElementById("lastUpdated").textContent = "Manual @ " + new Date().toLocaleTimeString();
-    renderAll();
-  }
-  return count;
-}
-
-// BOOT
-renderAll();
-updatePicksTabLabel();
-loadScores();
-startAutoRefresh();
-
-window.openManualEntry = function() {
-  const existing = Object.values(golferScores).map(g =>
-    `${g.name} ${g.toPar === 0 ? 'E' : (g.toPar > 0 ? '+'+g.toPar : g.toPar)} ${g.thru === 18 ? 'F' : (g.thru || '')}`
-  ).join('\n');
-
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
-  modal.innerHTML = `
-    <div style="background:white;border-radius:12px;padding:24px;width:500px;max-height:80vh;display:flex;flex-direction:column;gap:12px">
-      <div style="font-weight:700;font-size:16px">📝 Manual Score Entry</div>
-      <div style="font-size:12px;color:#666">One golfer per line: <code>Name Score Thru</code><br>
-      Examples: <code>Rory McIlroy -6 F</code> &nbsp; <code>Scottie Scheffler -1 12</code> &nbsp; <code>Jon Rahm E 9</code></div>
-      <textarea id="manualScoreInput" style="width:100%;height:300px;font-family:monospace;font-size:12px;border:1px solid #ddd;border-radius:6px;padding:8px;resize:vertical" placeholder="Rory McIlroy -6 F&#10;Scottie Scheffler -1 12&#10;Jon Rahm E 9">${existing}</textarea>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="this.closest('div[style]').remove()" style="padding:8px 16px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white">Cancel</button>
-        <button onclick="const n=applyManualScores(document.getElementById('manualScoreInput').value);this.closest('div[style]').remove();alert(n+' scores applied!')" style="padding:8px 16px;background:#166534;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600">Apply Scores</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-};
-
-</script>
-</body>
-</html>
