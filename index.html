@@ -685,6 +685,28 @@ function parseESPN(json) {
       document.getElementById("statusText").textContent = "Masters Tournament 2026";
       document.getElementById("statusSub").textContent = `Round ${round} · ${players.length} golfers · DataGolf Live`;
       document.getElementById("statusBar").className = "status-bar";
+
+      // Manual MC overrides — confirmed missed cut at +4 (cut official 4/10/26)
+      // Will auto-clear once DataGolf updates pos to "MC"
+      const CONFIRMED_MC = [
+        "Bryson DeChambeau",  // +5, triple bogey 18
+        "Akshay Bhatia",      // +5, double bogey 18
+        "Robert Macintyre",   // +7
+        "Jacob Bridgeman",    // missed cut
+        "Corey Conners",      // missed cut
+        "Sepp Straka",        // missed cut
+      ];
+      CONFIRMED_MC.forEach(n => {
+        const name = normName(n);
+        const key = name.toLowerCase();
+        if (golferScores[key]) {
+          golferScores[key].isMC = true;
+          golferScores[key].pos = 'MC';
+        } else {
+          // Player not in DataGolf feed — add them
+          golferScores[key] = { name, toPar: 5, thru: 18, pos: 'MC', isMC: true, status: '' };
+        }
+      });
       return;
     }
 
