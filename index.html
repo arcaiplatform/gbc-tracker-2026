@@ -373,7 +373,7 @@
         <li><span class="rule-icon">01</span><span>Pick <strong>4 golfers</strong> in order of expected finish. Only the <strong>top 3</strong> count for scoring.</span></li>
         <li><span class="rule-icon">02</span><span>Lowest <strong>collective score to par</strong> across your 3 counting golfers wins.</span></li>
         <li><span class="rule-icon">03</span><span>You may pick a maximum of <strong>2 of the top-10 OWGR players</strong> (as ranked the Monday of tournament week). You must pick at least 2 outside the top 10.</span></li>
-        <li><span class="rule-icon">04</span><span>If <strong>1 of your 3 picks misses the cut</strong>, your alternate (4th pick) is used in that player's position.</span></li>
+        <li><span class="rule-icon">04</span><span>If <strong>1 of your 3 picks misses the cut</strong>, your alternate (4th pick) is used in the <em>3rd scoring slot</em> — it does not replace the MC player's position. Your two remaining active picks stay in their original order, and the alternate fills in as the 3rd scorer.</span></li>
         <li><span class="rule-icon">05</span><span>If <strong>2 or more picks miss the cut</strong>, you are eliminated from the event.</span></li>
         <li><span class="rule-icon">06</span><span><strong>GBC players: keeping you in the game.</strong> If 2 or more of your picks miss the cut, you're never eliminated — the GBC always plays on. To keep you at 3 active golfers, you'll receive a <em>GBC Substitute</em>: a stand-in scored at the worst active score among all GBC players' picks, plus 1 stroke. This keeps you competitive while fairly reflecting the impact of the missed cuts. Your alternate also activates for one of the MC slots, so you always have real golfers in the mix.</span></li>
         <li><span class="rule-icon">06</span><span>If duplicate picks occur (same order submitted), the <strong>earlier timestamp wins</strong>. The second better must resubmit.</span></li>
@@ -932,29 +932,48 @@ function renderLeaderboard() {
 
     const displayRank = (twoMC && !better.gbc) ? "–" : rank;
 
-    // Build golfer pills — always show ALL 4 picks
+    // Build golfer pills — show scoring order: active picks first, then MC'd picks, then alt label
     let pillsHTML = "";
     if (golferData && golferData.length > 0) {
       pillsHTML = '<div class="golfer-pills">';
-      golferData.forEach((g, idx) => {
-        let cls = "pill";
-        const isUsedAsScoring = usedGolfers && usedGolfers.some(u => u.name === g.name && !u.isPhantom);
-        // Alt is "in play" only if it's in usedGolfers AND not MC'd itself
-        const altInPlay = idx === 3 && !g.isMC && usedGolfers && usedGolfers.some(u => u.name === g.name && u.replacedMC);
-        if (idx === 3) cls += " alt";
-        if (g.isMC) cls += " mc";
-        else if (isUsedAsScoring && !g.isAlt) cls += " scoring";
-        if (altInPlay) cls += " alt-used";
-        const scoreStr = g.isMC ? "MC" : fmtScore(g.toPar);
-        const prefix = idx === 3 ? (altInPlay ? "🟢 ALT IN: " : "ALT: ") : "";
-        pillsHTML += `<span class="${cls}">${prefix}${g.name} (${scoreStr})</span>`;
+      const main3 = golferData.slice(0, 3);
+      const alt = golferData[3];
+      const altInPlay = alt && !alt.isMC && usedGolfers && usedGolfers.some(u => u.name === alt.name && u.replacedMC);
+
+      // Build display order: active main picks, then alt-in-play, then MC picks
+      const activePicks = main3.filter(g => !g.isMC);
+      const mcPicks = main3.filter(g => g.isMC);
+
+      // Show active main picks
+      activePicks.forEach(g => {
+        pillsHTML += `<span class="pill scoring">${g.name} (${fmtScore(g.toPar)})</span>`;
       });
+
+      // Show alt IN PLAY in 3rd scoring slot (if applicable)
+      if (altInPlay) {
+        pillsHTML += `<span class="pill alt-used">🟢 ALT IN: ${alt.name} (${fmtScore(alt.toPar)})</span>`;
+      }
+
+      // GBC Sub in scoring position
       if (gbcSub) {
         const phantom = usedGolfers?.find(g => g.isPhantom);
         if (phantom) {
           pillsHTML += `<span class="pill" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa" title="GBC substitute: worst active GBC pick +1 stroke · Score: ${fmtScore(phantom.toPar)}">⚠ GBC Sub</span>`;
         }
       }
+
+      // Show MC picks pushed to right
+      mcPicks.forEach(g => {
+        pillsHTML += `<span class="pill mc">${g.name} (MC)</span>`;
+      });
+
+      // Show alt label only if NOT in play
+      if (alt && !altInPlay) {
+        const altCls = alt.isMC ? "pill mc" : "pill alt";
+        const altLabel = alt.isMC ? `ALT: ${alt.name} (MC)` : `ALT: ${alt.name} (${fmtScore(alt.toPar)})`;
+        pillsHTML += `<span class="${altCls}">${altLabel}</span>`;
+      }
+
       pillsHTML += "</div>";
     }
 
