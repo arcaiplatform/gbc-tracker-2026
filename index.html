@@ -1105,33 +1105,27 @@ function renderLeaderboard() {
 // RENDER GOLFER TABLE
 // ============================================================
 function renderGolfers() {
-  // Count how many betters have each golfer
   const betterCount = {};
   BETTERS.forEach(b => (b.picks || []).forEach(p => {
-    const key = p.toLowerCase();
+    const key = normName(p).toLowerCase();
     betterCount[key] = (betterCount[key] || 0) + 1;
   }));
-
-  // Sort by toPar
   const allGolfers = Object.values(golferScores).filter((g, i, arr) =>
-    arr.findIndex(x => x.name === g.name) === i // deduplicate
+    arr.findIndex(x => x.name === g.name) === i
   ).sort((a, b) => {
     if (a.isMC && !b.isMC) return 1;
     if (!a.isMC && b.isMC) return -1;
     return a.toPar - b.toPar;
   });
-
   const tbody = document.getElementById("golferBody");
   tbody.innerHTML = "";
-
   if (allGolfers.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted)">No golfer data loaded yet — click Refresh</td></tr>';
     return;
   }
-
   allGolfers.forEach((g, i) => {
     const cnt = betterCount[g.name.toLowerCase()] || 0;
-    if (cnt === 0 && g.isMC) return; // skip MC players nobody picked
+    if (cnt === 0 && g.isMC) return;
     const tr = document.createElement("tr");
     if (g.isMC) tr.style.opacity = "0.5";
     tr.dataset.name = g.name.toLowerCase();
@@ -1153,34 +1147,38 @@ function renderGolfers() {
 function renderPicks() {
   const container = document.getElementById("picksGrid");
   container.innerHTML = "";
-
-  BETTERS.forEach(b => {
-    const calc = calcBetter(b);
-    const { totalScore, twoMC: eliminated, golferData } = calc;
-
+  const sorted = [...BETTERS].sort((a,b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
+  sorted.forEach(better => {
+    const calc = calcBetter(better);
+    const { totalScore, twoMC, usedGolfers, golferData } = calc;
     const card = document.createElement("div");
-    card.className = "pick-card";
-
-    const scoreStr = eliminated ? "ELIM" : (totalScore !== null ? fmtScore(totalScore) : "–");
-    const scoreColor = eliminated ? "var(--red)" : (totalScore !== null ? (totalScore < 0 ? "var(--blue)" : totalScore > 0 ? "var(--red)" : "var(--text-muted)") : "var(--text-muted)");
-
+    card.className = "picks-card";
+    const scoreStr = (twoMC && !better.gbc) ? '2MC' : (totalScore !== null ? fmtScore(totalScore) : '–');
+    const scoreColor = (twoMC && !better.gbc) ? "var(--text-muted)" : (totalScore !== null ? (totalScore < 0 ? "var(--red)" : totalScore > 0 ? "var(--over)" : "var(--text-muted)") : "var(--text-muted)");
     let golfersHTML = "";
-    if (golferData && golferData.length > 0) {
+    if (golferData) {
       golferData.forEach((g, idx) => {
-        const label = idx === 3 ? "ALT" : `Pick ${idx+1}`;
-        const scoreDisp = g.isMC ? "MC" : fmtScore(g.toPar);
-        const scCls = g.isMC ? "over" : scoreCls(g.toPar);
-        golfersHTML += `<div class="pg-row"><div><span class="pg-label">${label}</span><span style="font-weight:600">${g.name}</span>${g.replacedMC ? ' <span class="alt-tag">subbed in</span>' : ''}${g.isMC ? ' <span class="mc-tag">MC</span>' : ''}</div><span class="${scCls}" style="font-weight:700;font-size:13px">${scoreDisp}</span></div>`;
+        const isUsedAsScoring = usedGolfers && usedGolfers.some(u => u.name === g.name && !u.isPhantom);
+        const altInPlay = idx === 3 && !g.isMC && usedGolfers && usedGolfers.some(u => u.name === g.name && u.replacedMC);
+        let cls = "pill";
+        if (idx === 3) cls += " alt";
+        if (g.isMC) cls += " mc";
+        else if (isUsedAsScoring && !g.isAlt) cls += " scoring";
+        if (altInPlay) cls += " alt-used";
+        const scoreS = g.isMC ? "MC" : fmtScore(g.toPar);
+        const prefix = idx === 3 ? (altInPlay ? "🟢 ALT IN: " : "ALT: ") : "";
+        golfersHTML += `<span class="${cls}">${prefix}${g.name} (${scoreS})</span>`;
       });
-    } else {
-      golfersHTML = '<div style="color:var(--text-muted);font-size:12px;padding:8px 0">No picks submitted yet</div>';
+      if (calc.gbcSub) {
+        const phantom = usedGolfers?.find(g => g.isPhantom);
+        if (phantom) golfersHTML += `<span class="pill" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa">⚠ GBC Sub</span>`;
+      }
     }
-
     card.innerHTML = `
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+      <div class="pc-header">
         <div>
-          <div class="pc-name">${b.name}${b.gbc ? '<span class="gbc-tag">GBC</span>' : ''}</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${b.paid ? "✓ Paid" : "⚠ Payment pending"}</div>
+          <div class="pc-name">${better.name}${better.gbc ? ' <span class="gbc-tag">GBC</span>' : ''}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${!better.paid ? "⚠ Payment pending" : "✓ Paid"}</div>
         </div>
         <div class="pc-score" style="color:${scoreColor}">${scoreStr}</div>
       </div>
@@ -1189,11 +1187,27 @@ function renderPicks() {
   });
 }
 
+function pct(val, denom) {
+  if (denom === 1) return Math.round(val * 100) + '%';
+  if (!denom) return '–';
+  return Math.round((val / denom) * 100) + '%';
+}
+function winColor(w) {
+  if (w >= 0.10) return '#15803d';
+  if (w >= 0.05) return '#1d4ed8';
+  if (w >= 0.02) return 'var(--text)';
+  return 'var(--text-muted)';
+}
+function cutColor(c) {
+  if (c >= 0.85) return '#15803d';
+  if (c >= 0.70) return 'var(--text)';
+  return '#b91c1c';
+}
+
 // ============================================================
 // RENDER FIELD BREAKDOWN
 // ============================================================
 function renderField() {
-  // Build pick map for betters-who-picked lookup
   const pickMap = {};
   BETTERS.forEach(b => {
     (b.picks || []).forEach((p, idx) => {
@@ -1204,21 +1218,15 @@ function renderField() {
     });
   });
 
-  // Full field from DG_DATA
   let allRows = Object.entries(DG_DATA).map(([key, dg]) => {
     const liveScore = golferScores[key] || null;
     const pickedEntry = pickMap[key] || null;
     return { key, dg, liveScore, pickedEntry };
   });
 
-  // Filter
   if (fieldFilter === 'picked') allRows = allRows.filter(r => r.pickedEntry);
-
-  // Sort by win prob desc
   allRows.sort((a, b) => (b.dg.win || 0) - (a.dg.win || 0));
 
-  // Stat cards
-  const pickedRows = Object.values(pickMap).length;
   const topRow = allRows[0];
   const topPicked = allRows.filter(r => r.pickedEntry)[0];
   const consensusArr = allRows.filter(r => r.pickedEntry);
@@ -1232,12 +1240,10 @@ function renderField() {
 
   const tbody = document.getElementById("fieldBody");
   tbody.innerHTML = "";
-
   if (allRows.length === 0) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">Loading — click Refresh</td></tr>';
     return;
   }
-
   allRows.forEach((row, i) => {
     const { dg, liveScore, pickedEntry } = row;
     const isMC = liveScore?.isMC || false;
@@ -1265,3 +1271,165 @@ function renderField() {
     tbody.appendChild(tr);
   });
 }
+
+// ============================================================
+// RENDER GBC SEASON
+// ============================================================
+let currentGBCYear = 2026;
+
+function renderGBCSeason() {
+  const yr = currentGBCYear;
+  const data = GBC_DATA[yr];
+  document.getElementById("gbcYearTitle").textContent = data.label;
+  document.getElementById("gbcYearSub").textContent = data.sub;
+  document.getElementById("gbcTableTitle").textContent = data.label;
+
+  const statRow = document.getElementById("gbcStatRow");
+  if (yr === 2026) {
+    const gbcBetters = BETTERS.filter(b => b.gbc);
+    const gbcPool = gbcBetters.length * 200;
+    statRow.innerHTML = `
+      <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
+      <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
+      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters · PGA · US Open · The Open</div></div>
+      <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value" style="font-size:14px;color:var(--green)">In Progress</div><div class="stat-sub">Masters live</div></div>`;
+  } else {
+    const [w1,w2,w3] = data.winners;
+    statRow.innerHTML = `
+      <div class="stat-card"><div class="stat-label">Winner</div><div class="stat-value" style="font-size:14px">${w1}</div><div class="stat-sub">GBC Champion</div></div>
+      <div class="stat-card"><div class="stat-label">2nd Place</div><div class="stat-value" style="font-size:14px">${w2}</div><div class="stat-sub"></div></div>
+      <div class="stat-card"><div class="stat-label">3rd Place</div><div class="stat-value" style="font-size:14px">${w3}</div><div class="stat-sub"></div></div>
+      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">${data.pool}</div><div class="stat-sub">entry fees</div></div>`;
+  }
+
+  const tbody = document.getElementById("gbcUnifiedBody");
+  tbody.innerHTML = "";
+
+  if (yr === 2026) {
+    const gbcBetters = BETTERS.filter(b => b.gbc);
+    const rows = gbcBetters.map(b => {
+      const calc = calcBetter(b);
+      const mastersScore = calc.totalScore;
+      return { name: b.name, mastersScore, total: mastersScore, twoMC: calc.twoMC, gbcSub: calc.gbcSub };
+    });
+    const started = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
+    if (started) {
+      rows.sort((a, b) => (a.total ?? 999) - (b.total ?? 999));
+    } else {
+      rows.sort((a, b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
+    }
+    let rank = 1;
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+      const mCls = scoreCls(row.mastersScore);
+      const mDisp = row.mastersScore !== null ? fmtScore(row.mastersScore) : '–';
+      const subTag = '';
+      tr.innerHTML = `<td class="rank-num">${rank}</td><td class="better-name">${row.name}${subTag}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
+      tbody.appendChild(tr);
+      rank++;
+    });
+  } else {
+    data.rows.forEach((row, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${scoreCls(row.total)}">${fmtScore(row.total)}</td><td class="num ${scoreCls(row.masters)}">${fmtScore(row.masters)}</td><td class="num ${scoreCls(row.pga)}">${fmtScore(row.pga)}</td><td class="num ${scoreCls(row.usOpen)}">${fmtScore(row.usOpen)}</td><td class="num ${scoreCls(row.theOpen)}">${fmtScore(row.theOpen)}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+}
+
+function showGBCYear(yr, evt, btn) {
+  if (evt) evt.stopPropagation();
+  currentGBCYear = parseInt(yr);
+  document.querySelectorAll('#sec-gbcseason .flt-btn').forEach(b => b.classList.remove('flt-active'));
+  if (btn) btn.classList.add('flt-active');
+  showTab('gbcseason', document.getElementById('gbcDropdownBtn'));
+  document.getElementById('gbcDropdownBtn').classList.add('gbc-active');
+  document.getElementById('gbcDropdownMenu').style.display = 'none';
+  renderGBCSeason();
+}
+
+function toggleGBCDropdown(evt) {
+  evt.stopPropagation();
+  const menu = document.getElementById('gbcDropdownMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+document.addEventListener('click', () => {
+  const m = document.getElementById('gbcDropdownMenu');
+  if (m) m.style.display = 'none';
+});
+
+// ============================================================
+// RENDER RECORDS
+// ============================================================
+function renderRecords() {
+  const grid = document.getElementById("recordsGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  Object.entries(RECORDS).forEach(([title, entries]) => {
+    const card = document.createElement("div");
+    card.className = "rules-section";
+    card.innerHTML = `<div class="section-heading">${title}</div>` +
+      entries.map((e,i) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${i+1}. ${e.n}</span><span style="font-weight:600">${e.y}</span></div>`).join('');
+    grid.appendChild(card);
+  });
+}
+
+// ============================================================
+// FILTER FUNCTIONS
+// ============================================================
+function filterLeaderboard(q) {
+  document.querySelectorAll("#lbBody tr").forEach(tr => {
+    tr.style.display = (!q || (tr.dataset.search || "").includes(q.toLowerCase())) ? "" : "none";
+  });
+}
+function filterGolfers(q) {
+  document.querySelectorAll("#golferBody tr").forEach(tr => {
+    tr.style.display = (!q || (tr.dataset.name || "").includes(q.toLowerCase())) ? "" : "none";
+  });
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function showTab(id, btn) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => { b.classList.remove("active"); b.classList.remove("gbc-active"); });
+  const sec = document.getElementById("sec-" + id);
+  if (sec) sec.classList.add("active");
+  if (btn) btn.classList.add("active");
+  const menu = document.getElementById('gbcDropdownMenu');
+  if (menu) menu.style.display = 'none';
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll() {
+  renderLeaderboard();
+  renderGolfers();
+  renderPicks();
+  renderField();
+  renderGBCSeason();
+  renderRecords();
+  const sp = document.getElementById("statPlayers");
+  if (sp) sp.textContent = BETTERS.length;
+  const sg = document.getElementById("statGBC");
+  if (sg) sg.textContent = BETTERS.filter(b => b.gbc).length;
+}
+
+// ============================================================
+// AUTO-REFRESH every 60 seconds
+// ============================================================
+function startAutoRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadScores, 60000);
+}
+
+// BOOT
+renderAll();
+loadScores();
+startAutoRefresh();
+</script>
+</body>
+</html>
