@@ -1059,14 +1059,11 @@ function renderLeaderboard() {
       const calc = calcBetter(b);
       if (calc.twoMC && !b.gbc) { el.innerHTML = '<span style="color:var(--text-muted)">–</span>'; return; }
       // Format: show 1 decimal for <5%, round for ≥5%
-      const display = prob < 0.01 ? `${(prob*100).toFixed(1)}%`
-        : `${Math.round(prob*100)}%`;
-      el.innerHTML = prob < 0.002 ? `<span style="color:var(--text-muted)">&lt;1%</span>`
-        : prob < 0.01 ? `<span style="color:var(--text-muted)">${display}</span>`
-        : prob >= 0.25 ? `<span style="color:var(--red);font-weight:700">${display}</span>`
-        : prob >= 0.10 ? `<span style="color:var(--green);font-weight:700">${display}</span>`
-        : prob >= 0.03 ? `<span style="color:var(--green)">${display}</span>`
-        : `<span style="color:var(--text-muted)">${display}</span>`;
+      el.innerHTML = prob < 0.01 ? `<span style="color:var(--text-muted)">&lt;1%</span>`
+        : prob >= 0.25 ? `<span style="color:var(--red);font-weight:700">${Math.round(prob*100)}%</span>`
+        : prob >= 0.10 ? `<span style="color:var(--green);font-weight:700">${Math.round(prob*100)}%</span>`
+        : prob >= 0.03 ? `<span style="color:var(--green)">${Math.round(prob*100)}%</span>`
+        : `<span style="color:var(--text-muted)">${Math.round(prob*100)}%</span>`;
     });
   }, 50); // slight delay so DOM is ready
 
