@@ -1365,7 +1365,7 @@ function renderRecords() {
     const card = document.createElement("div");
     card.className = "rules-section";
     card.innerHTML = `<div class="section-heading">${title}</div>` +
-      entries.map((e,i) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${i+1}. ${e.n}</span><span style="font-weight:600">${e.y}</span></div>`).join('');
+      entries.map((e,i) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${e.n}</span><span style="font-weight:600">${e.y}</span></div>`).join('');
     grid.appendChild(card);
   });
 }
