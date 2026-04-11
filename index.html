@@ -1077,7 +1077,7 @@ function renderLeaderboard() {
       // Format: show 1 decimal for <5%, round for ≥5%
       const display = prob < 0.01 ? `${(prob*100).toFixed(1)}%`
         : `${Math.round(prob*100)}%`;
-      el.innerHTML = prob < 0.005 ? `<span style="color:var(--text-muted)">–</span>`
+      el.innerHTML = prob < 0.002 ? `<span style="color:var(--text-muted)">&lt;1%</span>`
         : prob < 0.01 ? `<span style="color:var(--text-muted)">${display}</span>`
         : prob >= 0.25 ? `<span style="color:var(--red);font-weight:700">${display}</span>`
         : prob >= 0.10 ? `<span style="color:var(--green);font-weight:700">${display}</span>`
@@ -1124,14 +1124,17 @@ function renderGolfers() {
 
   allGolfers.forEach((g, i) => {
     const cnt = betterCount[g.name.toLowerCase()] || 0;
+    if (cnt === 0 && g.isMC) return; // skip MC players nobody picked
     const tr = document.createElement("tr");
-    if (g.isMC) tr.className = "";
+    if (g.isMC) tr.style.opacity = "0.5";
     tr.dataset.name = g.name.toLowerCase();
+    const scoreDisp = g.isMC ? '<span class="mc-tag">MC</span>' : `<span class="num ${scoreCls(g.toPar)}">${fmtScore(g.toPar)}</span>`;
+    const thruDisp = g.isMC ? '–' : (g.thru === 18 ? "F" : (g.thru !== null && g.thru !== undefined ? g.thru : "–"));
     tr.innerHTML = `
-      <td style="font-size:12px;color:var(--text-muted)">${g.pos || i+1}</td>
-      <td><span style="font-weight:600">${g.name}</span>${g.isMC ? ' <span class="mc-tag">MC</span>' : ''}</td>
-      <td class="num ${scoreCls(g.toPar)}">${fmtScore(g.toPar)}</td>
-      <td class="num" style="font-size:11px;color:var(--text-muted)">${g.thru === 18 ? "F" : (g.thru !== null && g.thru !== undefined ? g.thru : "–")}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${g.isMC ? 'MC' : (g.pos || i+1)}</td>
+      <td><span style="font-weight:600">${g.name}</span></td>
+      <td class="num">${scoreDisp}</td>
+      <td class="num" style="font-size:11px;color:var(--text-muted)">${thruDisp}</td>
       <td class="num" style="font-size:12px;color:var(--text-muted)">${cnt > 0 ? cnt : "–"}</td>`;
     tbody.appendChild(tr);
   });
@@ -1375,7 +1378,7 @@ function renderGBCSeason() {
       const tr = document.createElement("tr");
       const mCls = scoreCls(row.mastersScore);
       const mDisp = row.mastersScore !== null ? fmtScore(row.mastersScore) : '–';
-      const subTag = row.gbcSub ? ' <span style="font-size:9px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:3px;padding:1px 4px">GBC Sub</span>' : '';
+      const subTag = '';
       tr.innerHTML = `<td class="rank-num">${rank}</td><td class="better-name">${row.name}${subTag}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
       tbody.appendChild(tr);
       rank++;
