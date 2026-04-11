@@ -546,11 +546,39 @@ let currentGBCYear = 2026;
 // RECORD BOOK
 // ============================================================
 const RECORDS = {
-  "GBC Champion":    [{y:2025,n:"Joseph J. Pehanick"},{y:2024,n:"Mike Carpenter"},{y:2023,n:"Joseph J. Pehanick"}],
-  "The Masters":     [{y:2025,n:"Joseph J. Pehanick"},{y:2024,n:"Rob Law"},{y:2023,n:"Jason Henderson"},{y:2022,n:"George Pehanick"},{y:2021,n:"Mike Adams"},{y:2020,n:"Greg Hawley"},{y:2019,n:"John Hulsey"},{y:2018,n:"Joe M. Pehanick"},{y:2017,n:"G. Pehanick / J. Hulsey / J.J. Pehanick"},{y:2016,n:"Jay Ress"},{y:2015,n:"George Pehanick"}],
-  "PGA Championship":[{y:2025,n:"Jason Henderson"},{y:2024,n:"Doug Colliau"},{y:2023,n:"Joseph J. Pehanick"}],
-  "US Open":         [{y:2025,n:"Anthony Fassari"},{y:2024,n:"Joe M. Pehanick"},{y:2023,n:"Mike Carpenter"}],
-  "The Open":        [{y:2025,n:"Jay Ress"},{y:2024,n:"Tom Van Ormer"},{y:2023,n:"Brian McCarthy"}],
+  "GBC Champion":    [
+    {y:2025,n:"Joseph J. Pehanick",s:"-56"},
+    {y:2024,n:"Mike Carpenter",s:"-34"},
+    {y:2023,n:"Joseph J. Pehanick",s:"-43"},
+  ],
+  "The Masters":     [
+    {y:2025,n:"Joseph J. Pehanick",s:"-26"},
+    {y:2024,n:"Rob Law",s:"-20"},
+    {y:2023,n:"Jason Henderson",s:"-23"},
+    {y:2022,n:"George Pehanick",s:""},
+    {y:2021,n:"Mike Adams",s:""},
+    {y:2020,n:"Greg Hawley",s:""},
+    {y:2019,n:"John Hulsey",s:""},
+    {y:2018,n:"Joe M. Pehanick",s:""},
+    {y:2017,n:"G. Pehanick / J. Hulsey / J.J. Pehanick",s:""},
+    {y:2016,n:"Jay Ress",s:""},
+    {y:2015,n:"George Pehanick",s:""},
+  ],
+  "PGA Championship":[
+    {y:2025,n:"Jason Henderson",s:"-20"},
+    {y:2024,n:"Doug Colliau",s:"-45"},
+    {y:2023,n:"Joseph J. Pehanick",s:"-16"},
+  ],
+  "US Open":         [
+    {y:2025,n:"Anthony Fassari",s:"+12"},
+    {y:2024,n:"Joe M. Pehanick",s:"-5"},
+    {y:2023,n:"Mike Carpenter",s:"-15"},
+  ],
+  "The Open":        [
+    {y:2025,n:"Jay Ress",s:"-36"},
+    {y:2024,n:"Tom Van Ormer",s:""},
+    {y:2023,n:"Brian McCarthy",s:"-10"},
+  ],
 };
 
 // ============================================================
@@ -1384,7 +1412,7 @@ function renderRecords() {
     const card = document.createElement("div");
     card.className = "rules-section";
     card.innerHTML = `<div class="section-heading">${title}</div>` +
-      entries.map((e,i) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${e.n}</span><span style="font-weight:600">${e.y}</span></div>`).join('');
+      entries.map((e,i) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${e.n}${e.s ? `<span style="font-size:11px;color:var(--text-muted);margin-left:6px">${e.s}</span>` : ''}</span><span style="font-weight:600;color:var(--text-muted)">${e.y}</span></div>`).join('');
     grid.appendChild(card);
   });
 }
