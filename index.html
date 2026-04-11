@@ -380,7 +380,7 @@
         <li><span class="rule-icon">03</span><span>You may pick a maximum of <strong>2 of the top-10 OWGR players</strong> (as ranked the Monday of tournament week). You must pick at least 2 outside the top 10.</span></li>
         <li><span class="rule-icon">04</span><span>If <strong>1 of your 3 picks misses the cut</strong>, your alternate (4th pick) is used in that player's position.</span></li>
         <li><span class="rule-icon">05</span><span>If <strong>2 or more picks miss the cut</strong>, you are eliminated from the event.</span></li>
-        <li><span class="rule-icon">06</span><span><strong>GBC players only:</strong> If 2+ picks miss the cut, instead of elimination your score uses the <em>worst score among all golfers picked by any GBC better + 1 stroke</em> as a penalty alternate. You stay in the GBC standings but can never score better than last place among GBC picks.</span></li>
+        <li><span class="rule-icon">06</span><span><strong>GBC players: keeping you in the game.</strong> If 2 or more of your picks miss the cut, you're never eliminated — the GBC always plays on. To keep you at 3 active golfers, you'll receive a <em>GBC Substitute</em>: a stand-in scored at the worst active score among all GBC players' picks, plus 1 stroke. This keeps you competitive while fairly reflecting the impact of the missed cuts. Your alternate also activates for one of the MC slots, so you always have real golfers in the mix.</span></li>
         <li><span class="rule-icon">06</span><span>If duplicate picks occur (same order submitted), the <strong>earlier timestamp wins</strong>. The second better must resubmit.</span></li>
         <li><span class="rule-icon">07</span><span>In case of a <strong>tie on total score</strong>, it reverts to the finishing order of your individual golfers.</span></li>
       </ul>
@@ -561,26 +561,8 @@ const RECORDS = {
 // ============================================================
 // DATAGOLF PREDICTIONS — Masters 2026
 // ============================================================
-const DG_DATA = {
-  "Scottie Scheffler":   { win:0.1219, top5:0.3638, top10:0.5295, makeCut:0.9141 },
-  "Jon Rahm":            { win:0.0725, top5:0.2644, top10:0.4243, makeCut:0.8861 },
-  "Rory McIlroy":        { win:0.0603, top5:0.2267, top10:0.3738, makeCut:0.8617 },
-  "Xander Schauffele":   { win:0.0532, top5:0.2064, top10:0.3474, makeCut:0.8506 },
-  "Bryson DeChambeau":   { win:0.0445, top5:0.1826, top10:0.3130, makeCut:0.8206 },
-  "Matt Fitzpatrick":    { win:0.0428, top5:0.1833, top10:0.3223, makeCut:0.8466 },
-  "Tommy Fleetwood":     { win:0.0394, top5:0.1781, top10:0.3184, makeCut:0.8481 },
-  "Ludvig Aberg":        { win:0.0381, top5:0.1642, top10:0.2921, makeCut:0.8215 },
-  "Cameron Young":       { win:0.0357, top5:0.1532, top10:0.2728, makeCut:0.8124 },
-  "Hideki Matsuyama":    { win:0.0337, top5:0.1574, top10:0.2868, makeCut:0.8280 },
-  "Robert Macintyre":    { win:0.0282, top5:0.1410, top10:0.2672, makeCut:0.8254 },
-  "Justin Rose":         { win:0.0185, top5:0.0943, top10:0.1874, makeCut:0.7543 },
-  "Jake Knapp":          { win:0.0133, top5:0.0774, top10:0.1598, makeCut:0.7204 },
-  "Chris Gotterup":      { win:0.0121, top5:0.0703, top10:0.1467, makeCut:0.7172 },
-  "Jacob Bridgeman":     { win:0.0102, top5:0.0650, top10:0.1425, makeCut:0.7260 },
-  "Akshay Bhatia":       { win:0.0099, top5:0.0647, top10:0.1410, makeCut:0.7214 },
-  "Corey Conners":       { win:0.0056, top5:0.0389, top10:0.0935, makeCut:0.6667 },
-  "Sepp Straka":         { win:0.0067, top5:0.0490, top10:0.1110, makeCut:0.6881 },
-};
+// DG_DATA populated live from DataGolf feed on each refresh
+let DG_DATA = {};
 
 // field filter state
 let fieldFilter = 'all';
@@ -666,6 +648,8 @@ function parseESPN(json) {
     if (json.data && Array.isArray(json.data) && json.data[0]?.player_name) {
       const players = json.data;
       console.log("Parsing DataGolf:", players.length, "players");
+      // Clear stale data before repopulating
+      Object.keys(DG_DATA).forEach(k => delete DG_DATA[k]);
       players.forEach(p => {
         const raw = p.player_name || '';
         const parts = raw.split(',');
