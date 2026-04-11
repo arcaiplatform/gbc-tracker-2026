@@ -152,7 +152,12 @@
     .main { padding: 12px; }
     th, td { padding: 8px 8px; }
     .golfer-pills { display: none; }
+    .golfer-pills.expanded { display: flex; }
     .stat-row { grid-template-columns: 1fr 1fr; }
+    .better-name { cursor: pointer; }
+    .better-name::after { content: ' ▸'; font-size: 10px; color: var(--text-muted); }
+    .better-name.open::after { content: ' ▾'; }
+    tr.expanded-row td { padding-bottom: 4px; }
   }
 
   .rules-section { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
@@ -887,6 +892,17 @@ function fmtRound(r) {
 // ============================================================
 // RENDER LEADERBOARD
 // ============================================================
+function togglePills(td) {
+  // Only activate on mobile
+  if (window.innerWidth > 600) return;
+  const pills = td.querySelector('.golfer-pills');
+  const nameDiv = td.querySelector('.better-name');
+  if (!pills) return;
+  const isOpen = pills.classList.contains('expanded');
+  pills.classList.toggle('expanded', !isOpen);
+  if (nameDiv) nameDiv.classList.toggle('open', !isOpen);
+}
+
 function renderLeaderboard() {
   const rows = BETTERS.map(b => {
     const calc = calcBetter(b);
@@ -971,7 +987,7 @@ function renderLeaderboard() {
     const betterKey = better.name.replace(/[^a-z0-9]/gi,'_');
     tr.innerHTML = `
       <td class="rank-num">${displayRank}</td>
-      <td>
+      <td onclick="togglePills(this)" style="cursor:pointer">
         <div class="better-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           ${better.name}
           ${better.gbc ? '<span class="gbc-tag">GBC</span>' : ''}
