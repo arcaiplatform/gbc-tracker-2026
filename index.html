@@ -108,13 +108,11 @@
 
   /* PICKS */
   .picks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-  .pick-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
-  .pick-card .pc-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
-  .pick-card .pc-score { font-size: 18px; font-weight: 700; margin: 8px 0; }
-  .pick-card .pc-golfers { margin-top: 8px; }
-  .pick-card .pg-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
-  .pick-card .pg-row:last-child { border-bottom: none; }
-  .pg-label { font-size: 10px; color: var(--text-muted); margin-right: 4px; }
+  .picks-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .picks-card .pc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .picks-card .pc-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .picks-card .pc-score { font-size: 20px; font-weight: 700; }
+  .picks-card .pc-golfers { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
 
   /* RECORDS */
   .records-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
