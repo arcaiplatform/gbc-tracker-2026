@@ -822,8 +822,10 @@ function calcBetter(better) {
         replacedMC: true
       };
       const active = main3.filter(g => !g.isMC);
-      // If 2 MCs: use 1 active + phantom. If 3 MCs: use phantom only (padded)
-      usedGolfers = [...active, phantom, phantom].slice(0, 3);
+      // One GBC Sub replaces ALL missing picks — only one penalty score total
+      // Active picks + one phantom, padded with E (0) if needed to reach 3
+      const pad = { name: 'E', toPar: 0, thru: 18, pos: '–', isMC: false };
+      usedGolfers = [...active, phantom, pad, pad].slice(0, 3);
     } else {
       // Non-GBC: greyed out on leaderboard, no score
       usedGolfers = main3;
@@ -1074,10 +1076,10 @@ function renderLeaderboard() {
       const calc = calcBetter(b);
       if (calc.twoMC && !b.gbc) { el.innerHTML = '<span style="color:var(--text-muted)">–</span>'; return; }
       // Format: show 1 decimal for <5%, round for ≥5%
-      const display = prob === 0 ? '<1%'
-        : prob < 0.01 ? `${(prob*100).toFixed(1)}%`
+      const display = prob < 0.01 ? `${(prob*100).toFixed(1)}%`
         : `${Math.round(prob*100)}%`;
-      el.innerHTML = prob < 0.005 ? `<span style="color:var(--text-muted)">${display}</span>`
+      el.innerHTML = prob < 0.005 ? `<span style="color:var(--text-muted)">–</span>`
+        : prob < 0.01 ? `<span style="color:var(--text-muted)">${display}</span>`
         : prob >= 0.25 ? `<span style="color:var(--red);font-weight:700">${display}</span>`
         : prob >= 0.10 ? `<span style="color:var(--green);font-weight:700">${display}</span>`
         : prob >= 0.03 ? `<span style="color:var(--green)">${display}</span>`
