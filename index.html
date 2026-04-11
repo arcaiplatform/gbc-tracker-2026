@@ -42,11 +42,17 @@
   .last-updated { font-size: 11px; opacity: 0.6; }
 
   /* TABS */
-  .tabs-bar { background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-  .tabs-inner { max-width: 1100px; margin: 0 auto; display: flex; padding: 0 20px; gap: 0; flex-wrap: wrap; }
-  .tab-btn { padding: 14px 20px; font-size: 13px; font-weight: 600; color: var(--text-muted); border: none; background: none; cursor: pointer; border-bottom: 2.5px solid transparent; white-space: nowrap; transition: all .15s; }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+  .tabs-bar { background: #0f2540; border-bottom: none; position: sticky; top: 0; z-index: 100; }
+  .tabs-inner { max-width: 1100px; margin: 0 auto; display: flex; padding: 0 20px; gap: 0; }
+  .tab-btn { padding: 12px 18px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all .15s; }
+  .tab-btn:hover { color: rgba(255,255,255,0.85); }
+  .tab-btn.active { color: #c8a84b; border-bottom-color: #c8a84b; }
+  @media (max-width: 640px) {
+    .tabs-inner { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
+    .tab-btn { padding: 11px 6px; font-size: 12px; text-align: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); border-right: 0.5px solid rgba(255,255,255,0.1); }
+    .tab-btn:nth-child(2n) { border-right: none; }
+    .tab-btn.active { color: #c8a84b; border-bottom: 2px solid #c8a84b; background: rgba(255,255,255,0.05); }
+  }
 
   /* MAIN LAYOUT */
   .main { max-width: 1100px; margin: 0 auto; padding: 20px; }
@@ -405,177 +411,106 @@
 
   <!-- SCHEDULE -->
   <section class="section" id="sec-schedule">
-    <div style="padding: 4px 0 20px;">
-      <div style="margin-bottom:6px"><span style="font-size:18px;font-weight:500;color:var(--color-text-primary)">2026 Major Championship Schedule</span></div>
-      <div style="font-size:13px;color:var(--text-muted)">Pick windows open Monday 7 AM PST · close Wednesday 5 PM PST before first round</div>
-    </div>
+    <style>
+      .sched-card { background:white;border:0.5px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden; }
+      .sched-body { flex:1;padding:14px 16px;min-width:0; }
+      .sched-header { display:flex;align-items:center;gap:10px;margin-bottom:12px; }
+      .sched-badge { width:44px;height:44px;border-radius:8px;flex-shrink:0; }
+      .sched-name { font-size:15px;font-weight:500;color:var(--text);line-height:1.2; }
+      .sched-course { font-size:11px;color:var(--text-muted);margin-top:2px; }
+      .sched-status { font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap;margin-left:auto;flex-shrink:0; }
+      .sched-row { display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:12px; }
+      .sched-row:last-child { border-bottom:none; }
+      .sched-row-lbl { color:var(--text-muted); }
+      .sched-row-val { font-weight:500;color:var(--text);text-align:right; }
+      .sched-countdown { margin-top:10px;background:var(--gray-light);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center; }
+      .sched-cd-lbl { font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em; }
+      .sched-cd-val { font-size:16px;font-weight:600;color:var(--text); }
+    </style>
 
-    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)"><div style="width:7px;height:7px;border-radius:50%;background:#166534"></div>In progress</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)"><div style="width:7px;height:7px;border-radius:50%;background:#ca8a04"></div>Next up</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)"><div style="width:7px;height:7px;border-radius:50%;background:#888"></div>Upcoming</div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:4px">2026 Major Championship Schedule</div>
+      <div style="font-size:12px;color:var(--text-muted)">Pick windows open Mon 7 AM PST · close Wed 5 PM PST</div>
     </div>
 
     <!-- THE MASTERS -->
-    <div class="card" style="border-color:#166534;margin-bottom:14px;overflow:hidden">
-      <div class="sched-card-inner">
+    <div class="sched-card" style="border-color:#166534">
+      <div style="display:flex">
         <div style="width:5px;background:#166534;flex-shrink:0"></div>
-        <div style="flex:1;padding:16px 18px;min-width:0">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <svg width="48" height="48" viewBox="0 0 48 48" style="border-radius:10px;flex-shrink:0">
-              <rect width="48" height="48" rx="10" fill="#1a4731"/>
-              <rect x="22" y="10" width="2.5" height="22" fill="#f5c842"/>
-              <polygon points="24.5,10 38,17 24.5,24" fill="#f5c842"/>
-              <ellipse cx="24" cy="36" rx="10" ry="3" fill="#2d6a4f" opacity="0.6"/>
-            </svg>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:500;color:var(--text)">The Masters Tournament</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Augusta National Golf Club · Augusta, GA</div>
-            </div>
-            <span style="font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;background:#dcfce7;color:#166534;white-space:nowrap;flex-shrink:0">● Round 3 Live</span>
+        <div class="sched-body">
+          <div class="sched-header">
+            <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#1a4731"/><rect x="22" y="10" width="2.5" height="22" fill="#f5c842"/><polygon points="24.5,10 38,17 24.5,24" fill="#f5c842"/><ellipse cx="24" cy="36" rx="10" ry="3" fill="#2d6a4f" opacity="0.6"/></svg>
+            <div style="flex:1;min-width:0"><div class="sched-name">The Masters</div><div class="sched-course">Augusta National · Augusta, GA</div></div>
+            <span class="sched-status" style="background:#dcfce7;color:#166534">● Live R3</span>
           </div>
-          <div class="sched-dates">
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Tournament dates</div><div style="font-size:12px;font-weight:500;color:var(--text)">Apr 10–13, 2026</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks opened</div><div style="font-size:12px;font-weight:500;color:var(--text)">Mon Apr 6 · 7 AM PST</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks closed</div><div style="font-size:12px;font-weight:500;color:var(--text)">Wed Apr 8 · 5 PM PST</div></div>
-          </div>
-        </div>
-        <div class="sched-sidebar">
-          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Pick window</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Opened</span><span style="font-weight:500">Apr 6, 7 AM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Closed</span><span style="font-weight:500">Apr 8, 5 PM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Status</span><span style="font-weight:500;color:#166534">✓ Locked in</span></div>
-          <div style="border-top:0.5px solid var(--border);padding-top:8px;font-size:11px;color:var(--text-muted)">27 betters · 15 GBC players</div>
+          <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Apr 10–13, 2026</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks opened</span><span class="sched-row-val">Mon Apr 6 · 7 AM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks closed</span><span class="sched-row-val">Wed Apr 8 · 5 PM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#166534">✓ Locked in · 27 betters</span></div>
         </div>
       </div>
     </div>
 
     <!-- PGA CHAMPIONSHIP -->
-    <div class="card" style="border-color:#ca8a04;margin-bottom:14px;overflow:hidden">
-      <div class="sched-card-inner">
+    <div class="sched-card" style="border-color:#ca8a04">
+      <div style="display:flex">
         <div style="width:5px;background:#ca8a04;flex-shrink:0"></div>
-        <div style="flex:1;padding:16px 18px;min-width:0">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <svg width="48" height="48" viewBox="0 0 48 48" style="border-radius:10px;flex-shrink:0">
-              <rect width="48" height="48" rx="10" fill="#1e3a5f"/>
-              <rect x="20" y="28" width="8" height="3" fill="#c8a84b"/>
-              <rect x="17" y="31" width="14" height="2.5" rx="1" fill="#c8a84b"/>
-              <path d="M17 14 Q24 10 31 14 L31 26 Q24 30 17 26 Z" fill="#c8a84b"/>
-              <path d="M17 18 Q14 18 14 22 Q14 26 17 26" fill="none" stroke="#c8a84b" stroke-width="1.5"/>
-              <path d="M31 18 Q34 18 34 22 Q34 26 31 26" fill="none" stroke="#c8a84b" stroke-width="1.5"/>
-            </svg>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:500;color:var(--text)">PGA Championship</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Aronimink Golf Club · Newtown Square, PA</div>
-            </div>
-            <span style="font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;background:#fef9c3;color:#854d0e;white-space:nowrap;flex-shrink:0">Next up</span>
+        <div class="sched-body">
+          <div class="sched-header">
+            <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#1e3a5f"/><rect x="20" y="28" width="8" height="3" fill="#c8a84b"/><rect x="17" y="31" width="14" height="2.5" rx="1" fill="#c8a84b"/><path d="M17 14 Q24 10 31 14 L31 26 Q24 30 17 26 Z" fill="#c8a84b"/><path d="M17 18 Q14 18 14 22 Q14 26 17 26" fill="none" stroke="#c8a84b" stroke-width="1.5"/><path d="M31 18 Q34 18 34 22 Q34 26 31 26" fill="none" stroke="#c8a84b" stroke-width="1.5"/></svg>
+            <div style="flex:1;min-width:0"><div class="sched-name">PGA Championship</div><div class="sched-course">Aronimink GC · Newtown Square, PA</div></div>
+            <span class="sched-status" style="background:#fef9c3;color:#854d0e">Next up</span>
           </div>
-          <div class="sched-dates">
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Tournament dates</div><div style="font-size:12px;font-weight:500;color:var(--text)">May 14–17, 2026</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks open</div><div style="font-size:12px;font-weight:500;color:var(--text)">Mon May 11 · 7 AM PST</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks close</div><div style="font-size:12px;font-weight:500;color:var(--text)">Wed May 13 · 5 PM PST</div></div>
-          </div>
-        </div>
-        <div class="sched-sidebar">
-          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Pick window</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Opens</span><span style="font-weight:500">May 11, 7 AM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Closes</span><span style="font-weight:500">May 13, 5 PM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Status</span><span style="font-weight:500;color:var(--text-muted)">Not yet open</span></div>
-          <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px;text-align:center">
-            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Picks open in</div>
-            <div style="font-size:15px;font-weight:500;color:var(--text)" id="sched-cd-pga">–</div>
-          </div>
+          <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">May 14–17, 2026</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Mon May 11 · 7 AM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks close</span><span class="sched-row-val">Wed May 13 · 5 PM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:var(--text-muted)">Not yet open</span></div>
+          <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-pga">–</span></div>
         </div>
       </div>
     </div>
 
     <!-- US OPEN -->
-    <div class="card" style="margin-bottom:14px;overflow:hidden">
-      <div class="sched-card-inner">
+    <div class="sched-card">
+      <div style="display:flex">
         <div style="width:5px;background:#185fa5;flex-shrink:0"></div>
-        <div style="flex:1;padding:16px 18px;min-width:0">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <svg width="48" height="48" viewBox="0 0 48 48" style="border-radius:10px;flex-shrink:0">
-              <rect width="48" height="48" rx="10" fill="#0a2240"/>
-              <rect x="8" y="10" width="32" height="4" fill="#b22234"/>
-              <rect x="8" y="18" width="32" height="4" fill="#b22234"/>
-              <rect x="8" y="26" width="32" height="4" fill="#b22234"/>
-              <rect x="8" y="34" width="32" height="4" fill="#b22234"/>
-              <rect x="8" y="10" width="14" height="12" fill="#3c3b6e"/>
-              <circle cx="12" cy="14" r="1.2" fill="white"/>
-              <circle cx="16" cy="14" r="1.2" fill="white"/>
-              <circle cx="20" cy="14" r="1.2" fill="white"/>
-              <circle cx="14" cy="17" r="1.2" fill="white"/>
-              <circle cx="18" cy="17" r="1.2" fill="white"/>
-            </svg>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:500;color:var(--text)">US Open Championship</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Shinnecock Hills Golf Club · Southampton, NY</div>
-            </div>
-            <span style="font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;background:var(--gray-light);color:var(--text-muted);white-space:nowrap;flex-shrink:0">Upcoming</span>
+        <div class="sched-body">
+          <div class="sched-header">
+            <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#0a2240"/><rect x="8" y="10" width="32" height="4" fill="#b22234"/><rect x="8" y="18" width="32" height="4" fill="#b22234"/><rect x="8" y="26" width="32" height="4" fill="#b22234"/><rect x="8" y="34" width="32" height="4" fill="#b22234"/><rect x="8" y="10" width="14" height="12" fill="#3c3b6e"/><circle cx="12" cy="14" r="1.2" fill="white"/><circle cx="16" cy="14" r="1.2" fill="white"/><circle cx="20" cy="14" r="1.2" fill="white"/><circle cx="14" cy="17" r="1.2" fill="white"/><circle cx="18" cy="17" r="1.2" fill="white"/></svg>
+            <div style="flex:1;min-width:0"><div class="sched-name">US Open</div><div class="sched-course">Shinnecock Hills · Southampton, NY</div></div>
+            <span class="sched-status" style="background:var(--gray-light);color:var(--text-muted)">Upcoming</span>
           </div>
-          <div class="sched-dates">
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Tournament dates</div><div style="font-size:12px;font-weight:500;color:var(--text)">Jun 18–21, 2026</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks open</div><div style="font-size:12px;font-weight:500;color:var(--text)">Mon Jun 15 · 7 AM PST</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks close</div><div style="font-size:12px;font-weight:500;color:var(--text)">Wed Jun 17 · 5 PM PST</div></div>
-          </div>
-        </div>
-        <div class="sched-sidebar">
-          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Pick window</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Opens</span><span style="font-weight:500">Jun 15, 7 AM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Closes</span><span style="font-weight:500">Jun 17, 5 PM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Status</span><span style="font-weight:500;color:var(--text-muted)">Not yet open</span></div>
-          <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px;text-align:center">
-            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Picks open in</div>
-            <div style="font-size:15px;font-weight:500;color:var(--text)" id="sched-cd-uso">–</div>
-          </div>
+          <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Jun 18–21, 2026</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Mon Jun 15 · 7 AM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks close</span><span class="sched-row-val">Wed Jun 17 · 5 PM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:var(--text-muted)">Not yet open</span></div>
+          <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-uso">–</span></div>
         </div>
       </div>
     </div>
 
     <!-- THE OPEN -->
-    <div class="card" style="margin-bottom:14px;overflow:hidden">
-      <div class="sched-card-inner">
+    <div class="sched-card">
+      <div style="display:flex">
         <div style="width:5px;background:#5f3991;flex-shrink:0"></div>
-        <div style="flex:1;padding:16px 18px;min-width:0">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <svg width="48" height="48" viewBox="0 0 48 48" style="border-radius:10px;flex-shrink:0">
-              <rect width="48" height="48" rx="10" fill="#2d1b4e"/>
-              <path d="M20 12 L28 12 L30 22 Q34 24 34 28 Q34 34 24 36 Q14 34 14 28 Q14 24 18 22 Z" fill="#b8970a"/>
-              <rect x="22" y="8" width="4" height="5" rx="1" fill="#b8970a"/>
-              <path d="M28 20 Q33 20 33 26 Q33 30 28 31" fill="none" stroke="#b8970a" stroke-width="1.5"/>
-              <rect x="20" y="36" width="8" height="3" rx="1" fill="#b8970a"/>
-              <rect x="17" y="38" width="14" height="2" rx="1" fill="#b8970a"/>
-            </svg>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:500;color:var(--text)">The Open Championship</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Royal Birkdale Golf Club · Southport, England</div>
-            </div>
-            <span style="font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;background:var(--gray-light);color:var(--text-muted);white-space:nowrap;flex-shrink:0">Upcoming</span>
+        <div class="sched-body">
+          <div class="sched-header">
+            <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#2d1b4e"/><path d="M20 12 L28 12 L30 22 Q34 24 34 28 Q34 34 24 36 Q14 34 14 28 Q14 24 18 22 Z" fill="#b8970a"/><rect x="22" y="8" width="4" height="5" rx="1" fill="#b8970a"/><rect x="20" y="36" width="8" height="3" rx="1" fill="#b8970a"/><rect x="17" y="38" width="14" height="2" rx="1" fill="#b8970a"/></svg>
+            <div style="flex:1;min-width:0"><div class="sched-name">The Open Championship</div><div class="sched-course">Royal Birkdale · Southport, England</div></div>
+            <span class="sched-status" style="background:var(--gray-light);color:var(--text-muted)">Upcoming</span>
           </div>
-          <div class="sched-dates">
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Tournament dates</div><div style="font-size:12px;font-weight:500;color:var(--text)">Jul 16–19, 2026</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks open</div><div style="font-size:12px;font-weight:500;color:var(--text)">Mon Jul 13 · 7 AM PST</div></div>
-            <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Picks close</div><div style="font-size:12px;font-weight:500;color:var(--text)">Wed Jul 15 · 5 PM PST</div></div>
-          </div>
-        </div>
-        <div class="sched-sidebar">
-          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em">Pick window</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Opens</span><span style="font-weight:500">Jul 13, 7 AM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Closes</span><span style="font-weight:500">Jul 15, 5 PM</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text-muted)">Status</span><span style="font-weight:500;color:var(--text-muted)">Not yet open</span></div>
-          <div style="background:var(--gray-light);border-radius:8px;padding:8px 10px;text-align:center">
-            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Picks open in</div>
-            <div style="font-size:15px;font-weight:500;color:var(--text)" id="sched-cd-open">–</div>
-          </div>
+          <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Jul 16–19, 2026</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Mon Jul 13 · 7 AM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks close</span><span class="sched-row-val">Wed Jul 15 · 5 PM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:var(--text-muted)">Not yet open</span></div>
+          <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-open">–</span></div>
         </div>
       </div>
     </div>
 
-    <p style="font-size:11px;color:var(--text-muted);margin-top:4px">All times PST · The Open dates reflect championship rounds only (Jul 16–19)</p>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:4px">All times PST · Championship rounds only shown for The Open (Jul 16–19)</p>
   </section>
 
-  <!-- RULES -->
   <section class="section" id="sec-rules">
     <div class="rules-section">
       <div class="section-heading">📜 Golf Major Rules</div>
