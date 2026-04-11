@@ -605,8 +605,8 @@ const MASTERS_URL = "https://www.masters.com/en_US/scores/feeds/2026/scores.json
 
 async function fetchWithProxy(url) {
   const targets = [
-    WORKER_URL + "?src=datagolf",
-    WORKER_URL + "?src=masters",
+    WORKER_URL + "?src=datagolf&t=" + Date.now(),
+    WORKER_URL + "?src=masters&t=" + Date.now(),
   ];
 
   for (const target of targets) {
@@ -1361,32 +1361,25 @@ function renderGBCSeason() {
     const gbcBetters = BETTERS.filter(b => b.gbc);
     const rows = gbcBetters.map(b => {
       const calc = calcBetter(b);
-      const mastersScore = calc.twoMC ? null : calc.totalScore;
-      return { name: b.name, mastersScore, total: mastersScore, eliminated: calc.twoMC };
+      // GBC players always have a score (sub fills in for 2MC)
+      const mastersScore = calc.totalScore;
+      return { name: b.name, mastersScore, total: mastersScore, twoMC: calc.twoMC, gbcSub: calc.gbcSub };
     });
     const started = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
     if (started) {
-      rows.sort((a, b) => {
-        if (a.twoMC && !b.twoMC) return 1;
-        if (!a.twoMC && b.twoMC) return -1;
-        if (a.total === null && b.total !== null) return 1;
-        if (a.total !== null && b.total === null) return -1;
-        return (a.total ?? 999) - (b.total ?? 999);
-      });
+      rows.sort((a, b) => (a.total ?? 999) - (b.total ?? 999));
     } else {
       rows.sort((a, b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
     }
     let rank = 1;
     rows.forEach(row => {
       const tr = document.createElement("tr");
-      if (row.twoMC) tr.className = "elim-row";
-      const mDisp = row.twoMC ? '<span class="over">ELIM</span>' : fmtScore(row.mastersScore);
-      const mCls = row.twoMC ? "" : scoreCls(row.mastersScore);
-      const tDisp = row.twoMC ? '<span class="over">ELIM</span>' : fmtScore(row.total);
-      const tCls = row.twoMC ? "" : scoreCls(row.total);
-      tr.innerHTML = `<td class="rank-num">${row.twoMC ? "–" : rank}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
+      const mCls = scoreCls(row.mastersScore);
+      const mDisp = row.mastersScore !== null ? fmtScore(row.mastersScore) : '–';
+      const subTag = row.gbcSub ? ' <span style="font-size:9px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:3px;padding:1px 4px">GBC Sub</span>' : '';
+      tr.innerHTML = `<td class="rank-num">${rank}</td><td class="better-name">${row.name}${subTag}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
       tbody.appendChild(tr);
-      if (!row.twoMC) rank++;
+      rank++;
     });
   } else {
     data.rows.forEach((row, i) => {
