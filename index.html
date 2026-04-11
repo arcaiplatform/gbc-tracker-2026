@@ -225,7 +225,7 @@
   <div class="tabs-inner">
     <button class="tab-btn active" onclick="showTab('leaderboard', this)">🏆 Betters Leaderboard</button>
     <button class="tab-btn" onclick="showTab('golfers', this)">🏌️ Golfer Scores</button>
-    <button class="tab-btn" id="picksTabBtn" onclick="showTab('picks', this)">📋 All Picks</button>
+    <button class="tab-btn" id="picksTabBtn" onclick="showTab('picks', this)">📋 Pick Sheet</button>
     <button class="tab-btn" onclick="showTab('field', this); renderField()">📊 Field Breakdown</button>
     <button class="tab-btn" id="gbcDropdownBtn" onclick="currentGBCYear=2026; showTab('gbcseason', this); renderGBCSeason()">🏆 GBC Season</button>
     <button class="tab-btn" onclick="showTab('records', this)">📖 Record Book</button>
@@ -328,10 +328,54 @@
 
   <!-- PICKS -->
   <section class="section" id="sec-picks">
-    <div class="card-header" style="background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
-      <div><div class="card-title">All Picks — 2026 Masters</div><div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div></div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Pick Sheet — 2026 Masters</div>
+          <div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <input class="search-input" id="picksSearch" style="width:160px;flex:none" placeholder="Search name or golfer..." oninput="filterPicksSearch(this.value)" />
+          <div style="display:flex;gap:4px">
+            <button id="pickViewCards" class="flt-btn flt-active" onclick="setPickView('cards',this)">📋 Cards</button>
+            <button id="pickViewStats" class="flt-btn" onclick="setPickView('stats',this)">📊 Stats</button>
+          </div>
+          <select id="picksSort" onchange="renderPicks()" style="font-size:12px;padding:5px 8px;border-radius:20px;border:1px solid var(--border);background:white;color:var(--text)">
+            <option value="name">Sort: Name A–Z</option>
+            <option value="score">Sort: Score</option>
+            <option value="winpct">Sort: Win %</option>
+          </select>
+        </div>
+      </div>
     </div>
-    <div class="picks-grid" id="picksGrid"></div>
+
+    <!-- CARDS VIEW -->
+    <div id="picksCardsView">
+      <div class="picks-grid" id="picksGrid"></div>
+    </div>
+
+    <!-- STATS VIEW -->
+    <div id="picksStatsView" style="display:none">
+      <!-- Summary numbers -->
+      <div class="stat-row" id="picksSummaryStats" style="margin-bottom:16px"></div>
+      <!-- Popularity chart -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div><div class="card-title">Golfer popularity</div><div class="card-sub">How many betters selected each golfer · main picks + alternates</div></div>
+          <div style="display:flex;gap:4px">
+            <button id="popFilterAll" class="flt-btn flt-active" onclick="setPopFilter('all',this)">All</button>
+            <button id="popFilterMain" class="flt-btn" onclick="setPopFilter('main',this)">Main picks</button>
+            <button id="popFilterAlt" class="flt-btn" onclick="setPopFilter('alt',this)">Alternates</button>
+          </div>
+        </div>
+        <div id="popularityChart" style="padding:8px 4px"></div>
+      </div>
+      <!-- Pick overlap -->
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Alternate tracker</div><div class="card-sub">Which betters have their alternate active right now</div></div></div>
+        <div id="altTracker" style="padding:4px 0"></div>
+      </div>
+    </div>
   </section>
 
   <!-- FIELD BREAKDOWN -->
@@ -1496,10 +1540,141 @@ function renderGolfers() {
 // ============================================================
 // RENDER PICKS
 // ============================================================
+let pickView = 'cards';
+let popFilter = 'all';
+let picksSearchTerm = '';
+
+function setPickView(view, btn) {
+  pickView = view;
+  document.querySelectorAll('#pickViewCards,#pickViewStats').forEach(el => el.style.display = 'none');
+  document.getElementById(view === 'cards' ? 'picksCardsView' : 'picksStatsView').style.display = 'block';
+  document.getElementById('pickViewCards').classList.toggle('flt-active', view === 'cards');
+  document.getElementById('pickViewStats').classList.toggle('flt-active', view === 'stats');
+  document.getElementById('picksSort').style.display = view === 'cards' ? '' : 'none';
+  document.getElementById('picksSearch').style.display = view === 'cards' ? '' : 'none';
+  if (view === 'stats') renderPickStats();
+}
+
+function setPopFilter(f, btn) {
+  popFilter = f;
+  document.querySelectorAll('#popFilterAll,#popFilterMain,#popFilterAlt').forEach(b => b.classList.remove('flt-active'));
+  btn.classList.add('flt-active');
+  renderPickStats();
+}
+
+function filterPicksSearch(val) {
+  picksSearchTerm = val.toLowerCase();
+  renderPicks();
+}
+
+function renderPickStats() {
+  // Tally golfer popularity
+  const mainCount = {}, altCount = {};
+  BETTERS.forEach(b => {
+    const picks = b.picks || [];
+    picks.slice(0,3).forEach(p => { const n = normName(p); mainCount[n] = (mainCount[n]||0)+1; });
+    if (picks[3]) { const n = normName(picks[3]); altCount[n] = (altCount[n]||0)+1; }
+  });
+
+  // Summary stats
+  let altsActive = 0, eliminated = 0, gbcSubs = 0;
+  BETTERS.forEach(b => {
+    const c = calcBetter(b);
+    if (c.twoMC && !b.gbc) eliminated++;
+    if (c.gbcSub) gbcSubs++;
+    const usedAlt = c.usedGolfers?.some(g => g.replacedMC && !g.isPhantom);
+    if (usedAlt) altsActive++;
+  });
+
+  const summaryEl = document.getElementById('picksSummaryStats');
+  summaryEl.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-val">${BETTERS.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Alts active</div><div class="stat-val" style="color:var(--green)">${altsActive}</div></div>
+    <div class="stat-card"><div class="stat-label">GBC subs</div><div class="stat-val" style="color:#c2410c">${gbcSubs}</div></div>
+    <div class="stat-card"><div class="stat-label">Eliminated</div><div class="stat-val" style="color:var(--red)">${eliminated}</div></div>
+  `;
+
+  // Build popularity data
+  const combined = {};
+  Object.entries(mainCount).forEach(([n,c]) => { combined[n] = { main: c, alt: 0 }; });
+  Object.entries(altCount).forEach(([n,c]) => { if (!combined[n]) combined[n] = { main: 0, alt: 0 }; combined[n].alt += c; });
+
+  let entries = Object.entries(combined)
+    .map(([key, val]) => {
+      const displayName = Object.keys(golferScores).find(k => normName(k) === key) || key;
+      const gs = golferScores[key];
+      const score = gs ? fmtScore(gs.toPar) : '–';
+      const isMC = gs?.isMC || false;
+      const total = popFilter === 'main' ? val.main : popFilter === 'alt' ? val.alt : val.main + val.alt;
+      return { name: displayName, main: val.main, alt: val.alt, total, score, isMC };
+    })
+    .filter(e => e.total > 0)
+    .sort((a,b) => b.total - a.total);
+
+  const maxTotal = entries[0]?.total || 1;
+  const chartEl = document.getElementById('popularityChart');
+  chartEl.innerHTML = entries.map(e => {
+    const pct = Math.round((e.total / BETTERS.length) * 100);
+    const barW = Math.round((e.total / maxTotal) * 100);
+    const mainW = Math.round((e.main / maxTotal) * 100);
+    const nameColor = e.isMC ? 'var(--text-muted)' : 'var(--text)';
+    const mcBadge = e.isMC ? '<span style="font-size:10px;background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:4px;margin-left:4px">MC</span>' : '';
+    const scoreColor = e.score.startsWith('-') ? 'var(--red)' : e.score === 'E' ? 'var(--text-muted)' : 'var(--over)';
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+        <div style="width:160px;flex-shrink:0;font-size:12px;color:${nameColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.name}${mcBadge}</div>
+        <div style="flex:1;position:relative;height:18px;background:var(--gray-light);border-radius:4px;overflow:hidden">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:${barW}%;background:#e2e8f0;border-radius:4px"></div>
+          <div style="position:absolute;left:0;top:0;bottom:0;width:${mainW}%;background:var(--green);border-radius:4px;opacity:0.7"></div>
+        </div>
+        <div style="width:28px;text-align:center;font-size:12px;font-weight:500;color:var(--text)">${e.total}</div>
+        <div style="width:36px;text-align:right;font-size:11px;color:${scoreColor}">${e.score}</div>
+        <div style="width:32px;text-align:right;font-size:10px;color:var(--text-muted)">${pct}%</div>
+      </div>`;
+  }).join('');
+
+  // Alt tracker
+  const altEl = document.getElementById('altTracker');
+  const altBetters = BETTERS.filter(b => {
+    const c = calcBetter(b);
+    return c.usedGolfers?.some(g => g.replacedMC && !g.isPhantom);
+  });
+  if (altBetters.length === 0) {
+    altEl.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--text-muted)">No alternates currently active</div>';
+  } else {
+    altEl.innerHTML = altBetters.map(b => {
+      const c = calcBetter(b);
+      const alt = c.usedGolfers?.find(g => g.replacedMC && !g.isPhantom);
+      const mc = c.golferData?.find(g => g.isMC);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:12px">
+        <span style="font-weight:500;color:var(--text)">${b.name}${b.gbc ? ' <span style="font-size:9px;background:#0f2540;color:white;padding:1px 4px;border-radius:3px">GBC</span>' : ''}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="color:var(--text-muted)">${mc?.name || '?'} MC →</span>
+          <span class="pill alt-used" style="font-size:11px">🟢 ${alt?.name} (${fmtScore(alt?.toPar)})</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
 function renderPicks() {
   const container = document.getElementById("picksGrid");
   container.innerHTML = "";
-  const sorted = [...BETTERS].sort((a,b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
+  const sortVal = document.getElementById('picksSort')?.value || 'name';
+
+  let sorted = [...BETTERS];
+  if (sortVal === 'name') sorted.sort((a,b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
+  else if (sortVal === 'score') sorted.sort((a,b) => { const ca=calcBetter(a), cb=calcBetter(b); if(ca.twoMC && !a.gbc) return 1; if(cb.twoMC && !b.gbc) return -1; return (ca.totalScore??99)-(cb.totalScore??99); });
+  else if (sortVal === 'winpct') sorted.sort((a,b) => { const wa=WIN_PROB_HISTORY[a.name]?.at(-1)?.w||0, wb=WIN_PROB_HISTORY[b.name]?.at(-1)?.w||0; return wb-wa; });
+
+  // Apply search filter
+  if (picksSearchTerm) {
+    sorted = sorted.filter(b => {
+      if (b.name.toLowerCase().includes(picksSearchTerm)) return true;
+      return (b.picks||[]).some(p => p.toLowerCase().includes(picksSearchTerm));
+    });
+  }
+
   sorted.forEach(better => {
     const calc = calcBetter(better);
     const { totalScore, twoMC, usedGolfers, golferData } = calc;
@@ -1509,22 +1684,15 @@ function renderPicks() {
     const scoreColor = (twoMC && !better.gbc) ? "var(--text-muted)" : (totalScore !== null ? (totalScore < 0 ? "var(--red)" : totalScore > 0 ? "var(--over)" : "var(--text-muted)") : "var(--text-muted)");
     let golfersHTML = "";
     if (golferData) {
-      golferData.forEach((g, idx) => {
-        const isUsedAsScoring = usedGolfers && usedGolfers.some(u => u.name === g.name && !u.isPhantom);
-        const altInPlay = idx === 3 && !g.isMC && usedGolfers && usedGolfers.some(u => u.name === g.name && u.replacedMC);
-        let cls = "pill";
-        if (idx === 3) cls += " alt";
-        if (g.isMC) cls += " mc";
-        else if (isUsedAsScoring && !g.isAlt) cls += " scoring";
-        if (altInPlay) cls += " alt-used";
-        const scoreS = g.isMC ? "MC" : fmtScore(g.toPar);
-        const prefix = idx === 3 ? (altInPlay ? "🟢 ALT IN: " : "ALT: ") : "";
-        golfersHTML += `<span class="${cls}">${prefix}${g.name} (${scoreS})</span>`;
-      });
-      if (calc.gbcSub) {
-        const phantom = usedGolfers?.find(g => g.isPhantom);
-        if (phantom) golfersHTML += `<span class="pill" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa">⚠ GBC Sub</span>`;
-      }
+      const altInPlay = golferData[3] && !golferData[3].isMC && usedGolfers?.some(u => u.name === golferData[3].name && u.replacedMC);
+      const activePicks = golferData.slice(0,3).filter(g => !g.isMC);
+      const mcPicks = golferData.slice(0,3).filter(g => g.isMC);
+      const alt = golferData[3];
+      activePicks.forEach(g => { golfersHTML += `<span class="pill scoring">${g.name} (${fmtScore(g.toPar)})</span>`; });
+      if (altInPlay) golfersHTML += `<span class="pill alt-used">🟢 ALT IN: ${alt.name} (${fmtScore(alt.toPar)})</span>`;
+      if (calc.gbcSub) { const phantom = usedGolfers?.find(g => g.isPhantom); if (phantom) golfersHTML += `<span class="pill" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa">⚠ GBC Sub</span>`; }
+      mcPicks.forEach(g => { golfersHTML += `<span class="pill mc">${g.name} (MC)</span>`; });
+      if (alt && !altInPlay) { golfersHTML += `<span class="${alt.isMC ? 'pill mc' : 'pill alt'}">${alt.isMC ? 'ALT: '+alt.name+' (MC)' : 'ALT: '+alt.name+' ('+fmtScore(alt.toPar)+')'}</span>`; }
     }
     card.innerHTML = `
       <div class="pc-header">
