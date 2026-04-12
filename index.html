@@ -2167,6 +2167,20 @@ function showTab(id, btn) {
   if (btn) btn.classList.add("active");
   const menu = document.getElementById('gbcDropdownMenu');
   if (menu) menu.style.display = 'none';
+  try { localStorage.setItem('gbc_active_tab', id); } catch(e) {}
+}
+
+function restoreActiveTab() {
+  try {
+    const saved = localStorage.getItem('gbc_active_tab');
+    if (!saved || saved === 'leaderboard') return;
+    // Find the button that opens this tab and click it
+    const btns = document.querySelectorAll('.tab-btn');
+    for (const btn of btns) {
+      const onclick = btn.getAttribute('onclick') || '';
+      if (onclick.includes(`'${saved}'`)) { btn.click(); return; }
+    }
+  } catch(e) {}
 }
 
 // ============================================================
@@ -2227,6 +2241,7 @@ schedCountdown('2026-07-13', 'sched-cd-open');
 // BOOT
 loadWinProbHistory();
 renderAll();
+restoreActiveTab();
 loadScores();
 startAutoRefresh();
 </script>
