@@ -1408,20 +1408,23 @@ function renderLeaderboard() {
     const wins = {};
     BETTERS.forEach(b => wins[b.name] = 0);
 
+    // Detect rounds remaining from live data
+    const currentRound = parseInt(document.getElementById('roundInfo')?.textContent?.match(/Round (\d)/)?.[1] || '3', 10);
+    const roundsLeft = Math.max(1, 4 - currentRound + (currentRound < 4 ? 0 : 0));
     // Augusta historical volatility: ~3.5 strokes std dev per remaining round
-    // After R2: 2 rounds left = ~3.5 * sqrt(2) ≈ 4.9 strokes total variance
     const golferDist = {};
     Object.values(golferScores).forEach(g => {
       if (golferDist[g.name.toLowerCase()]) return;
       if (g.isMC) return;
-      const roundsLeft = 2; // R3 + R4 remaining after cut
-      const stdPerRound = 3.5; // Augusta historical round-to-round std dev
+      const stdPerRound = 3.5;
       const std = stdPerRound * Math.sqrt(roundsLeft);
-      // Blend current score with DataGolf's implied skill level
+      // Use DataGolf win% as primary skill signal — convert to implied strokes-behind-leader
       const dg = DG_DATA[g.name.toLowerCase()];
-      // Regression to mean: weight current score 70%, DG implied 30%
-      const dgImplied = dg ? (Math.log(dg.win + 0.0001) * -2) : g.toPar;
-      const mean = g.toPar * 0.75 + dgImplied * 0.25;
+      // DG win% → implied score: log transform anchored so 50% win ≈ current leader score
+      const dgSkill = dg?.win > 0 ? Math.log(dg.win + 0.001) * -2.5 : g.toPar + 4;
+      // Blend: current score 80%, DG skill 20% — current score dominates in final rounds
+      const blendWeight = roundsLeft === 1 ? 0.9 : 0.75;
+      const mean = g.toPar * blendWeight + dgSkill * (1 - blendWeight);
       golferDist[g.name.toLowerCase()] = { mean, std };
     });
 
