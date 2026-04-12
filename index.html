@@ -1146,9 +1146,23 @@ function loadWinProbHistory() {
   try {
     const g = localStorage.getItem('gbc_golfer_history');
     const b = localStorage.getItem('gbc_better_history');
-    if (g) Object.assign(WIN_PROB_HISTORY, JSON.parse(g));
-    if (b) Object.assign(BETTER_WIN_HISTORY, JSON.parse(b));
-    console.log('Loaded win prob history from localStorage:', Object.keys(WIN_PROB_HISTORY).length, 'golfers,', Object.keys(BETTER_WIN_HISTORY).length, 'betters');
+    if (g) {
+      const parsed = JSON.parse(g);
+      // Clean any values over 1.0
+      Object.entries(parsed).forEach(([k,v]) => {
+        parsed[k] = v.filter(d => d.w <= 1.0 && d.w >= 0);
+      });
+      Object.assign(WIN_PROB_HISTORY, parsed);
+    }
+    if (b) {
+      const parsed = JSON.parse(b);
+      // Clean bad better data — hard cap 75% for 27-person pool
+      Object.entries(parsed).forEach(([k,v]) => {
+        parsed[k] = v.filter(d => d.w <= 0.75 && d.w >= 0);
+      });
+      Object.assign(BETTER_WIN_HISTORY, parsed);
+    }
+    console.log('Loaded win prob history:', Object.keys(WIN_PROB_HISTORY).length, 'golfers,', Object.keys(BETTER_WIN_HISTORY).length, 'betters');
   } catch(e) {}
 }
 
@@ -1334,20 +1348,19 @@ function renderWinProbChart() {
   ctx.strokeRect(pad.left, pad.top, chartW, chartH);
 
   active.forEach(n => {
-    const rawPts = history[n].filter(d => d.t >= dayStart && d.t <= dayEnd);
+    // Filter corrupt data: hard cap at 75% (impossible in 27-person pool),
+    // and remove single-point spikes that jump >40pp and immediately reverse
+    const rawPts = history[n].filter(d => d.t >= dayStart && d.t <= dayEnd && d.w <= 0.75);
     if (rawPts.length < 1) return;
 
-    // Filter corrupt data points: remove single-point spikes where value jumps
-    // >40pp then immediately drops back — real eagles move 20pp max per refresh
     const pts = rawPts.filter((d, i, arr) => {
-      if (i === 0 || i === arr.length - 1) return true;
-      const prev = arr[i-1].w;
-      const next = arr[i+1].w;
+      if (arr.length < 3) return true;
+      const prev = i > 0 ? arr[i-1].w : arr[i+1]?.w ?? d.w;
+      const next = i < arr.length-1 ? arr[i+1].w : arr[i-1]?.w ?? d.w;
       const jumpUp   = d.w - prev;
       const jumpDown = d.w - next;
-      // Corrupt if spike >40pp AND immediately reverses >30pp
-      if (jumpUp > 0.40 && jumpDown > 0.30) return false;
-      if (jumpUp < -0.40 && jumpDown < -0.30) return false;
+      if (jumpUp > 0.35 && jumpDown > 0.25) return false;
+      if (jumpUp < -0.35 && jumpDown < -0.25) return false;
       return true;
     });
 
