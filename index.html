@@ -1112,7 +1112,7 @@ const BETTER_WIN_HISTORY = {}; // pool win% from Monte Carlo { name: [{t, w}] }
 function snapshotBetterWinProbs(winCounts, N) {
   const now = Date.now();
   BETTERS.forEach(b => {
-    const prob = (winCounts[b.name] || 0) / N;
+    const prob = Math.min(1, Math.max(0, (winCounts[b.name] || 0) / N)); // clamp 0-1
     if (!BETTER_WIN_HISTORY[b.name]) BETTER_WIN_HISTORY[b.name] = [];
     BETTER_WIN_HISTORY[b.name].push({ t: now, w: prob });
     if (BETTER_WIN_HISTORY[b.name].length > 300) BETTER_WIN_HISTORY[b.name].shift();
@@ -1334,7 +1334,23 @@ function renderWinProbChart() {
   ctx.strokeRect(pad.left, pad.top, chartW, chartH);
 
   active.forEach(n => {
-    const pts = history[n].filter(d => d.t >= dayStart && d.t <= dayEnd);
+    const rawPts = history[n].filter(d => d.t >= dayStart && d.t <= dayEnd);
+    if (rawPts.length < 1) return;
+
+    // Filter corrupt data points: remove single-point spikes where value jumps
+    // >40pp then immediately drops back — real eagles move 20pp max per refresh
+    const pts = rawPts.filter((d, i, arr) => {
+      if (i === 0 || i === arr.length - 1) return true;
+      const prev = arr[i-1].w;
+      const next = arr[i+1].w;
+      const jumpUp   = d.w - prev;
+      const jumpDown = d.w - next;
+      // Corrupt if spike >40pp AND immediately reverses >30pp
+      if (jumpUp > 0.40 && jumpDown > 0.30) return false;
+      if (jumpUp < -0.40 && jumpDown < -0.30) return false;
+      return true;
+    });
+
     if (pts.length < 1) return;
     const color = colorMap[n];
 
