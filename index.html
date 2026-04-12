@@ -1244,7 +1244,7 @@ function renderWinProbChart() {
   if (!canvas) return;
 
   const history = wpMode === 'golfer' ? WIN_PROB_HISTORY : BETTER_WIN_HISTORY;
-  const active = [...wpSelected].filter(n => history[n]?.length >= 2);
+  const active = [...wpSelected].filter(n => history[n]?.length >= 1);
 
   if (active.length === 0) {
     canvas.style.display = 'none';
@@ -1254,85 +1254,125 @@ function renderWinProbChart() {
   canvas.style.display = 'block';
   if (empty) empty.style.display = 'none';
 
+  // Fixed x-axis: today 7 AM → 8 PM local time
+  const today = new Date();
+  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 0, 0).getTime();
+  const dayEnd   = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 20, 0, 0).getTime();
+  const tRange = dayEnd - dayStart;
+
+  // Retina-quality canvas
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.offsetWidth || 640;
+  const cssH = 220;
+  canvas.width  = cssW * dpr;
+  canvas.height = cssH * dpr;
+  canvas.style.width  = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth || 600;
-  const H = 200;
-  canvas.width = W;
-  canvas.height = H;
-  const pad = { top: 16, right: 50, bottom: 28, left: 44 };
+  ctx.scale(dpr, dpr);
+
+  const W = cssW;
+  const H = cssH;
+  const pad = { top: 20, right: 56, bottom: 32, left: 44 };
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
   ctx.clearRect(0, 0, W, H);
 
-  // Global time and value range across all selected
-  let tMin = Infinity, tMax = -Infinity, maxW = 0, minW = 1;
-  active.forEach(n => {
-    history[n].forEach(d => {
-      tMin = Math.min(tMin, d.t);
-      tMax = Math.max(tMax, d.t);
-      maxW = Math.max(maxW, d.w);
-      minW = Math.min(minW, d.w);
-    });
-  });
-  maxW = Math.min(1, maxW * 1.1);
-  minW = Math.max(0, minW * 0.9);
-  const tRange = tMax - tMin || 1;
-  const wRange = maxW - minW || 0.1;
+  // Y-axis range: 0 to max across all series, with 10% headroom
+  let maxW = 0.05;
+  active.forEach(n => history[n].forEach(d => { maxW = Math.max(maxW, d.w); }));
+  maxW = Math.min(1, maxW * 1.15);
+  const wRange = maxW;
 
-  const toX = t => pad.left + ((t - tMin) / tRange) * chartW;
-  const toY = w => pad.top + chartH - ((w - minW) / wRange) * chartH;
+  const toX = t  => pad.left + Math.max(0, Math.min(1, (t - dayStart) / tRange)) * chartW;
+  const toY = w  => pad.top + chartH - (w / wRange) * chartH;
 
-  // Grid lines
-  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  // Horizontal grid lines at 10% intervals
+  ctx.strokeStyle = 'rgba(0,0,0,0.07)';
   ctx.lineWidth = 0.5;
-  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
-    const y = pad.top + chartH * (1 - frac);
+  const step = maxW > 0.5 ? 0.25 : maxW > 0.2 ? 0.1 : 0.05;
+  for (let v = 0; v <= maxW + 0.001; v += step) {
+    const y = toY(v);
+    if (y < pad.top - 2 || y > pad.top + chartH + 2) continue;
     ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y); ctx.stroke();
-    const pct = Math.round((minW + frac * wRange) * 100);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.font = '10px sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.font = `${10 * 1}px sans-serif`;
     ctx.textAlign = 'right';
-    ctx.fillText(pct + '%', pad.left - 5, y + 3);
-  });
+    ctx.fillText(Math.round(v * 100) + '%', pad.left - 5, y + 3);
+  }
+
+  // Vertical grid lines at each hour
+  ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+  const fmt = t => new Date(t).toLocaleTimeString([], { hour: 'numeric', hour12: true });
+  for (let h = 8; h <= 19; h++) {
+    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, 0, 0).getTime();
+    const x = toX(t);
+    ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + chartH); ctx.stroke();
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(fmt(t), x, pad.top + chartH + 14);
+  }
+
+  // "Now" vertical line
+  const nowX = toX(Date.now());
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath(); ctx.moveTo(nowX, pad.top); ctx.lineTo(nowX, pad.top + chartH); ctx.stroke();
+  ctx.setLineDash([]);
 
   // Draw each line
   const colorMap = {};
   let ci = 0;
   active.forEach(n => { colorMap[n] = WP_COLORS[ci++ % WP_COLORS.length]; });
 
+  // Border around chart area
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.lineWidth = 0.5;
+  ctx.strokeRect(pad.left, pad.top, chartW, chartH);
+
   active.forEach(n => {
-    const pts = history[n];
+    const pts = history[n].filter(d => d.t >= dayStart && d.t <= dayEnd);
+    if (pts.length < 1) return;
     const color = colorMap[n];
 
-    // Line
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
-    pts.forEach((d, i) => i === 0 ? ctx.moveTo(toX(d.t), toY(d.w)) : ctx.lineTo(toX(d.t), toY(d.w)));
+    ctx.lineCap = 'round';
+    pts.forEach((d, i) => {
+      const x = toX(d.t);
+      const y = toY(d.w);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
     ctx.stroke();
 
-    // End dot + label
+    // End dot
     const last = pts.at(-1);
-    const x = toX(last.t);
-    const y = toY(last.w);
+    const ex = toX(last.t);
+    const ey = toY(last.w);
     ctx.beginPath();
-    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.arc(ex, ey, 4, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
+
+    // End label (right of chart)
     ctx.fillStyle = color;
-    ctx.font = '10px sans-serif';
+    ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(Math.round(last.w * 100) + '%', x + 6, y + 3);
+    ctx.fillText(Math.round(last.w * 100) + '%', ex + 7, ey + 3);
   });
 
-  // Time axis labels
-  const fmt = t => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.font = '10px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(fmt(tMin), pad.left, H - 6);
-  ctx.fillText(fmt(tMax), pad.left + chartW, H - 6);
+  // X-axis label
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('7 AM', pad.left, pad.top + chartH + 14);
+  ctx.textAlign = 'right';
+  ctx.fillText('8 PM', pad.left + chartW, pad.top + chartH + 14);
 }
 
 // ============================================================
