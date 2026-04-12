@@ -1304,7 +1304,9 @@ function renderWinProbChart() {
 
   // Y-axis range: 0 to max across all series, with 10% headroom
   let maxW = 0.05;
-  active.forEach(n => history[n].forEach(d => { maxW = Math.max(maxW, d.w); }));
+  active.forEach(n => history[n]
+    .filter(d => d.w <= 0.75 && d.w > 0)
+    .forEach(d => { maxW = Math.max(maxW, d.w); }));
   maxW = Math.min(1, maxW * 1.15);
   const wRange = maxW;
 
