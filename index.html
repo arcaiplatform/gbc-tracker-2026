@@ -286,22 +286,19 @@
         <div class="card-header">
           <div>
             <div class="card-title">Win Probability Tracker</div>
-            <div class="card-sub">Live win% tracked each refresh · Golfer = DataGolf model · Better = GBC pool simulation</div>
+            <div class="card-sub">DataGolf win% · Multiple lines · Tracks since page load</div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <div style="display:flex;gap:4px">
-              <button id="wpModeGolfer" onclick="setWpMode('golfer')" class="flt-btn flt-active" style="font-size:11px">🏌️ Golfer</button>
-              <button id="wpModeBetter" onclick="setWpMode('better')" class="flt-btn" style="font-size:11px">👤 Better</button>
-            </div>
-            <select id="winProbPlayer" onchange="renderWinProbChart()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border)">
-              <option value="">Select...</option>
-            </select>
-            <button onclick="document.getElementById('winProbTracker').style.display='none'" style="font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:white;cursor:pointer;color:var(--text-muted)">Hide</button>
+          <div style="display:flex;gap:4px;align-items:center">
+            <button id="wpModeGolfer" onclick="setWpMode('golfer')" class="flt-btn flt-active" style="font-size:11px">🏌️ Golfers</button>
+            <button id="wpModeBetter" onclick="setWpMode('better')" class="flt-btn" style="font-size:11px">👤 Betters</button>
+            <button onclick="document.getElementById('winProbTracker').style.display='none'" style="font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:white;cursor:pointer;color:var(--text-muted);margin-left:4px">Hide</button>
           </div>
         </div>
-        <div style="padding:16px">
-          <canvas id="winProbCanvas" height="160" style="width:100%;display:none"></canvas>
-          <div id="winProbEmpty" style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px">Tracking begins on next refresh — data accumulates throughout the round</div>
+        <div style="padding:0 16px 12px">
+          <div id="wpCheckboxes" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 12px;border-bottom:0.5px solid var(--border);margin-bottom:12px"></div>
+          <canvas id="winProbCanvas" height="200" style="width:100%"></canvas>
+          <div id="winProbEmpty" style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;display:none">Tracking begins on next refresh</div>
+          <div id="wpLegend" style="display:flex;flex-wrap:wrap;gap:12px;padding-top:10px"></div>
         </div>
       </div>
     </div>
@@ -1118,153 +1115,224 @@ function snapshotBetterWinProbs(winCounts, N) {
     const prob = (winCounts[b.name] || 0) / N;
     if (!BETTER_WIN_HISTORY[b.name]) BETTER_WIN_HISTORY[b.name] = [];
     BETTER_WIN_HISTORY[b.name].push({ t: now, w: prob });
-    if (BETTER_WIN_HISTORY[b.name].length > 200) BETTER_WIN_HISTORY[b.name].shift();
+    if (BETTER_WIN_HISTORY[b.name].length > 300) BETTER_WIN_HISTORY[b.name].shift();
   });
+  saveWinProbHistory();
 }
 
 function snapshotWinProbs() {
   const now = Date.now();
-  // Snapshot win% for all golfers in DG_DATA
   Object.entries(DG_DATA).forEach(([key, dg]) => {
     if (!dg.win || dg.win === 0) return;
     const name = golferScores[key]?.name || key;
     if (!WIN_PROB_HISTORY[name]) WIN_PROB_HISTORY[name] = [];
     WIN_PROB_HISTORY[name].push({ t: now, w: dg.win });
-    // Keep last 200 snapshots per player
-    if (WIN_PROB_HISTORY[name].length > 200) WIN_PROB_HISTORY[name].shift();
+    if (WIN_PROB_HISTORY[name].length > 300) WIN_PROB_HISTORY[name].shift();
   });
-
-  // Update player dropdown if tracker is visible
-  updateWinProbDropdown();
+  saveWinProbHistory();
+  updateWinProbCheckboxes();
   renderWinProbChart();
 }
 
-let wpMode = 'golfer'; // 'golfer' or 'better'
+// localStorage persistence
+function saveWinProbHistory() {
+  try {
+    localStorage.setItem('gbc_golfer_history', JSON.stringify(WIN_PROB_HISTORY));
+    localStorage.setItem('gbc_better_history', JSON.stringify(BETTER_WIN_HISTORY));
+  } catch(e) {}
+}
+
+function loadWinProbHistory() {
+  try {
+    const g = localStorage.getItem('gbc_golfer_history');
+    const b = localStorage.getItem('gbc_better_history');
+    if (g) Object.assign(WIN_PROB_HISTORY, JSON.parse(g));
+    if (b) Object.assign(BETTER_WIN_HISTORY, JSON.parse(b));
+    console.log('Loaded win prob history from localStorage:', Object.keys(WIN_PROB_HISTORY).length, 'golfers,', Object.keys(BETTER_WIN_HISTORY).length, 'betters');
+  } catch(e) {}
+}
+
+// Colors for multi-line chart
+const WP_COLORS = [
+  '#0f2540','#c8a84b','#166534','#185fa5','#c2410c','#7c3aed',
+  '#0891b2','#be185d','#15803d','#92400e','#1d4ed8','#9f1239'
+];
+
+let wpMode = 'golfer';
+let wpSelected = new Set(); // names currently checked
 
 function setWpMode(mode) {
   wpMode = mode;
   document.getElementById('wpModeGolfer').classList.toggle('flt-active', mode === 'golfer');
   document.getElementById('wpModeBetter').classList.toggle('flt-active', mode === 'better');
-  updateWinProbDropdown();
+  wpSelected.clear();
+  updateWinProbCheckboxes();
   renderWinProbChart();
 }
 
-function updateWinProbDropdown() {
-  const sel = document.getElementById('winProbPlayer');
-  if (!sel) return;
-  const current = sel.value;
+function updateWinProbDropdown() { updateWinProbCheckboxes(); }
 
+function updateWinProbCheckboxes() {
+  const box = document.getElementById('wpCheckboxes');
+  if (!box) return;
+
+  const history = wpMode === 'golfer' ? WIN_PROB_HISTORY : BETTER_WIN_HISTORY;
+
+  // Get relevant names sorted by current win%
+  let names;
   if (wpMode === 'golfer') {
     const picks = new Set();
     BETTERS.forEach(b => (b.picks || []).forEach(p => picks.add(normName(p).toLowerCase())));
-    const options = Object.keys(WIN_PROB_HISTORY)
-      .filter(n => picks.has(normName(n).toLowerCase()) && WIN_PROB_HISTORY[n].length > 0)
-      .sort((a, b) => (WIN_PROB_HISTORY[b].at(-1)?.w || 0) - (WIN_PROB_HISTORY[a].at(-1)?.w || 0));
-    sel.innerHTML = '<option value="">Select a golfer...</option>' +
-      options.map(n => `<option value="${n}" ${n === current ? 'selected' : ''}>${n} (${Math.round((WIN_PROB_HISTORY[n].at(-1)?.w || 0) * 100)}%)</option>`).join('');
+    names = Object.keys(history)
+      .filter(n => picks.has(normName(n).toLowerCase()) && history[n].length > 0)
+      .sort((a, b) => (history[b].at(-1)?.w || 0) - (history[a].at(-1)?.w || 0));
   } else {
-    const options = Object.keys(BETTER_WIN_HISTORY)
-      .filter(n => BETTER_WIN_HISTORY[n].length > 0)
-      .sort((a, b) => (BETTER_WIN_HISTORY[b].at(-1)?.w || 0) - (BETTER_WIN_HISTORY[a].at(-1)?.w || 0));
-    sel.innerHTML = '<option value="">Select a better...</option>' +
-      options.map(n => `<option value="${n}" ${n === current ? 'selected' : ''}>${n} (${Math.round((BETTER_WIN_HISTORY[n].at(-1)?.w || 0) * 100)}%)</option>`).join('');
+    names = Object.keys(history)
+      .filter(n => history[n].length > 0)
+      .sort((a, b) => (history[b].at(-1)?.w || 0) - (history[a].at(-1)?.w || 0));
   }
-  if (!sel.value && sel.options.length > 1) sel.selectedIndex = 1;
+
+  // Auto-select top 5 if nothing selected
+  if (wpSelected.size === 0) {
+    names.slice(0, 5).forEach(n => wpSelected.add(n));
+  }
+
+  // Remove stale selections
+  wpSelected.forEach(n => { if (!names.includes(n)) wpSelected.delete(n); });
+
+  let colorIdx = 0;
+  const colorMap = {};
+  names.forEach(n => { colorMap[n] = WP_COLORS[colorIdx++ % WP_COLORS.length]; });
+
+  box.innerHTML = names.map(n => {
+    const checked = wpSelected.has(n);
+    const pct = Math.round((history[n].at(-1)?.w || 0) * 100);
+    const color = colorMap[n];
+    const shortName = n.split(' ').slice(-1)[0]; // last name only
+    return `<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;padding:3px 8px;border-radius:20px;border:1px solid ${checked ? color : 'var(--border)'};background:${checked ? color+'18' : 'white'};color:${checked ? color : 'var(--text-muted)'}">
+      <input type="checkbox" style="display:none" ${checked ? 'checked' : ''} onchange="toggleWpName('${n}', this.checked)">
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span>
+      ${shortName} ${pct}%
+    </label>`;
+  }).join('');
+
+  // Update legend
+  const legend = document.getElementById('wpLegend');
+  if (legend) {
+    legend.innerHTML = [...wpSelected].map(n => {
+      const color = colorMap[n];
+      const pct = Math.round((history[n].at(-1)?.w || 0) * 100);
+      return `<div style="display:flex;align-items:center;gap:5px;font-size:11px">
+        <div style="width:20px;height:2px;background:${color};border-radius:2px"></div>
+        <span style="color:var(--text)">${n}</span>
+        <span style="color:${color};font-weight:600">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function toggleWpName(name, checked) {
+  if (checked) wpSelected.add(name);
+  else wpSelected.delete(name);
+  updateWinProbCheckboxes();
+  renderWinProbChart();
 }
 
 function renderWinProbChart() {
   const canvas = document.getElementById('winProbCanvas');
   const empty = document.getElementById('winProbEmpty');
-  const sel = document.getElementById('winProbPlayer');
-  if (!canvas || !sel) return;
+  if (!canvas) return;
 
-  const name = sel.value;
-  const history = name ? (wpMode === 'golfer' ? WIN_PROB_HISTORY[name] : BETTER_WIN_HISTORY[name]) : null;
-  const lineColor = wpMode === 'better' ? '#185fa5' : '#166534';
-  const fillColor = wpMode === 'better' ? 'rgba(24,95,165,0.08)' : 'rgba(22,101,52,0.08)';
+  const history = wpMode === 'golfer' ? WIN_PROB_HISTORY : BETTER_WIN_HISTORY;
+  const active = [...wpSelected].filter(n => history[n]?.length >= 2);
 
-  if (!history || history.length < 2) {
+  if (active.length === 0) {
     canvas.style.display = 'none';
     if (empty) empty.style.display = 'block';
     return;
   }
-
   canvas.style.display = 'block';
   if (empty) empty.style.display = 'none';
 
   const ctx = canvas.getContext('2d');
   const W = canvas.offsetWidth || 600;
-  const H = 160;
+  const H = 200;
   canvas.width = W;
   canvas.height = H;
-
-  const pad = { top: 16, right: 16, bottom: 28, left: 48 };
+  const pad = { top: 16, right: 50, bottom: 28, left: 44 };
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
-
   ctx.clearRect(0, 0, W, H);
 
-  const vals = history.map(d => d.w);
-  const maxW = Math.max(...vals, 0.1);
-  const minW = Math.min(...vals, 0);
-  const range = maxW - minW || 0.1;
-
-  const tMin = history[0].t;
-  const tMax = history.at(-1).t;
+  // Global time and value range across all selected
+  let tMin = Infinity, tMax = -Infinity, maxW = 0, minW = 1;
+  active.forEach(n => {
+    history[n].forEach(d => {
+      tMin = Math.min(tMin, d.t);
+      tMax = Math.max(tMax, d.t);
+      maxW = Math.max(maxW, d.w);
+      minW = Math.min(minW, d.w);
+    });
+  });
+  maxW = Math.min(1, maxW * 1.1);
+  minW = Math.max(0, minW * 0.9);
   const tRange = tMax - tMin || 1;
+  const wRange = maxW - minW || 0.1;
 
   const toX = t => pad.left + ((t - tMin) / tRange) * chartW;
-  const toY = w => pad.top + chartH - ((w - minW) / range) * chartH;
+  const toY = w => pad.top + chartH - ((w - minW) / wRange) * chartH;
 
   // Grid lines
   ctx.strokeStyle = 'rgba(0,0,0,0.06)';
   ctx.lineWidth = 0.5;
-  [0.25, 0.5, 0.75].forEach(frac => {
+  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
     const y = pad.top + chartH * (1 - frac);
     ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y); ctx.stroke();
-    const pct = Math.round((minW + frac * range) * 100);
+    const pct = Math.round((minW + frac * wRange) * 100);
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(pct + '%', pad.left - 6, y + 3);
+    ctx.fillText(pct + '%', pad.left - 5, y + 3);
   });
 
-  // Area fill
-  ctx.beginPath();
-  ctx.moveTo(toX(history[0].t), toY(history[0].w));
-  history.forEach(d => ctx.lineTo(toX(d.t), toY(d.w)));
-  ctx.lineTo(toX(history.at(-1).t), pad.top + chartH);
-  ctx.lineTo(toX(history[0].t), pad.top + chartH);
-  ctx.closePath();
-  ctx.fillStyle = fillColor;
-  ctx.fill();
+  // Draw each line
+  const colorMap = {};
+  let ci = 0;
+  active.forEach(n => { colorMap[n] = WP_COLORS[ci++ % WP_COLORS.length]; });
 
-  // Line
-  ctx.beginPath();
-  ctx.strokeStyle = lineColor;
-  ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  history.forEach((d, i) => i === 0 ? ctx.moveTo(toX(d.t), toY(d.w)) : ctx.lineTo(toX(d.t), toY(d.w)));
-  ctx.stroke();
+  active.forEach(n => {
+    const pts = history[n];
+    const color = colorMap[n];
 
-  // Current value dot
-  const last = history.at(-1);
-  ctx.beginPath();
-  ctx.arc(toX(last.t), toY(last.w), 4, 0, Math.PI * 2);
-  ctx.fillStyle = lineColor;
-  ctx.fill();
-  ctx.fillStyle = lineColor;
-  ctx.font = '11px sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(Math.round(last.w * 100) + '%', toX(last.t) + 8, toY(last.w) + 4);
+    // Line
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    pts.forEach((d, i) => i === 0 ? ctx.moveTo(toX(d.t), toY(d.w)) : ctx.lineTo(toX(d.t), toY(d.w)));
+    ctx.stroke();
 
-  // Time labels
+    // End dot + label
+    const last = pts.at(-1);
+    const x = toX(last.t);
+    const y = toY(last.w);
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.fillStyle = color;
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(Math.round(last.w * 100) + '%', x + 6, y + 3);
+  });
+
+  // Time axis labels
+  const fmt = t => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'center';
-  const fmt = t => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  ctx.fillText(fmt(history[0].t), toX(history[0].t), H - 6);
-  ctx.fillText(fmt(last.t), toX(last.t), H - 6);
+  ctx.fillText(fmt(tMin), pad.left, H - 6);
+  ctx.fillText(fmt(tMax), pad.left + chartW, H - 6);
 }
 
 // ============================================================
@@ -2100,6 +2168,7 @@ schedCountdown('2026-06-15', 'sched-cd-uso');
 schedCountdown('2026-07-13', 'sched-cd-open');
 
 // BOOT
+loadWinProbHistory();
 renderAll();
 loadScores();
 startAutoRefresh();
