@@ -1337,6 +1337,15 @@ function renderWinProbChart() {
   ctx.beginPath(); ctx.moveTo(nowX, pad.top); ctx.lineTo(nowX, pad.top + chartH); ctx.stroke();
   ctx.setLineDash([]);
 
+  // Check if data is tightly clustered (< 10 min total spread = early in day)
+  let allTMin = Infinity, allTMax = -Infinity;
+  active.forEach(n => {
+    const pts = history[n].filter(d => d.t >= dayStart && d.t <= dayEnd && d.w <= 0.75);
+    if (pts.length > 0) { allTMin = Math.min(allTMin, pts[0].t); allTMax = Math.max(allTMax, pts.at(-1).t); }
+  });
+  const nowT = Math.min(Date.now(), dayEnd);
+  const dataClustered = (allTMax - allTMin) < 10 * 60 * 1000;
+
   // Draw each line
   const colorMap = {};
   let ci = 0;
@@ -1348,8 +1357,6 @@ function renderWinProbChart() {
   ctx.strokeRect(pad.left, pad.top, chartW, chartH);
 
   active.forEach(n => {
-    // Filter corrupt data: hard cap at 75% (impossible in 27-person pool),
-    // and remove single-point spikes that jump >40pp and immediately reverse
     const rawPts = history[n].filter(d => d.t >= dayStart && d.t <= dayEnd && d.w <= 0.75);
     if (rawPts.length < 1) return;
 
@@ -1366,33 +1373,59 @@ function renderWinProbChart() {
 
     if (pts.length < 1) return;
     const color = colorMap[n];
-
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    pts.forEach((d, i) => {
-      const x = toX(d.t);
-      const y = toY(d.w);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-
-    // End dot
     const last = pts.at(-1);
-    const ex = toX(last.t);
-    const ey = toY(last.w);
-    ctx.beginPath();
-    ctx.arc(ex, ey, 4, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
 
-    // End label (right of chart)
+    if (dataClustered) {
+      // Data too clustered to show as line — draw a horizontal rule from first point to now
+      const startX = toX(pts[0].t);
+      const endX = toX(nowT);
+      const y = toY(last.w);
+
+      // Horizontal dashed line from data point to now-line
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 3]);
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Dot at current position
+      ctx.beginPath();
+      ctx.arc(endX, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    } else {
+      // Normal line chart
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      pts.forEach((d, i) => {
+        const x = toX(d.t);
+        const y = toY(d.w);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Dot at end
+      const ex = toX(last.t);
+      const ey = toY(last.w);
+      ctx.beginPath();
+      ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    // Label always goes on the right edge
+    const labelX = dataClustered ? toX(nowT) + 7 : toX(last.t) + 7;
+    const labelY = toY(last.w) + 3;
     ctx.fillStyle = color;
     ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(Math.round(last.w * 100) + '%', ex + 7, ey + 3);
+    ctx.fillText(Math.round(last.w * 100) + '%', labelX, labelY);
   });
 
   // X-axis label
