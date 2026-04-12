@@ -1374,7 +1374,8 @@ function tiebreak(tiedBetters) {
 function checkTournamentComplete() {
   const activeGolfers = Object.values(golferScores).filter(g => !g.isMC);
   if (activeGolfers.length === 0) return false;
-  const allDone = activeGolfers.every(g => g.thru === 18 || String(g.pos).match(/^T?\d+$/));
+  // Only complete when ALL active golfers have finished R4 (thru=18)
+  const allDone = activeGolfers.every(g => g.thru === 18);
   if (!allDone) return false;
 
   // Build final leaderboard
