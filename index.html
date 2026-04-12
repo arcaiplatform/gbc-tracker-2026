@@ -1204,10 +1204,12 @@ function updateWinProbCheckboxes() {
   // Get relevant names sorted by current win%
   let names;
   if (wpMode === 'golfer') {
+    // Show ALL golfers with any win history, sorted by current win%
+    // Separate picked golfers (highlighted) from unpicked
     const picks = new Set();
     BETTERS.forEach(b => (b.picks || []).forEach(p => picks.add(normName(p).toLowerCase())));
     names = Object.keys(history)
-      .filter(n => picks.has(normName(n).toLowerCase()) && history[n].length > 0)
+      .filter(n => history[n].length > 0 && (history[n].at(-1)?.w || 0) > 0)
       .sort((a, b) => (history[b].at(-1)?.w || 0) - (history[a].at(-1)?.w || 0));
   } else {
     names = Object.keys(history)
@@ -1215,13 +1217,17 @@ function updateWinProbCheckboxes() {
       .sort((a, b) => (history[b].at(-1)?.w || 0) - (history[a].at(-1)?.w || 0));
   }
 
-  // Auto-select top 5 if nothing selected
+  // Auto-select top 7 if nothing selected
   if (wpSelected.size === 0) {
-    names.slice(0, 5).forEach(n => wpSelected.add(n));
+    names.slice(0, 7).forEach(n => wpSelected.add(n));
   }
 
   // Remove stale selections
   wpSelected.forEach(n => { if (!names.includes(n)) wpSelected.delete(n); });
+
+  // Mark picked golfers for visual distinction
+  const picks = new Set();
+  if (wpMode === 'golfer') BETTERS.forEach(b => (b.picks || []).forEach(p => picks.add(normName(p).toLowerCase())));
 
   let colorIdx = 0;
   const colorMap = {};
@@ -1231,11 +1237,13 @@ function updateWinProbCheckboxes() {
     const checked = wpSelected.has(n);
     const pct = Math.round((history[n].at(-1)?.w || 0) * 100);
     const color = getWpColor(n);
-    const shortName = n.split(' ').slice(-1)[0]; // last name only
-    return `<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;padding:3px 8px;border-radius:20px;border:1px solid ${checked ? color : 'var(--border)'};background:${checked ? color+'18' : 'white'};color:${checked ? color : 'var(--text-muted)'}">
+    const isPicked = picks.has(normName(n).toLowerCase());
+    const shortName = n.split(' ').slice(-1)[0];
+    const pickedDot = isPicked && wpMode === 'golfer' ? '★ ' : '';
+    return `<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;padding:3px 8px;border-radius:20px;border:1px solid ${checked ? color : 'var(--border)'};background:${checked ? color+'18' : 'white'};color:${checked ? color : 'var(--text-muted)'}${isPicked && !checked ? ';font-weight:500' : ''}">
       <input type="checkbox" style="display:none" ${checked ? 'checked' : ''} onchange="toggleWpName('${n}', this.checked)">
       <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span>
-      ${shortName} ${pct}%
+      ${pickedDot}${shortName} ${pct}%
     </label>`;
   }).join('');
 
