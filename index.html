@@ -1418,12 +1418,15 @@ function renderLeaderboard() {
       if (g.isMC) return;
       const stdPerRound = 3.5;
       const std = stdPerRound * Math.sqrt(roundsLeft);
-      // Use DataGolf win% as primary skill signal — convert to implied strokes-behind-leader
       const dg = DG_DATA[g.name.toLowerCase()];
-      // DG win% → implied score: log transform anchored so 50% win ≈ current leader score
-      const dgSkill = dg?.win > 0 ? Math.log(dg.win + 0.001) * -2.5 : g.toPar + 4;
-      // Blend: current score 80%, DG skill 20% — current score dominates in final rounds
-      const blendWeight = roundsLeft === 1 ? 0.9 : 0.75;
+      // Use top_10 probability as finishing quality signal — less correlated with
+      // current score than win%, better reflects true player strength going forward
+      // Convert top10% to implied strokes: 90% top10 ≈ leader, 10% top10 ≈ +6 back
+      const top10 = dg?.top10 || 0;
+      const dgSkill = top10 > 0 ? Math.log(top10 + 0.01) * -3.0 : g.toPar + 8;
+      // In final round weight current score heavily, but let DG quality pull weak
+      // players' means upward (toward par) even if currently scoring well
+      const blendWeight = roundsLeft === 1 ? 0.75 : 0.65;
       const mean = g.toPar * blendWeight + dgSkill * (1 - blendWeight);
       golferDist[g.name.toLowerCase()] = { mean, std };
     });
