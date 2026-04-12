@@ -1267,6 +1267,123 @@ function renderWinProbChart() {
   ctx.fillText(fmt(last.t), toX(last.t), H - 6);
 }
 
+// ============================================================
+// TOURNAMENT COMPLETE DETECTION + AUTO RECORD UPDATE
+// ============================================================
+let tournamentComplete = false;
+let finalPodium = []; // [{name, score, rank}]
+
+function tiebreak(tiedBetters) {
+  // Walk actual Masters leaderboard top to bottom
+  // First tied better who picked a golfer the others didn't — wins
+  const sortedGolfers = Object.values(golferScores)
+    .filter(g => !g.isMC)
+    .sort((a, b) => a.toPar - b.toPar);
+
+  // Build pick sets for each tied better (all 4 picks, normalized)
+  const pickSets = {};
+  tiedBetters.forEach(b => {
+    const better = BETTERS.find(bt => bt.name === b.name);
+    pickSets[b.name] = new Set((better?.picks || []).map(p => normName(p).toLowerCase()));
+  });
+
+  for (const golfer of sortedGolfers) {
+    const key = normName(golfer.name).toLowerCase();
+    const whoHas = tiedBetters.filter(b => pickSets[b.name].has(key));
+    const whoDoesnt = tiedBetters.filter(b => !pickSets[b.name].has(key));
+
+    // If some have this golfer and some don't — the ones who have it win this tiebreak
+    if (whoHas.length > 0 && whoDoesnt.length > 0) {
+      // Winners are those who picked this golfer — recurse if still tied among them
+      if (whoHas.length === 1) return whoHas; // single winner found
+      return tiebreak(whoHas); // still tied among subset — keep walking
+    }
+    // Everyone has or nobody has — keep walking leaderboard
+  }
+  return tiedBetters; // truly unresolvable tie
+}
+
+function checkTournamentComplete() {
+  const activeGolfers = Object.values(golferScores).filter(g => !g.isMC);
+  if (activeGolfers.length === 0) return false;
+  const allDone = activeGolfers.every(g => g.thru === 18 || String(g.pos).match(/^T?\d+$/));
+  if (!allDone) return false;
+
+  // Build final leaderboard
+  const rows = BETTERS.map(b => {
+    const c = calcBetter(b);
+    return { name: b.name, score: c.totalScore ?? 999, twoMC: c.twoMC, gbc: b.gbc };
+  }).filter(r => !(r.twoMC && !r.gbc))
+    .sort((a, b) => a.score - b.score);
+
+  // Assign ranks with tiebreaking
+  finalPodium = [];
+  let i = 0;
+  while (i < rows.length && finalPodium.length < 3) {
+    // Find all betters tied at this score
+    const tied = rows.filter(r => r.score === rows[i].score);
+
+    if (tied.length === 1) {
+      finalPodium.push({ ...tied[0], rank: finalPodium.length + 1, tied: false });
+      i++;
+    } else {
+      // Apply tiebreaker
+      const broken = tiebreak(tied);
+      if (broken.length === 1 || broken.length === tied.length) {
+        // Fully resolved or truly unresolvable — assign same rank to all tied
+        tied.forEach(b => {
+          if (finalPodium.length < 3) {
+            finalPodium.push({ ...b, rank: finalPodium.length + 1, tied: tied.length > 1 });
+          }
+        });
+      } else {
+        // Partially resolved — winners first, then remaining
+        broken.forEach(b => {
+          if (finalPodium.length < 3) finalPodium.push({ ...b, rank: finalPodium.length + 1, tied: false });
+        });
+        tied.filter(b => !broken.find(w => w.name === b.name)).forEach(b => {
+          if (finalPodium.length < 3) finalPodium.push({ ...b, rank: finalPodium.length + 1, tied: false });
+        });
+      }
+      i += tied.length;
+    }
+  }
+
+  return true;
+}
+
+function getMedalForBetter(name) {
+  if (!tournamentComplete || finalPodium.length === 0) return '';
+  const entry = finalPodium.find(p => p.name === name);
+  if (!entry) return '';
+  const medals = ['🥇', '🥈', '🥉'];
+  const medal = medals[entry.rank - 1] || '';
+  const tieNote = entry.tied ? '<span style="font-size:9px;color:var(--text-muted);margin-left:2px">T</span>' : '';
+  return `<span style="font-size:16px;margin-left:4px" title="${entry.rank === 1 ? '1st' : entry.rank === 2 ? '2nd' : '3rd'} place">${medal}</span>${tieNote}`;
+}
+
+function autoUpdateRecords() {
+  if (!tournamentComplete || finalPodium.length === 0) return;
+  const winner = finalPodium[0];
+  const year = 2026;
+
+  const mastersEntries = RECORDS["The Masters"];
+  if (mastersEntries.some(e => e.y === year)) return;
+
+  mastersEntries.unshift({ y: year, n: winner.name, s: fmtScore(winner.score) });
+
+  const winnerBetter = BETTERS.find(b => b.name === winner.name);
+  if (winnerBetter?.gbc) {
+    const gbcEntries = RECORDS["GBC Champion"];
+    if (!gbcEntries.some(e => e.y === year)) {
+      gbcEntries.unshift({ y: year, n: winner.name, s: fmtScore(winner.score) });
+    }
+  }
+
+  renderRecords();
+  console.log(`🏆 2026 Masters winner: ${winner.name} (${fmtScore(winner.score)})${winner.tied ? ' via tiebreaker' : ''}`);
+}
+
 function renderLeaderboard() {
   const rows = BETTERS.map(b => {
     const calc = calcBetter(b);
@@ -1373,6 +1490,7 @@ function renderLeaderboard() {
       <td onclick="togglePills(this)" style="cursor:pointer">
         <div class="better-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           ${better.name}
+          ${getMedalForBetter(better.name)}
           ${better.gbc ? '<span class="gbc-tag">GBC</span>' : ''}
           ${!better.paid ? '<span style="font-size:10px;font-weight:700;background:var(--red-light);color:var(--red);padding:1px 6px;border-radius:3px;border:1px solid #fca5a5">NOT PAID</span>' : ''}
         </div>
@@ -1930,6 +2048,14 @@ function showTab(id, btn) {
 // RENDER ALL
 // ============================================================
 function renderAll() {
+  // Check if tournament is complete before rendering
+  if (!tournamentComplete) {
+    tournamentComplete = checkTournamentComplete();
+    if (tournamentComplete) {
+      autoUpdateRecords();
+      console.log('🏆 Tournament complete! Podium:', finalPodium.map(p => p.name).join(', '));
+    }
+  }
   renderLeaderboard();
   renderGolfers();
   renderPicks();
