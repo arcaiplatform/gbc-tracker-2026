@@ -739,6 +739,7 @@ const RECORDS = {
     {y:2023,n:"Joseph J. Pehanick",s:"-43"},
   ],
   "The Masters":     [
+    {y:2026,n:"Tom Counts",s:"-30"},
     {y:2025,n:"Joseph J. Pehanick",s:"-26"},
     {y:2024,n:"Rob Law",s:"-20"},
     {y:2023,n:"Jason Henderson",s:"-23"},
@@ -787,6 +788,42 @@ function setFieldFilter(f, btn) {
 let golferScores = {}; // { normalizedName: { score, toPar, thru, pos, r1,r2,r3,r4, status } }
 let lastFetch = null;
 let refreshTimer = null;
+
+// ============================================================
+// FINAL MASTERS 2026 SCORES — fallback when API goes dark
+// ============================================================
+const FINAL_MASTERS_2026 = {
+  "cameron young":         { name:"Cameron Young",        toPar:-11, thru:18, pos:"T1",  isMC:false },
+  "rory mcilroy":          { name:"Rory McIlroy",         toPar:-11, thru:18, pos:"T1",  isMC:false },
+  "sam burns":             { name:"Sam Burns",             toPar:-9,  thru:18, pos:"3",   isMC:false },
+  "shane lowry":           { name:"Shane Lowry",           toPar:-8,  thru:18, pos:"T4",  isMC:false },
+  "justin rose":           { name:"Justin Rose",           toPar:-8,  thru:18, pos:"T4",  isMC:false },
+  "russell henley":        { name:"Russell Henley",        toPar:-7,  thru:18, pos:"6",   isMC:false },
+  "sepp straka":           { name:"Sepp Straka",           toPar:-6,  thru:18, pos:"T7",  isMC:false },
+  "jake knapp":            { name:"Jake Knapp",            toPar:-6,  thru:18, pos:"T7",  isMC:false },
+  "tommy fleetwood":       { name:"Tommy Fleetwood",       toPar:-5,  thru:18, pos:"T9",  isMC:false },
+  "chris gotterup":        { name:"Chris Gotterup",        toPar:-5,  thru:18, pos:"T9",  isMC:false },
+  "scottie scheffler":     { name:"Scottie Scheffler",     toPar:-4,  thru:18, pos:"T11", isMC:false },
+  "xander schauffele":     { name:"Xander Schauffele",     toPar:-4,  thru:18, pos:"T11", isMC:false },
+  "ludvig aberg":          { name:"Ludvig Aberg",          toPar:-3,  thru:18, pos:"T13", isMC:false },
+  "corey conners":         { name:"Corey Conners",         toPar:-3,  thru:18, pos:"T13", isMC:false },
+  "hideki matsuyama":      { name:"Hideki Matsuyama",      toPar:-2,  thru:18, pos:"T15", isMC:false },
+  "matt fitzpatrick":      { name:"Matt Fitzpatrick",      toPar:-1,  thru:18, pos:"T17", isMC:false },
+  "jacob bridgeman":       { name:"Jacob Bridgeman",       toPar:0,   thru:18, pos:"T19", isMC:false },
+  "jon rahm":              { name:"Jon Rahm",              toPar:2,   thru:18, pos:"T21", isMC:false },
+  "cameron smith":         { name:"Cameron Smith",         toPar:3,   thru:18, pos:"T23", isMC:false },
+  "bryson dechambeau":     { name:"Bryson DeChambeau",     toPar:5,   thru:18, pos:"MC",  isMC:true  },
+  "akshay bhatia":         { name:"Akshay Bhatia",         toPar:5,   thru:18, pos:"MC",  isMC:true  },
+  "robert macintyre":      { name:"Robert Macintyre",      toPar:7,   thru:18, pos:"MC",  isMC:true  },
+};
+
+function seedFinalScores() {
+  if (Object.keys(golferScores).length > 5) return; // already populated from live feed
+  Object.entries(FINAL_MASTERS_2026).forEach(([key, g]) => {
+    golferScores[key] = { ...g, status: '' };
+  });
+  console.log('Seeded final Masters 2026 scores');
+}
 
 // ============================================================
 // ESPN API — multi-proxy fallback chain
@@ -863,7 +900,7 @@ async function loadScores() {
     document.getElementById("statusText").textContent = "⚠ Could not reach ESPN live data";
     document.getElementById("statusSub").textContent = firstLoad ? "Could not load scores. Try refreshing." : "Showing last known scores. Will retry automatically.";
     document.getElementById("lastUpdated").textContent = "Failed — retrying in 60s";
-    if (firstLoad) { firstLoad = false; renderAll(); }
+    if (firstLoad) { firstLoad = false; seedFinalScores(); renderAll(); }
   }
 }
 
@@ -2312,6 +2349,7 @@ function tickPGACountdown() {
 // BOOT
 loadWinProbHistory();
 tickPGACountdown();
+seedFinalScores();
 renderAll();
 restoreActiveTab();
 loadScores();
