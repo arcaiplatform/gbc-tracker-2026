@@ -381,8 +381,8 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Full Field · DataGolf Live Odds</div>
-          <div class="card-sub">All golfers in the field · Live win probability, top 5, top 10, make cut · sorted by win prob</div>
+          <div class="card-title">PGA Championship · Field Breakdown</div>
+          <div class="card-sub">Available when PGA Championship picks open · May 11</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="fieldFilterBtns">
           <button onclick="setFieldFilter('all',this)" class="flt-btn flt-active">Full Field</button>
@@ -482,7 +482,7 @@
           <div class="sched-header">
             <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#1a4731"/><rect x="22" y="10" width="2.5" height="22" fill="#f5c842"/><polygon points="24.5,10 38,17 24.5,24" fill="#f5c842"/><ellipse cx="24" cy="36" rx="10" ry="3" fill="#2d6a4f" opacity="0.6"/></svg>
             <div style="flex:1;min-width:0"><div class="sched-name">The Masters</div><div class="sched-course">Augusta National · Augusta, GA</div></div>
-            <span class="sched-status" style="background:#dcfce7;color:#166534">● Live R3</span>
+            <span class="sched-status" style="background:#dcfce7;color:#166534">✓ Complete</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Apr 10–13, 2026</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks opened</span><span class="sched-row-val">Mon Apr 6 · 7 AM PST</span></div>
@@ -1859,7 +1859,9 @@ function renderLeaderboard() {
       if (!el) return;
       const calc = calcBetter(b);
       if (calc.twoMC && !b.gbc) { el.innerHTML = '<span style="color:var(--text-muted)">–</span>'; return; }
-      // Format: show 1 decimal for <5%, round for ≥5%
+      // Show 100% for the winner if tournament complete
+      const isWinner = tournamentComplete && finalPodium.length > 0 && finalPodium[0].name === b.name;
+      if (isWinner) { el.innerHTML = '<span style="color:#c8a84b;font-weight:700">🏆 Winner</span>'; return; }
       el.innerHTML = prob < 0.01 ? `<span style="color:var(--text-muted)">&lt;1%</span>`
         : prob >= 0.25 ? `<span style="color:#c8a84b;font-weight:700">${Math.round(prob*100)}%</span>`
         : prob >= 0.10 ? `<span style="color:#0f2540;font-weight:700">${Math.round(prob*100)}%</span>`
@@ -2221,9 +2223,11 @@ function renderGBCSeason() {
       tbody.appendChild(tr);
     });
   } else {
+    const isCurrent = (yr === 2026);
     data.rows.forEach((row, i) => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${scoreCls(row.total)}">${fmtScore(row.total)}</td><td class="num ${scoreCls(row.masters)}">${fmtScore(row.masters)}</td><td class="num ${scoreCls(row.pga)}">${fmtScore(row.pga)}</td><td class="num ${scoreCls(row.usOpen)}">${fmtScore(row.usOpen)}</td><td class="num ${scoreCls(row.theOpen)}">${fmtScore(row.theOpen)}</td>`;
+      const fmtMajor = (s) => s !== null && s !== undefined ? `<span class="${scoreCls(s)}">${fmtScore(s)}</span>` : `<span style="color:var(--text-muted)">${isCurrent ? 'TBD' : '–'}</span>`;
+      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${scoreCls(row.total)}">${row.total !== null ? fmtScore(row.total) : (isCurrent ? 'TBD' : '–')}</td>${fmtMajor(row.masters)}${fmtMajor(row.pga)}${fmtMajor(row.usOpen)}${fmtMajor(row.theOpen)}`;
       tbody.appendChild(tr);
     });
   }
@@ -2234,9 +2238,7 @@ function showGBCYear(yr, evt, btn) {
   currentGBCYear = parseInt(yr);
   document.querySelectorAll('#sec-gbcseason .flt-btn').forEach(b => b.classList.remove('flt-active'));
   if (btn) btn.classList.add('flt-active');
-  showTab('gbcseason', document.getElementById('gbcDropdownBtn'));
-  document.getElementById('gbcDropdownBtn').classList.add('gbc-active');
-  document.getElementById('gbcDropdownMenu').style.display = 'none';
+  // Don't call showTab — just re-render in place
   renderGBCSeason();
 }
 
