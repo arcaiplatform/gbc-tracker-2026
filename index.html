@@ -228,7 +228,7 @@
     <button class="tab-btn" id="picksTabBtn" onclick="showTab('picks', this)">📋 Pick Sheet</button>
     <button class="tab-btn" onclick="showTab('field', this); renderField()">📊 Field Breakdown</button>
     <button class="tab-btn" id="gbcDropdownBtn" onclick="currentGBCYear=2026; showTab('gbcseason', this); renderGBCSeason()">🏆 GBC Season</button>
-    <button class="tab-btn" onclick="showTab('records', this)">📖 Record Book</button>
+    <button class="tab-btn" onclick="showTab('records', this); renderRecords()">📖 Record Book</button>
     <button class="tab-btn" onclick="showTab('schedule', this)">📅 Schedule</button>
     <button class="tab-btn" onclick="showTab('rules', this)">📜 Rules</button>
   </div>
@@ -447,7 +447,53 @@
 
   <!-- RECORDS -->
   <section class="section" id="sec-records">
-    <div class="records-grid" id="recordsGrid"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px" id="recordsGrid">
+
+      <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">🏆 GBC Champion</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joseph J. Pehanick <span style="font-size:11px;color:#6b7280">-56</span></span><span style="font-weight:600;color:#6b7280">2025</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Mike Carpenter <span style="font-size:11px;color:#6b7280">-34</span></span><span style="font-weight:600;color:#6b7280">2024</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joseph J. Pehanick <span style="font-size:11px;color:#6b7280">-43</span></span><span style="font-weight:600;color:#6b7280">2023</span></div>
+      </div>
+
+      <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">⛳ The Masters</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Tom Counts <span style="font-size:11px;color:#6b7280">-30</span></span><span style="font-weight:600;color:#6b7280">2026</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joseph J. Pehanick <span style="font-size:11px;color:#6b7280">-26</span></span><span style="font-weight:600;color:#6b7280">2025</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Rob Law <span style="font-size:11px;color:#6b7280">-20</span></span><span style="font-weight:600;color:#6b7280">2024</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Jason Henderson <span style="font-size:11px;color:#6b7280">-23</span></span><span style="font-weight:600;color:#6b7280">2023</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>George Pehanick</span><span style="font-weight:600;color:#6b7280">2022</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Mike Adams</span><span style="font-weight:600;color:#6b7280">2021</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Greg Hawley</span><span style="font-weight:600;color:#6b7280">2020</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>John Hulsey</span><span style="font-weight:600;color:#6b7280">2019</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joe M. Pehanick</span><span style="font-weight:600;color:#6b7280">2018</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>G. Pehanick / J. Hulsey / J.J. Pehanick</span><span style="font-weight:600;color:#6b7280">2017</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Jay Ress</span><span style="font-weight:600;color:#6b7280">2016</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>George Pehanick</span><span style="font-weight:600;color:#6b7280">2015</span></div>
+      </div>
+
+      <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">🏌️ PGA Championship</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Jason Henderson <span style="font-size:11px;color:#6b7280">-20</span></span><span style="font-weight:600;color:#6b7280">2025</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Doug Colliau <span style="font-size:11px;color:#6b7280">-45</span></span><span style="font-weight:600;color:#6b7280">2024</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joseph J. Pehanick <span style="font-size:11px;color:#6b7280">-16</span></span><span style="font-weight:600;color:#6b7280">2023</span></div>
+      </div>
+
+      <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">🇺🇸 US Open</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Anthony Fassari <span style="font-size:11px;color:#6b7280">+12</span></span><span style="font-weight:600;color:#6b7280">2025</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joe M. Pehanick <span style="font-size:11px;color:#6b7280">-5</span></span><span style="font-weight:600;color:#6b7280">2024</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Mike Carpenter <span style="font-size:11px;color:#6b7280">-15</span></span><span style="font-weight:600;color:#6b7280">2023</span></div>
+      </div>
+
+      <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">🇬🇧 The Open</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Jay Ress <span style="font-size:11px;color:#6b7280">-36</span></span><span style="font-weight:600;color:#6b7280">2025</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Tom Van Ormer <span style="font-size:11px;color:#6b7280">-2</span></span><span style="font-weight:600;color:#6b7280">2024</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Brian McCarthy <span style="font-size:11px;color:#6b7280">-10</span></span><span style="font-weight:600;color:#6b7280">2023</span></div>
+      </div>
+
+    </div>
   </section>
 
   <!-- SCHEDULE -->
@@ -755,7 +801,7 @@ const RECORDS = {
     {y:2023,n:"Joseph J. Pehanick",s:"-43"},
   ],
   "The Masters": [
-    {y:2026,n:"Rory McIlroy",s:"-12"},
+    {y:2026,n:"Tom Counts",s:"-30"},
     {y:2025,n:"Joseph J. Pehanick",s:"-26"},
     {y:2024,n:"Rob Law",s:"-20"},
     {y:2023,n:"Jason Henderson",s:"-23"},
