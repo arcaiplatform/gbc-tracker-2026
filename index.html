@@ -210,7 +210,7 @@
       </svg>
       <div>
         <div class="logo-text">Golf Betters Cup</div>
-        <div class="logo-sub">Live Masters Tracker · Augusta National</div>
+        <div class="logo-sub">2026 Major Season · PGA Championship Next</div>
       </div>
     </div>
     <div class="header-meta">
@@ -240,17 +240,17 @@
   <section class="section active" id="sec-leaderboard">
     <div id="statusBar" class="status-bar">
       <div>
-        <div class="status-text" id="statusText">Masters Tournament 2026</div>
-        <div class="status-sub" id="statusSub">Loading live scores...</div>
+        <div class="status-text" id="statusText">Masters Tournament 2026 — Complete</div>
+        <div class="status-sub" id="statusSub">Final standings · PGA Championship next · Aronimink GC · May 14–17</div>
       </div>
       <div style="font-size:11px;color:var(--text-muted)" id="roundInfo"></div>
     </div>
 
     <div class="stat-row" id="statRow">
-      <div class="stat-card"><div class="stat-label">Tournament</div><div class="stat-value" style="font-size:15px">The Masters</div><div class="stat-sub">Augusta National · 2026</div></div>
-      <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value" id="statPlayers">28</div><div class="stat-sub">entries</div></div>
-      <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value" id="statGBC">–</div><div class="stat-sub">playing all 4 majors</div></div>
-      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value" id="statPool">–</div><div class="stat-sub" id="statPoolSub">entries × $200</div></div>
+      <div class="stat-card"><div class="stat-label">Next Major</div><div class="stat-value" style="font-size:14px">PGA Championship</div><div class="stat-sub">Aronimink GC · May 14–17</div></div>
+      <div class="stat-card"><div class="stat-label">Picks Open In</div><div class="stat-value" style="font-size:16px;color:#185fa5" id="pgaCountdown">–</div><div class="stat-sub">Mon May 11 · 7 AM PST</div></div>
+      <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value" id="statPlayers">27</div><div class="stat-sub">entries</div></div>
+      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value" id="statPool">$5,400</div><div class="stat-sub" id="statPoolSub">27 entries × $200</div></div>
     </div>
 
     <div class="card">
@@ -650,11 +650,12 @@ function normName(n) {
 // ============================================================
 const GBC_DATA = {
   2026: {
-    label: "GBC 2026 — Live (Masters only)",
-    sub: "Masters live · PGA, US Open & The Open scores TBD",
+    label: "GBC 2026 — After The Masters",
+    sub: "Masters complete · PGA Championship, US Open & The Open scores TBD",
     winners: ["TBD","TBD","TBD"],
-    pool: null, // computed dynamically
-    live: true,
+    pool: null,
+    live: false,
+    liveGBC: true, // use live scores for masters column, TBD for rest
     rows: null, // computed from BETTERS + live scores
   },
   2025: {
@@ -1551,22 +1552,12 @@ function autoUpdateRecords() {
   if (!tournamentComplete || finalPodium.length === 0) return;
   const winner = finalPodium[0];
   const year = 2026;
-
   const mastersEntries = RECORDS["The Masters"];
   if (mastersEntries.some(e => e.y === year)) return;
-
+  // Record Masters winner only — GBC Champion decided after all 4 majors
   mastersEntries.unshift({ y: year, n: winner.name, s: fmtScore(winner.score) });
-
-  const winnerBetter = BETTERS.find(b => b.name === winner.name);
-  if (winnerBetter?.gbc) {
-    const gbcEntries = RECORDS["GBC Champion"];
-    if (!gbcEntries.some(e => e.y === year)) {
-      gbcEntries.unshift({ y: year, n: winner.name, s: fmtScore(winner.score) });
-    }
-  }
-
   renderRecords();
-  console.log(`🏆 2026 Masters winner: ${winner.name} (${fmtScore(winner.score)})${winner.tied ? ' via tiebreaker' : ''}`);
+  console.log(`🏆 2026 Masters: ${winner.name} (${fmtScore(winner.score)})`);
 }
 
 function renderLeaderboard() {
@@ -2115,11 +2106,17 @@ function renderGBCSeason() {
   if (yr === 2026) {
     const gbcBetters = BETTERS.filter(b => b.gbc);
     const gbcPool = gbcBetters.length * 200;
+    // PGA countdown
+    const pgaOpen = new Date('2026-05-11T07:00:00-07:00').getTime();
+    const msLeft = pgaOpen - Date.now();
+    const dLeft = Math.floor(msLeft / 86400000);
+    const hLeft = Math.floor((msLeft % 86400000) / 3600000);
+    const cdStr = msLeft > 0 ? `${dLeft}d ${hLeft}h` : 'Open now';
     statRow.innerHTML = `
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters · PGA · US Open · The Open</div></div>
-      <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value" style="font-size:14px;color:var(--green)">In Progress</div><div class="stat-sub">Masters live</div></div>`;
+      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters complete</div></div>
+      <div class="stat-card"><div class="stat-label">PGA Picks Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">May 11 · 7 AM PST</div></div>`;
   } else {
     const [w1,w2,w3] = data.winners;
     statRow.innerHTML = `
@@ -2298,8 +2295,23 @@ schedCountdown('2026-05-11', 'sched-cd-pga');
 schedCountdown('2026-06-15', 'sched-cd-uso');
 schedCountdown('2026-07-13', 'sched-cd-open');
 
+// PGA Championship picks countdown
+function tickPGACountdown() {
+  const el = document.getElementById('pgaCountdown');
+  if (!el) return;
+  const target = new Date('2026-05-11T07:00:00-07:00').getTime();
+  const diff = target - Date.now();
+  if (diff <= 0) { el.textContent = 'Open now!'; return; }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  el.textContent = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m`;
+  setTimeout(tickPGACountdown, 60000);
+}
+
 // BOOT
 loadWinProbHistory();
+tickPGACountdown();
 renderAll();
 restoreActiveTab();
 loadScores();
