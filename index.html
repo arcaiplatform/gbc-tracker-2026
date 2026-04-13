@@ -2225,8 +2225,16 @@ function renderGBCSeason() {
     const isCurrent = (yr === 2026);
     data.rows.forEach((row, i) => {
       const tr = document.createElement("tr");
-      const fmtMajor = (s) => s !== null && s !== undefined ? `<span class="${scoreCls(s)}">${fmtScore(s)}</span>` : `<span style="color:var(--text-muted)">${isCurrent ? 'TBD' : '–'}</span>`;
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${scoreCls(row.total)}">${row.total !== null ? fmtScore(row.total) : (isCurrent ? 'TBD' : '–')}</td>${fmtMajor(row.masters)}${fmtMajor(row.pga)}${fmtMajor(row.usOpen)}${fmtMajor(row.theOpen)}`;
+      const tdScore = (s) => {
+        if (s !== null && s !== undefined) {
+          return `<td class="num ${scoreCls(s)}">${fmtScore(s)}</td>`;
+        }
+        return `<td class="num even" style="color:var(--text-muted)">${isCurrent ? 'TBD' : '–'}</td>`;
+      };
+      const totalDisp = row.total !== null && row.total !== undefined
+        ? `<td class="num ${scoreCls(row.total)}">${fmtScore(row.total)}</td>`
+        : `<td class="num even" style="color:var(--text-muted)">${isCurrent ? 'TBD' : '–'}</td>`;
+      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td>${totalDisp}${tdScore(row.masters)}${tdScore(row.pga)}${tdScore(row.usOpen)}${tdScore(row.theOpen)}`;
       tbody.appendChild(tr);
     });
   }
