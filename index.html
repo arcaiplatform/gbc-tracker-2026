@@ -657,20 +657,21 @@ const GBC_DATA = {
     live: false,
     liveGBC: true,
     rows: [
-      { name:"Tom Counts",          total:-30, masters:-30, pga:null, usOpen:null, theOpen:null },
-      { name:"Brian McCarthy",      total:-26, masters:-26, pga:null, usOpen:null, theOpen:null },
-      { name:"Anthony Fassari",     total:-24, masters:-24, pga:null, usOpen:null, theOpen:null },
+      { name:"Brian McCarthy",      total:-27, masters:-27, pga:null, usOpen:null, theOpen:null },
+      { name:"Tom Counts",          total:-27, masters:-27, pga:null, usOpen:null, theOpen:null },
+      { name:"Joe Cassele",         total:-26, masters:-26, pga:null, usOpen:null, theOpen:null },
+      { name:"Anthony Fassari",     total:-25, masters:-25, pga:null, usOpen:null, theOpen:null },
+      { name:"Doug Colliau",        total:-25, masters:-25, pga:null, usOpen:null, theOpen:null },
+      { name:"Scott Stevens",       total:-23, masters:-23, pga:null, usOpen:null, theOpen:null },
       { name:"Joseph J. Pehanick",  total:-23, masters:-23, pga:null, usOpen:null, theOpen:null },
-      { name:"Scott Stevens",       total:-22, masters:-22, pga:null, usOpen:null, theOpen:null },
+      { name:"Joseph M. Pehanick",  total:-23, masters:-23, pga:null, usOpen:null, theOpen:null },
       { name:"David A. Morgan",     total:-22, masters:-22, pga:null, usOpen:null, theOpen:null },
-      { name:"Doug Colliau",        total:-15, masters:-15, pga:null, usOpen:null, theOpen:null },
-      { name:"Jim Stankiwicz",      total:-14, masters:-14, pga:null, usOpen:null, theOpen:null },
-      { name:"Tom Van Ormer",       total:-13, masters:-13, pga:null, usOpen:null, theOpen:null },
-      { name:"Rod Walters",         total:-12, masters:-12, pga:null, usOpen:null, theOpen:null },
-      { name:"Joseph M. Pehanick",  total:-10, masters:-10, pga:null, usOpen:null, theOpen:null },
-      { name:"Matt Mingrone",       total:-9,  masters:-9,  pga:null, usOpen:null, theOpen:null },
-      { name:"Christian Fassari",   total:-8,  masters:-8,  pga:null, usOpen:null, theOpen:null },
-      { name:"Kevin Shinar",        total:-2,  masters:-2,  pga:null, usOpen:null, theOpen:null },
+      { name:"Kevin Shinar",        total:-22, masters:-22, pga:null, usOpen:null, theOpen:null },
+      { name:"Matt Mingrone",       total:-22, masters:-22, pga:null, usOpen:null, theOpen:null },
+      { name:"Rod Walters",         total:-21, masters:-21, pga:null, usOpen:null, theOpen:null },
+      { name:"Jim Stankiwicz",      total:-21, masters:-21, pga:null, usOpen:null, theOpen:null },
+      { name:"Tom Van Ormer",       total:-19, masters:-19, pga:null, usOpen:null, theOpen:null },
+      { name:"Christian Fassari",   total:-18, masters:-18, pga:null, usOpen:null, theOpen:null },
       { name:"George Pehanick",     total:null, masters:null,pga:null, usOpen:null, theOpen:null },
     ],
   },
@@ -749,13 +750,13 @@ let currentGBCYear = 2026;
 // RECORD BOOK
 // ============================================================
 const RECORDS = {
-  "GBC Champion":    [
+  "GBC Champion": [
     {y:2025,n:"Joseph J. Pehanick",s:"-56"},
     {y:2024,n:"Mike Carpenter",s:"-34"},
     {y:2023,n:"Joseph J. Pehanick",s:"-43"},
   ],
-  "The Masters":     [
-    {y:2026,n:"Tom Counts",s:"-30"},
+  "The Masters": [
+    {y:2026,n:"Rory McIlroy",s:"-12"},
     {y:2025,n:"Joseph J. Pehanick",s:"-26"},
     {y:2024,n:"Rob Law",s:"-20"},
     {y:2023,n:"Jason Henderson",s:"-23"},
@@ -768,17 +769,17 @@ const RECORDS = {
     {y:2016,n:"Jay Ress",s:""},
     {y:2015,n:"George Pehanick",s:""},
   ],
-  "PGA Championship":[
+  "PGA Championship": [
     {y:2025,n:"Jason Henderson",s:"-20"},
     {y:2024,n:"Doug Colliau",s:"-45"},
     {y:2023,n:"Joseph J. Pehanick",s:"-16"},
   ],
-  "US Open":         [
+  "US Open": [
     {y:2025,n:"Anthony Fassari",s:"+12"},
     {y:2024,n:"Joe M. Pehanick",s:"-5"},
     {y:2023,n:"Mike Carpenter",s:"-15"},
   ],
-  "The Open":        [
+  "The Open": [
     {y:2025,n:"Jay Ress",s:"-36"},
     {y:2024,n:"Tom Van Ormer",s:"-2"},
     {y:2023,n:"Brian McCarthy",s:"-10"},
@@ -809,36 +810,40 @@ let refreshTimer = null;
 // FINAL MASTERS 2026 SCORES — fallback when API goes dark
 // ============================================================
 const FINAL_MASTERS_2026 = {
-  "cameron young":         { name:"Cameron Young",        toPar:-11, thru:18, pos:"T1",  isMC:false },
-  "rory mcilroy":          { name:"Rory McIlroy",         toPar:-11, thru:18, pos:"T1",  isMC:false },
-  "sam burns":             { name:"Sam Burns",             toPar:-9,  thru:18, pos:"3",   isMC:false },
-  "shane lowry":           { name:"Shane Lowry",           toPar:-8,  thru:18, pos:"T4",  isMC:false },
-  "justin rose":           { name:"Justin Rose",           toPar:-8,  thru:18, pos:"T4",  isMC:false },
-  "russell henley":        { name:"Russell Henley",        toPar:-7,  thru:18, pos:"6",   isMC:false },
-  "sepp straka":           { name:"Sepp Straka",           toPar:-6,  thru:18, pos:"T7",  isMC:false },
-  "jake knapp":            { name:"Jake Knapp",            toPar:-6,  thru:18, pos:"T7",  isMC:false },
-  "tommy fleetwood":       { name:"Tommy Fleetwood",       toPar:-5,  thru:18, pos:"T9",  isMC:false },
-  "chris gotterup":        { name:"Chris Gotterup",        toPar:-5,  thru:18, pos:"T9",  isMC:false },
-  "scottie scheffler":     { name:"Scottie Scheffler",     toPar:-4,  thru:18, pos:"T11", isMC:false },
-  "xander schauffele":     { name:"Xander Schauffele",     toPar:-4,  thru:18, pos:"T11", isMC:false },
-  "ludvig aberg":          { name:"Ludvig Aberg",          toPar:-3,  thru:18, pos:"T13", isMC:false },
-  "corey conners":         { name:"Corey Conners",         toPar:-3,  thru:18, pos:"T13", isMC:false },
-  "hideki matsuyama":      { name:"Hideki Matsuyama",      toPar:-2,  thru:18, pos:"T15", isMC:false },
-  "matt fitzpatrick":      { name:"Matt Fitzpatrick",      toPar:-1,  thru:18, pos:"T17", isMC:false },
-  "jacob bridgeman":       { name:"Jacob Bridgeman",       toPar:0,   thru:18, pos:"T19", isMC:false },
-  "jon rahm":              { name:"Jon Rahm",              toPar:2,   thru:18, pos:"T21", isMC:false },
-  "cameron smith":         { name:"Cameron Smith",         toPar:3,   thru:18, pos:"T23", isMC:false },
+  "rory mcilroy":          { name:"Rory McIlroy",         toPar:-12, thru:18, pos:"1",   isMC:false },
+  "scottie scheffler":     { name:"Scottie Scheffler",     toPar:-11, thru:18, pos:"2",   isMC:false },
+  "tyrrell hatton":        { name:"Tyrrell Hatton",        toPar:-10, thru:18, pos:"T3",  isMC:false },
+  "justin rose":           { name:"Justin Rose",           toPar:-10, thru:18, pos:"T3",  isMC:false },
+  "cameron young":         { name:"Cameron Young",         toPar:-10, thru:18, pos:"T3",  isMC:false },
+  "russell henley":        { name:"Russell Henley",        toPar:-10, thru:18, pos:"T3",  isMC:false },
+  "collin morikawa":       { name:"Collin Morikawa",       toPar:-9,  thru:18, pos:"T7",  isMC:false },
+  "sam burns":             { name:"Sam Burns",             toPar:-9,  thru:18, pos:"T7",  isMC:false },
+  "max homa":              { name:"Max Homa",              toPar:-8,  thru:18, pos:"T9",  isMC:false },
+  "xander schauffele":     { name:"Xander Schauffele",     toPar:-8,  thru:18, pos:"T9",  isMC:false },
+  "patrick reed":          { name:"Patrick Reed",          toPar:-5,  thru:18, pos:"T11", isMC:false },
+  "tommy fleetwood":       { name:"Tommy Fleetwood",       toPar:-5,  thru:18, pos:"T11", isMC:false },
+  "sepp straka":           { name:"Sepp Straka",           toPar:-5,  thru:18, pos:"T11", isMC:false },
+  "jake knapp":            { name:"Jake Knapp",            toPar:-7,  thru:18, pos:"T11", isMC:false },
+  "ludvig aberg":          { name:"Ludvig Aberg",          toPar:-4,  thru:18, pos:"T14", isMC:false },
+  "chris gotterup":        { name:"Chris Gotterup",        toPar:-4,  thru:18, pos:"T14", isMC:false },
+  "hideki matsuyama":      { name:"Hideki Matsuyama",      toPar:-3,  thru:18, pos:"T17", isMC:false },
+  "corey conners":         { name:"Corey Conners",         toPar:-3,  thru:18, pos:"T17", isMC:false },
+  "matt fitzpatrick":      { name:"Matt Fitzpatrick",      toPar:-2,  thru:18, pos:"T19", isMC:false },
+  "jacob bridgeman":       { name:"Jacob Bridgeman",       toPar:-1,  thru:18, pos:"T21", isMC:false },
+  "jon rahm":              { name:"Jon Rahm",              toPar:0,   thru:18, pos:"T23", isMC:false },
+  "shane lowry":           { name:"Shane Lowry",           toPar:3,   thru:18, pos:"T25", isMC:false },
+  "haotong li":            { name:"Haotong Li",            toPar:4,   thru:18, pos:"T27", isMC:false },
   "bryson dechambeau":     { name:"Bryson DeChambeau",     toPar:5,   thru:18, pos:"MC",  isMC:true  },
   "akshay bhatia":         { name:"Akshay Bhatia",         toPar:5,   thru:18, pos:"MC",  isMC:true  },
   "robert macintyre":      { name:"Robert Macintyre",      toPar:7,   thru:18, pos:"MC",  isMC:true  },
 };
 
 function seedFinalScores() {
-  if (Object.keys(golferScores).length > 5) return; // already populated from live feed
+  // Always seed — these are the official final Masters 2026 results
   Object.entries(FINAL_MASTERS_2026).forEach(([key, g]) => {
     golferScores[key] = { ...g, status: '' };
   });
-  console.log('Seeded final Masters 2026 scores');
+  console.log('Seeded final Masters 2026 scores:', Object.keys(golferScores).length, 'golfers');
 }
 
 // ============================================================
@@ -2232,9 +2237,9 @@ function renderRecords() {
   grid.innerHTML = "";
   Object.entries(RECORDS).forEach(([title, entries]) => {
     const card = document.createElement("div");
-    card.className = "rules-section";
-    card.innerHTML = `<div class="section-heading">${title}</div>` +
-      entries.map((e,i) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${e.n}${e.s ? `<span style="font-size:11px;color:var(--text-muted);margin-left:6px">${e.s}</span>` : ''}</span><span style="font-weight:600;color:var(--text-muted)">${e.y}</span></div>`).join('');
+    card.style.cssText = "background:white;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;";
+    card.innerHTML = `<div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">${title}</div>` +
+      entries.map(e => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${e.n}${e.s ? `<span style="font-size:11px;color:var(--text-muted);margin-left:6px">${e.s}</span>` : ''}</span><span style="font-weight:600;color:var(--text-muted)">${e.y}</span></div>`).join('');
     grid.appendChild(card);
   });
 }
