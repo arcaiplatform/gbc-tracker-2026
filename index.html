@@ -453,8 +453,8 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">PGA Championship · Field Breakdown</div>
-          <div class="card-sub">Available when PGA Championship picks open · May 12</div>
+          <div class="card-title">PGA Championship · Field & OWGR Rankings</div>
+          <div class="card-sub">Full 156-player field · Aronimink GC · ★ = OWGR Top 10 · sorted by DataGolf win% when live, OWGR rank pre-tournament</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="fieldFilterBtns">
           <button onclick="setFieldFilter('all',this)" class="flt-btn flt-active">Full Field</button>
@@ -470,7 +470,6 @@
             <th class="num">Top 5</th>
             <th class="num">Top 10</th>
             <th class="num">Make Cut</th>
-            <th>Betters who picked</th>
           </tr>
         </thead>
         <tbody id="fieldBody"></tbody>
@@ -2227,69 +2226,83 @@ function cutColor(c) {
 // RENDER FIELD BREAKDOWN
 // ============================================================
 function renderField() {
+  // Build pick map from current BETTERS
   const pickMap = {};
   BETTERS.forEach(b => {
     (b.picks || []).forEach((p, idx) => {
-      const isAlt = idx === 3;
       const key = normName(p).toLowerCase();
       if (!pickMap[key]) pickMap[key] = { name: p, betters: [] };
-      pickMap[key].betters.push({ name: b.name, isAlt });
+      pickMap[key].betters.push({ name: b.name, isAlt: idx === 3 });
     });
   });
 
-  let allRows = Object.entries(DG_DATA).map(([key, dg]) => {
+  // Base: PGA_FIELD with OWGR data; overlay DG_DATA win% when available
+  let allRows = PGA_FIELD.map(player => {
+    const key = normName(player.name).toLowerCase();
+    const dg = DG_DATA[key] || {};
     const liveScore = golferScores[key] || null;
     const pickedEntry = pickMap[key] || null;
-    return { key, dg, liveScore, pickedEntry };
+    return { key, player, dg, liveScore, pickedEntry };
   });
 
   if (fieldFilter === 'picked') allRows = allRows.filter(r => r.pickedEntry);
-  allRows.sort((a, b) => (b.dg.win || 0) - (a.dg.win || 0));
 
+  // Sort: by DG win% if available, else by OWGR rank
+  allRows.sort((a, b) => {
+    const aw = a.dg.win || 0, bw = b.dg.win || 0;
+    if (aw !== bw) return bw - aw;
+    const ar = a.player.rank || 999, br = b.player.rank || 999;
+    return ar - br;
+  });
+
+  const hasDG = allRows.some(r => r.dg.win > 0);
   const topRow = allRows[0];
-  const topPicked = allRows.filter(r => r.pickedEntry)[0];
-  const consensusArr = allRows.filter(r => r.pickedEntry);
+  const topPicked = allRows.find(r => r.pickedEntry);
+  const consensusArr = allRows.filter(r => r.pickedEntry && r.dg.win);
   const consensus = consensusArr.length ? consensusArr.reduce((s,r) => s + (r.dg.win||0), 0) / consensusArr.length : 0;
 
   document.getElementById("fieldStats").innerHTML = `
-    <div class="stat-card"><div class="stat-label">Field size</div><div class="stat-value">${allRows.length}</div><div class="stat-sub">${fieldFilter === 'picked' ? 'golfers picked' : 'golfers in field'}</div></div>
-    <div class="stat-card"><div class="stat-label">Leader win prob</div><div class="stat-value" style="font-size:15px">${topRow ? (topRow.liveScore?.name || topRow.key).split(' ').pop() : '–'}</div><div class="stat-sub">${topRow ? pct(topRow.dg.win, 1) : '–'} to win</div></div>
-    <div class="stat-card"><div class="stat-label">Top picked win prob</div><div class="stat-value" style="font-size:15px">${topPicked ? (topPicked.liveScore?.name || topPicked.key).split(' ').pop() : '–'}</div><div class="stat-sub">${topPicked ? pct(topPicked.dg.win, 1) : '–'} per DataGolf</div></div>
-    <div class="stat-card"><div class="stat-label">Consensus win prob</div><div class="stat-value">${pct(consensus, 1)}</div><div class="stat-sub">avg across picked golfers</div></div>`;
+    <div class="stat-card"><div class="stat-label">Field size</div><div class="stat-value">${PGA_FIELD.length}</div><div class="stat-sub">${fieldFilter === 'picked' ? 'showing picked only' : 'confirmed starters'}</div></div>
+    <div class="stat-card"><div class="stat-label">OWGR #1</div><div class="stat-value" style="font-size:14px">Scheffler</div><div class="stat-sub">World #1 · defending champ</div></div>
+    <div class="stat-card"><div class="stat-label">Top 10 in field</div><div class="stat-value">9</div><div class="stat-sub">OWGR Top 10 · Spaun not entered</div></div>
+    <div class="stat-card"><div class="stat-label">Win odds source</div><div class="stat-value" style="font-size:13px">${hasDG ? 'DataGolf Live' : 'OWGR Rank'}</div><div class="stat-sub">${hasDG ? 'Live tournament data' : 'Pre-tournament · updates at R1'}</div></div>`;
 
   const tbody = document.getElementById("fieldBody");
   tbody.innerHTML = "";
-  if (allRows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">Loading — click Refresh</td></tr>';
-    return;
-  }
+
   allRows.forEach((row, i) => {
-    const { dg, liveScore, pickedEntry } = row;
+    const { player, dg, liveScore, pickedEntry } = row;
     const isMC = liveScore?.isMC || false;
-    const pos = isMC ? 'MC' : (liveScore?.pos || '–');
-    const name = liveScore?.name || row.key.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    const score = liveScore ? (isMC ? '<span class="mc-tag">MC</span>' : `<span class="${scoreCls(liveScore.toPar)}" style="font-weight:700">${fmtScore(liveScore.toPar)}</span>`) : '';
-    const today = (dg.today !== null && dg.today !== undefined) ? `<span class="${scoreCls(dg.today)}">${fmtScore(dg.today)}</span>` : '–';
-    const pickerNames = pickedEntry
-      ? pickedEntry.betters.map(b => `<span style="white-space:nowrap">${b.name.split(' ').pop()}${b.isAlt ? '<span style="font-size:9px;color:var(--text-muted)"> (alt)</span>' : ''}</span>`).join(', ')
-      : '<span style="color:var(--border)">–</span>';
+    const name = liveScore?.name || player.name;
+    const owgrBadge = player.owgr
+      ? `<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;margin-left:4px">★ #${player.rank}</span>`
+      : (player.rank ? `<span style="color:var(--text-muted);font-size:10px;margin-left:4px">#${player.rank}</span>` : '');
+    const scoreDisp = liveScore
+      ? (isMC ? '<span class="mc-tag">MC</span>' : `<span class="${scoreCls(liveScore.toPar)}" style="font-weight:700">${fmtScore(liveScore.toPar)}</span>`)
+      : '';
+    const winDisp = dg.win > 0
+      ? `<span style="font-weight:700;color:${winColor(dg.win)}">${pct(dg.win, 1)}</span>`
+      : `<span style="color:var(--text-muted);font-size:11px">–</span>`;
+    const top10Disp = dg.top10 > 0 ? pct(dg.top10, 1) : '–';
+    const mcDisp = dg.makeCut > 0
+      ? `<span style="color:${cutColor(dg.makeCut)}">${pct(dg.makeCut, 1)}</span>`
+      : '–';
     const tr = document.createElement("tr");
     if (isMC) tr.style.opacity = "0.45";
-    if (pickedEntry) tr.style.background = "#f0fdf4";
     tr.innerHTML = `
-      <td class="rank-num" style="color:var(--text-muted)">${i + 1}</td>
+      <td class="rank-num" style="color:var(--text-muted)">${i+1}</td>
       <td>
-        <div style="font-weight:${pickedEntry ? '700' : '500'};font-size:13px">${name} ${score}</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:1px">Pos: ${pos} · Today: ${today}</div>
+        <div style="font-weight:${pickedEntry ? '700' : '500'};font-size:13px">${name}${owgrBadge} ${scoreDisp}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:1px">${liveScore ? `Pos: ${isMC ? 'MC' : (liveScore.pos || '–')} · Thru: ${liveScore.thru ?? '–'}` : `OWGR #${player.rank || '–'}`}</div>
       </td>
-      <td class="num" style="font-weight:700;color:${winColor(dg.win)}">${pct(dg.win, 1)}</td>
-      <td class="num" style="font-size:12px">${pct(dg.top5, 1)}</td>
-      <td class="num" style="font-size:12px">${pct(dg.top10, 1)}</td>
-      <td class="num" style="font-size:12px;color:${cutColor(dg.makeCut)}">${pct(dg.makeCut, 1)}</td>
-      <td><div class="picker-list">${pickerNames}</div></td>`;
+      <td class="num">${winDisp}</td>
+      <td class="num" style="font-size:12px">${dg.top5 > 0 ? pct(dg.top5,1) : '–'}</td>
+      <td class="num" style="font-size:12px">${top10Disp}</td>
+      <td class="num" style="font-size:12px">${mcDisp}</td>`;
     tbody.appendChild(tr);
   });
 }
+
 
 // ============================================================
 // RENDER GBC SEASON
