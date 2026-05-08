@@ -1088,7 +1088,7 @@ function parseESPN(json) {
         const pos = String(p.current_pos || '');
         const isMC = pos === 'MC' || pos === 'CUT' || pos === 'WD' || pos === 'DQ' || p.make_cut === 0;
         DG_DATA[name.toLowerCase()] = { win: p.win||0, top5: p.top_5||0, top10: p.top_10||0, makeCut: p.make_cut||0, today: p.today||null };
-        golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status: '' };
+        golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status: '', _pgaLive: true };
         if (rawName.toLowerCase() !== name.toLowerCase())
           golferScores[rawName.toLowerCase()] = golferScores[name.toLowerCase()];
       });
@@ -2237,10 +2237,13 @@ function renderField() {
   });
 
   // Base: PGA_FIELD with OWGR data; overlay DG_DATA win% when available
+  // Only use golferScores if it contains PGA data (not Masters seeds)
+  const pgaIsLive = Object.values(golferScores).some(g => g._pgaLive === true);
+
   let allRows = PGA_FIELD.map(player => {
     const key = normName(player.name).toLowerCase();
     const dg = DG_DATA[key] || {};
-    const liveScore = golferScores[key] || null;
+    const liveScore = pgaIsLive ? (golferScores[key] || null) : null;
     const pickedEntry = pickMap[key] || null;
     return { key, player, dg, liveScore, pickedEntry };
   });
