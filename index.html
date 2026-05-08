@@ -238,43 +238,110 @@
 
   <!-- LEADERBOARD -->
   <section class="section active" id="sec-leaderboard">
+
     <div id="statusBar" class="status-bar">
       <div>
-        <div class="status-text" id="statusText">Masters Tournament 2026 — Complete</div>
-        <div class="status-sub" id="statusSub">Final standings · PGA Championship next · Aronimink GC · May 14–17</div>
+        <div class="status-text" id="statusText">PGA Championship 2026 — Pick Submission</div>
+        <div class="status-sub" id="statusSub">Aronimink GC · Newtown Square, PA · May 14–17</div>
       </div>
       <div style="font-size:11px;color:var(--text-muted)" id="roundInfo"></div>
     </div>
 
     <div class="stat-row" id="statRow">
       <div class="stat-card"><div class="stat-label">Next Major</div><div class="stat-value" style="font-size:14px">PGA Championship</div><div class="stat-sub">Aronimink GC · May 14–17</div></div>
-      <div class="stat-card"><div class="stat-label">Picks Open In</div><div class="stat-value" style="font-size:16px;color:#185fa5" id="pgaCountdown">–</div><div class="stat-sub">Mon May 11 · 7 AM PST</div></div>
-      <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value" id="statPlayers">27</div><div class="stat-sub">entries</div></div>
-      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value" id="statPool">$5,400</div><div class="stat-sub" id="statPoolSub">27 entries × $200</div></div>
+      <div class="stat-card"><div class="stat-label">Picks Open In</div><div class="stat-value" style="font-size:16px;color:#185fa5" id="pgaCountdown">–</div><div class="stat-sub">Tue May 12 · 7 AM PST</div></div>
+      <div class="stat-card"><div class="stat-label">Picks Close</div><div class="stat-value" style="font-size:14px">May 13</div><div class="stat-sub">Wed · 5 PM PST</div></div>
+      <div class="stat-card"><div class="stat-label">Entry Fee</div><div class="stat-value">$200</div><div class="stat-sub">per entry</div></div>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Betters Leaderboard</div>
-          <div class="card-sub">Lowest collective score of top 3 golfers wins · Alternate used if 1 player MCs · 2 MCs = greyed out (non-GBC) or GBC substitute applied</div>
-        </div>
-        <input class="search-input" style="width:180px;flex:none" placeholder="Search..." oninput="filterLeaderboard(this.value)" />
+    <!-- LOCKED — shown before May 12 7AM PST -->
+    <div id="picksLocked" class="card" style="text-align:center;padding:48px 24px">
+      <div style="font-size:52px;margin-bottom:16px">🔒</div>
+      <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px">Picks Not Yet Open</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:28px">Pick submission opens Tuesday May 12 at 7:00 AM PST</div>
+      <div style="display:inline-block;background:var(--navy);border-radius:12px;padding:20px 40px">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Opens in</div>
+        <div id="lockedCountdown" style="font-size:28px;font-weight:700;color:#c8a84b;font-family:Georgia,serif">–</div>
       </div>
-      <div id="loading"><div class="spinner"></div><br>Loading live scores...</div>
-      <table id="lbTable" style="display:none">
-        <thead>
-          <tr>
-            <th style="width:36px">#</th>
-            <th>Better</th>
-            <th class="num">Score</th>
-            <th class="num" style="min-width:80px">Holes</th>
-            <th class="num" style="min-width:70px" title="Sum of live win probabilities for scoring golfers (DataGolf)">🏆 Win%</th>
-          </tr>
-        </thead>
-        <tbody id="lbBody"></tbody>
-      </table>
+      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">Picks close Wednesday May 13 · 5:00 PM PST</div>
     </div>
+
+    <!-- OPEN — shown after May 12 7AM PST -->
+    <div id="picksOpen" style="display:none">
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><div class="card-title">📋 Pick Rules</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 0 8px">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">3 + 1</span>3 main picks + 1 alternate. Top 3 scores count.</div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">★ MAX 2</span>Max 2 OWGR Top 10 players in your main picks.</div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">ALT</span>If 1 MCs, alternate scores in their place.</div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">≠</span>Picks 1–3 in exact order cannot duplicate another entry.</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><div class="card-title">Your Details</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 0 8px">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--navy);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Full Name</label>
+            <input type="text" id="betterName" placeholder="e.g. Joseph Pehanick" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--navy);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Email (optional)</label>
+            <input type="email" id="betterEmail" placeholder="you@email.com" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit">
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="card-title">Your Picks</div>
+          <div style="font-size:11px;color:var(--text-muted)">★ = OWGR Top 10</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0 8px">
+          <div style="display:grid;grid-template-columns:36px 1fr 80px;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#c8a84b">1</div>
+            <div style="position:relative"><select id="pick1" onchange="onPickChange()" style="width:100%;padding:10px 32px 10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;appearance:none;cursor:pointer"><option value="">— Pick 1 —</option></select><div style="position:absolute;right:11px;top:50%;transform:translateY(-50%);color:#c8a84b;pointer-events:none">▾</div></div>
+            <div id="badge1" style="font-size:10px;font-weight:600;padding:4px 8px;border-radius:5px;text-align:center;visibility:hidden;background:#fef3c7;color:#92400e">★ TOP 10</div>
+          </div>
+          <div style="display:grid;grid-template-columns:36px 1fr 80px;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#c8a84b">2</div>
+            <div style="position:relative"><select id="pick2" onchange="onPickChange()" style="width:100%;padding:10px 32px 10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;appearance:none;cursor:pointer"><option value="">— Pick 2 —</option></select><div style="position:absolute;right:11px;top:50%;transform:translateY(-50%);color:#c8a84b;pointer-events:none">▾</div></div>
+            <div id="badge2" style="font-size:10px;font-weight:600;padding:4px 8px;border-radius:5px;text-align:center;visibility:hidden;background:#fef3c7;color:#92400e">★ TOP 10</div>
+          </div>
+          <div style="display:grid;grid-template-columns:36px 1fr 80px;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#c8a84b">3</div>
+            <div style="position:relative"><select id="pick3" onchange="onPickChange()" style="width:100%;padding:10px 32px 10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;appearance:none;cursor:pointer"><option value="">— Pick 3 —</option></select><div style="position:absolute;right:11px;top:50%;transform:translateY(-50%);color:#c8a84b;pointer-events:none">▾</div></div>
+            <div id="badge3" style="font-size:10px;font-weight:600;padding:4px 8px;border-radius:5px;text-align:center;visibility:hidden;background:#fef3c7;color:#92400e">★ TOP 10</div>
+          </div>
+          <div style="display:grid;grid-template-columns:36px 1fr 80px;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;background:rgba(200,168,75,0.12);border:1.5px solid rgba(200,168,75,0.35);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#c8a84b;letter-spacing:.5px">ALT</div>
+            <div style="position:relative"><select id="pick4" onchange="onPickChange()" style="width:100%;padding:10px 32px 10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;appearance:none;cursor:pointer"><option value="">— Alternate —</option></select><div style="position:absolute;right:11px;top:50%;transform:translateY(-50%);color:#c8a84b;pointer-events:none">▾</div></div>
+            <div style="width:80px"></div>
+          </div>
+        </div>
+
+        <div id="owgrTracker" style="display:flex;align-items:center;justify-content:space-between;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:10px 14px;margin-top:4px;font-size:12px">
+          <div style="color:#92400e;font-weight:500">OWGR Top 10 used in main picks (max 2)</div>
+          <div id="owgrCount" style="font-weight:700;color:#92400e;font-size:15px">0 / 2</div>
+        </div>
+        <div id="msgError" style="display:none;background:#fee2e2;border:1px solid #fca5a5;border-radius:9px;padding:12px 16px;font-size:13px;color:#991b1b;font-weight:500;margin-top:10px">⚠️ <span id="msgErrorText"></span></div>
+        <div id="msgDupe" style="display:none;background:#fee2e2;border:1px solid #fca5a5;border-radius:9px;padding:12px 16px;font-size:13px;color:#991b1b;font-weight:500;margin-top:10px">🚫 These exact picks in this order have already been submitted. Change at least one pick or the order.</div>
+      </div>
+
+      <button id="submitBtn" onclick="submitPicks()" style="width:100%;padding:16px;background:var(--navy);color:white;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;font-family:Georgia,serif;box-shadow:0 4px 20px rgba(15,37,64,0.25)">Submit <span style="color:#c8a84b">My Picks</span> →</button>
+      <div style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:10px">Picks close Wednesday May 13 · 5:00 PM PST</div>
+
+      <div id="successScreen" style="display:none;text-align:center;background:white;border:1px solid var(--border);border-radius:14px;padding:48px 24px;margin-top:16px">
+        <div style="font-size:52px;margin-bottom:16px">🏆</div>
+        <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:8px">You're in!</div>
+        <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 PGA Championship</div>
+        <div id="picksSummary" style="background:#f8f9fa;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:13px"></div>
+        <div style="color:var(--text-muted);font-size:13px">Good luck — may your picks make the cut! ⛳</div>
+      </div>
+
+    </div><!-- /picksOpen -->
+
   </section>
 
   <!-- GOLFER SCORES -->
@@ -382,7 +449,7 @@
       <div class="card-header">
         <div>
           <div class="card-title">PGA Championship · Field Breakdown</div>
-          <div class="card-sub">Available when PGA Championship picks open · May 11</div>
+          <div class="card-sub">Available when PGA Championship picks open · May 12</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="fieldFilterBtns">
           <button onclick="setFieldFilter('all',this)" class="flt-btn flt-active">Full Field</button>
@@ -549,7 +616,7 @@
             <span class="sched-status" style="background:#fef9c3;color:#854d0e">Next up</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">May 14–17, 2026</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Mon May 11 · 7 AM PST</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Tue May 12 · 7 AM PST</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks close</span><span class="sched-row-val">Wed May 13 · 5 PM PST</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:var(--text-muted)">Not yet open</span></div>
           <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-pga">–</span></div>
@@ -2236,7 +2303,7 @@ function renderGBCSeason() {
     const gbcBetters = BETTERS.filter(b => b.gbc);
     const gbcPool = gbcBetters.length * 200;
     // PGA countdown
-    const pgaOpen = new Date('2026-05-11T07:00:00-07:00').getTime();
+    const pgaOpen = new Date('2026-05-12T07:00:00-07:00').getTime();
     const msLeft = pgaOpen - Date.now();
     const dLeft = Math.floor(msLeft / 86400000);
     const hLeft = Math.floor((msLeft % 86400000) / 3600000);
@@ -2245,7 +2312,7 @@ function renderGBCSeason() {
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
       <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters complete</div></div>
-      <div class="stat-card"><div class="stat-label">PGA Picks Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">May 11 · 7 AM PST</div></div>`;
+      <div class="stat-card"><div class="stat-label">PGA Picks Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">May 12 · 7 AM PST</div></div>`;
   } else {
     const [w1,w2,w3] = data.winners;
     statRow.innerHTML = `
@@ -2415,7 +2482,7 @@ function schedCountdown(targetDateStr, elId) {
   }
   tick();
 }
-schedCountdown('2026-05-11', 'sched-cd-pga');
+schedCountdown('2026-05-12', 'sched-cd-pga');
 schedCountdown('2026-06-15', 'sched-cd-uso');
 schedCountdown('2026-07-13', 'sched-cd-open');
 
@@ -2423,7 +2490,7 @@ schedCountdown('2026-07-13', 'sched-cd-open');
 function tickPGACountdown() {
   const el = document.getElementById('pgaCountdown');
   if (!el) return;
-  const target = new Date('2026-05-11T07:00:00-07:00').getTime();
+  const target = new Date('2026-05-12T07:00:00-07:00').getTime();
   const diff = target - Date.now();
   if (diff <= 0) { el.textContent = 'Open now!'; return; }
   const d = Math.floor(diff / 86400000);
@@ -2433,9 +2500,209 @@ function tickPGACountdown() {
   setTimeout(tickPGACountdown, 60000);
 }
 
-// BOOT
+// ── PICK SUBMISSION ──────────────────────────────────────────
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+const PICKS_OPEN_TIME  = new Date('2026-05-12T07:00:00-07:00');
+const PICKS_CLOSE_TIME = new Date('2026-05-13T17:00:00-07:00');
+
+const PGA_FIELD = [
+  {name:"Scottie Scheffler",owgr:true},{name:"Rory McIlroy",owgr:true},
+  {name:"Xander Schauffele",owgr:true},{name:"Collin Morikawa",owgr:true},
+  {name:"Ludvig Aberg",owgr:true},{name:"Tommy Fleetwood",owgr:true},
+  {name:"Viktor Hovland",owgr:true},{name:"Jon Rahm",owgr:true},
+  {name:"Shane Lowry",owgr:true},{name:"Bryson DeChambeau",owgr:true},
+  {name:"Cameron Young",owgr:false},{name:"Max Homa",owgr:false},
+  {name:"Justin Rose",owgr:false},{name:"Russell Henley",owgr:false},
+  {name:"Sam Burns",owgr:false},{name:"Jake Knapp",owgr:false},
+  {name:"Patrick Cantlay",owgr:false},{name:"Keegan Bradley",owgr:false},
+  {name:"Matt Fitzpatrick",owgr:false},{name:"Jordan Spieth",owgr:false},
+  {name:"Brooks Koepka",owgr:false},{name:"Jason Day",owgr:false},
+  {name:"Adam Scott",owgr:false},{name:"Hideki Matsuyama",owgr:false},
+  {name:"Corey Conners",owgr:false},{name:"Justin Thomas",owgr:false},
+  {name:"Tyrrell Hatton",owgr:false},{name:"Chris Gotterup",owgr:false},
+  {name:"Sepp Straka",owgr:false},{name:"Patrick Reed",owgr:false},
+  {name:"Wyndham Clark",owgr:false},{name:"Harris English",owgr:false},
+  {name:"Akshay Bhatia",owgr:false},{name:"Nick Taylor",owgr:false},
+  {name:"Robert Macintyre",owgr:false},{name:"Tom Kim",owgr:false},
+  {name:"Min Woo Lee",owgr:false},{name:"Sungjae Im",owgr:false},
+  {name:"Eric Cole",owgr:false},{name:"Davis Riley",owgr:false},
+  {name:"Ben Griffin",owgr:false},{name:"Maverick McNealy",owgr:false},
+  {name:"Jacob Bridgeman",owgr:false},{name:"Sahith Theegala",owgr:false},
+  {name:"Alex Noren",owgr:false},{name:"Haotong Li",owgr:false},
+  {name:"Taylor Pendrith",owgr:false},{name:"Tom Hoge",owgr:false},
+  {name:"Gary Woodland",owgr:false},{name:"Cameron Smith",owgr:false},
+].sort((a,b) => a.name.localeCompare(b.name));
+
+let existingPicks = [];
+
+function initPickForm() {
+  ['pick1','pick2','pick3','pick4'].forEach((id,i) => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = `<option value="">${i===3 ? '— Alternate —' : `— Pick ${i+1} —`}</option>`;
+    PGA_FIELD.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.owgr ? `★ ${p.name}` : p.name;
+      opt.dataset.owgr = p.owgr ? '1' : '0';
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function checkPicksLock() {
+  const now = Date.now();
+  const locked = document.getElementById('picksLocked');
+  const open   = document.getElementById('picksOpen');
+  if (!locked || !open) return;
+
+  if (now >= PICKS_OPEN_TIME.getTime() && now < PICKS_CLOSE_TIME.getTime()) {
+    locked.style.display = 'none';
+    open.style.display = 'block';
+    if (!document.getElementById('pick1').options.length || document.getElementById('pick1').options.length < 2) {
+      initPickForm();
+      loadExistingPicks();
+    }
+  } else if (now >= PICKS_CLOSE_TIME.getTime()) {
+    locked.style.display = 'none';
+    open.style.display = 'none';
+  } else {
+    locked.style.display = 'block';
+    open.style.display = 'none';
+    tickLockedCountdown();
+  }
+}
+
+function tickLockedCountdown() {
+  const el = document.getElementById('lockedCountdown');
+  if (!el) return;
+  const diff = PICKS_OPEN_TIME.getTime() - Date.now();
+  if (diff <= 0) { checkPicksLock(); return; }
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor(diff%86400000/3600000);
+  const m = Math.floor(diff%3600000/60000);
+  const s = Math.floor(diff%60000/1000);
+  el.textContent = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
+  setTimeout(tickLockedCountdown, 1000);
+}
+
+function getPickData(id) {
+  const sel = document.getElementById(id);
+  if (!sel || !sel.value) return null;
+  const opt = sel.querySelector(`option[value="${sel.value}"]`);
+  return { name: sel.value, owgr: opt?.dataset.owgr === '1' };
+}
+
+function onPickChange() {
+  ['pick1','pick2','pick3'].forEach((id,i) => {
+    const p = getPickData(id);
+    const badge = document.getElementById(`badge${i+1}`);
+    if (!badge) return;
+    if (!p) { badge.style.visibility = 'hidden'; return; }
+    badge.style.visibility = 'visible';
+    if (p.owgr) { badge.style.background='#fef3c7'; badge.style.color='#92400e'; badge.textContent='★ TOP 10'; }
+    else { badge.style.background='#dcfce7'; badge.style.color='#166534'; badge.textContent='✓ OK'; }
+  });
+  const owgrUsed = ['pick1','pick2','pick3'].filter(id => getPickData(id)?.owgr).length;
+  document.getElementById('owgrCount').textContent = `${owgrUsed} / 2`;
+  const tracker = document.getElementById('owgrTracker');
+  if (tracker) {
+    tracker.style.background = owgrUsed > 2 ? '#fee2e2' : '#fffbeb';
+    tracker.style.borderColor = owgrUsed > 2 ? '#fca5a5' : '#fde68a';
+    tracker.querySelector('div').style.color = owgrUsed > 2 ? '#991b1b' : '#92400e';
+    document.getElementById('owgrCount').style.color = owgrUsed > 2 ? '#991b1b' : '#92400e';
+  }
+  document.getElementById('msgError').style.display = 'none';
+  document.getElementById('msgDupe').style.display = 'none';
+}
+
+function validatePicks() {
+  const name = document.getElementById('betterName').value.trim();
+  if (!name) return 'Please enter your name.';
+  const picks = ['pick1','pick2','pick3','pick4'].map(getPickData);
+  if (!picks[0]||!picks[1]||!picks[2]) return 'Please select all 3 main picks.';
+  if (!picks[3]) return 'Please select an alternate.';
+  const names = picks.map(p => p.name);
+  if (new Set(names).size < 4) return 'All 4 picks must be different players.';
+  const owgr = picks.slice(0,3).filter(p => p.owgr).length;
+  if (owgr > 2) return `You have ${owgr} OWGR Top 10 picks — maximum is 2.`;
+  return null;
+}
+
+async function loadExistingPicks() {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=get`);
+    const data = await res.json();
+    existingPicks = data.picks || [];
+  } catch(e) { console.warn('Could not load picks:', e); }
+}
+
+async function submitPicks() {
+  const err = validatePicks();
+  if (err) {
+    document.getElementById('msgErrorText').textContent = err;
+    document.getElementById('msgError').style.display = 'block';
+    return;
+  }
+  const p1=document.getElementById('pick1').value;
+  const p2=document.getElementById('pick2').value;
+  const p3=document.getElementById('pick3').value;
+  const alt=document.getElementById('pick4').value;
+  const isDupe = existingPicks.some(e => e.pick1===p1 && e.pick2===p2 && e.pick3===p3);
+  if (isDupe) { document.getElementById('msgDupe').style.display='block'; return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Submitting...';
+
+  const payload = {
+    action:'submit',
+    name: document.getElementById('betterName').value.trim(),
+    email: document.getElementById('betterEmail').value.trim(),
+    pick1:p1, pick2:p2, pick3:p3, alternate:alt,
+    timestamp: new Date().toISOString()
+  };
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    await new Promise(r => setTimeout(r, 800));
+    showPickSuccess(payload);
+    return;
+  }
+
+  try {
+    await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload), mode:'no-cors' });
+    existingPicks.push({pick1:p1,pick2:p2,pick3:p3});
+    showPickSuccess(payload);
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = 'Submit <span style="color:#c8a84b">My Picks</span> →';
+    document.getElementById('msgErrorText').textContent = 'Submission failed — please try again or contact Joseph directly.';
+    document.getElementById('msgError').style.display = 'block';
+  }
+}
+
+function showPickSuccess(payload) {
+  document.getElementById('picksOpen').innerHTML = `
+    <div style="text-align:center;background:white;border:1px solid var(--border);border-radius:14px;padding:48px 24px">
+      <div style="font-size:52px;margin-bottom:16px">🏆</div>
+      <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:8px">You're in!</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 PGA Championship</div>
+      <div style="background:#f8f9fa;border-radius:10px;padding:16px;text-align:left;font-size:13px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 1</span><strong>${payload.pick1}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 2</span><strong>${payload.pick2}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 3</span><strong>${payload.pick3}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Alternate</span><strong>${payload.alternate}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0"><span style="color:#6b7280">Submitted by</span><strong>${payload.name}</strong></div>
+      </div>
+      <div style="color:var(--text-muted);font-size:13px">Good luck — may your picks make the cut! ⛳</div>
+    </div>`;
+}
+
+// ── BOOT
 loadWinProbHistory();
 tickPGACountdown();
+checkPicksLock();
 seedFinalScores();
 renderAll();
 restoreActiveTab();
