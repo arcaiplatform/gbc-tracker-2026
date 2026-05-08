@@ -225,7 +225,7 @@
   <div class="tabs-inner">
     <button class="tab-btn active" onclick="showTab('leaderboard', this)">🏆 Betters Leaderboard</button>
     <button class="tab-btn" onclick="showTab('golfers', this)">🏌️ Golfer Scores</button>
-    <button class="tab-btn" id="picksTabBtn" onclick="showTab('picks', this)">📋 Pick Sheet</button>
+    <button class="tab-btn" id="picksTabBtn" onclick="showTab('picks', this); checkPickReveal()">📋 Pick Sheet</button>
     <button class="tab-btn" onclick="showTab('field', this); renderField()">📊 Field Breakdown</button>
     <button class="tab-btn" id="gbcDropdownBtn" onclick="currentGBCYear=2026; showTab('gbcseason', this); renderGBCSeason()">🏆 GBC Season</button>
     <button class="tab-btn" onclick="showTab('records', this); renderRecords()">📖 Record Book</button>
@@ -392,55 +392,60 @@
 
   <!-- PICKS -->
   <section class="section" id="sec-picks">
-    <div class="card" style="margin-bottom:14px">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Pick Sheet — 2026 Masters</div>
-          <div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <input class="search-input" id="picksSearch" style="width:160px;flex:none" placeholder="Search name or golfer..." oninput="filterPicksSearch(this.value)" />
-          <div style="display:flex;gap:4px">
-            <button id="pickViewCards" class="flt-btn flt-active" onclick="setPickView('cards',this)">📋 Cards</button>
-            <button id="pickViewStats" class="flt-btn" onclick="setPickView('stats',this)">📊 Stats</button>
-          </div>
-          <select id="picksSort" onchange="renderPicks()" style="font-size:12px;padding:5px 8px;border-radius:20px;border:1px solid var(--border);background:white;color:var(--text)">
-            <option value="name">Sort: Name A–Z</option>
-            <option value="score">Sort: Score</option>
-            <option value="winpct">Sort: Win %</option>
-          </select>
-        </div>
+
+    <!-- LOCKED until Wed May 13 5PM PST -->
+    <div id="picksRevealLocked" class="card" style="text-align:center;padding:48px 24px">
+      <div style="font-size:48px;margin-bottom:16px">🔒</div>
+      <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px">Pick Sheet — Confidential</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:24px">Picks will be revealed after submissions close on Wednesday May 13 at 5:00 PM PST</div>
+      <div style="display:inline-block;background:var(--navy);border-radius:12px;padding:20px 40px">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Reveals in</div>
+        <div id="pickRevealCountdown" style="font-size:28px;font-weight:700;color:#c8a84b;font-family:Georgia,serif">–</div>
       </div>
+      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">PGA Championship · Aronimink GC · May 14–17, 2026</div>
     </div>
 
-    <!-- CARDS VIEW -->
-    <div id="picksCardsView">
-      <div class="picks-grid" id="picksGrid"></div>
-    </div>
-
-    <!-- STATS VIEW -->
-    <div id="picksStatsView" style="display:none">
-      <!-- Summary numbers -->
-      <div class="stat-row" id="picksSummaryStats" style="margin-bottom:16px"></div>
-      <!-- Popularity chart -->
-      <div class="card" style="margin-bottom:16px">
+    <!-- REVEALED after Wed May 13 5PM PST -->
+    <div id="picksRevealOpen" style="display:none">
+      <div class="card" style="margin-bottom:14px">
         <div class="card-header">
-          <div><div class="card-title">Golfer popularity</div><div class="card-sub">How many betters selected each golfer · main picks + alternates</div></div>
-          <div style="display:flex;gap:4px">
-            <button id="popFilterAll" class="flt-btn flt-active" onclick="setPopFilter('all',this)">All</button>
-            <button id="popFilterMain" class="flt-btn" onclick="setPopFilter('main',this)">Main picks</button>
-            <button id="popFilterAlt" class="flt-btn" onclick="setPopFilter('alt',this)">Alternates</button>
+          <div>
+            <div class="card-title">Pick Sheet — 2026 PGA Championship</div>
+            <div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <input class="search-input" id="picksSearch" style="width:160px;flex:none" placeholder="Search name or golfer..." oninput="filterPicksSearch(this.value)" />
+            <div style="display:flex;gap:4px">
+              <button id="pickViewCards" class="flt-btn flt-active" onclick="setPickView('cards',this)">📋 Cards</button>
+              <button id="pickViewStats" class="flt-btn" onclick="setPickView('stats',this)">📊 Stats</button>
+            </div>
+            <select id="picksSort" onchange="renderPicks()" style="font-size:12px;padding:5px 8px;border-radius:20px;border:1px solid var(--border);background:white;color:var(--text)">
+              <option value="name">Sort: Name A–Z</option>
+              <option value="score">Sort: Score</option>
+              <option value="winpct">Sort: Win %</option>
+            </select>
           </div>
         </div>
-        <div id="popularityChart" style="padding:8px 4px"></div>
       </div>
-      <!-- Pick overlap -->
-      <div class="card">
-        <div class="card-header"><div><div class="card-title">Alternate tracker</div><div class="card-sub">Which betters have their alternate active right now</div></div></div>
-        <div id="altTracker" style="padding:4px 0"></div>
+      <div id="picksCardsView"><div class="picks-grid" id="picksGrid"></div></div>
+      <div id="picksStatsView" style="display:none">
+        <div class="stat-row" id="picksSummaryStats" style="margin-bottom:16px"></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div><div class="card-title">Golfer popularity</div><div class="card-sub">How many betters selected each golfer</div></div>
+          </div>
+          <div id="popularityChart" style="padding:8px 4px"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Alternate tracker</div></div></div>
+          <div id="altTracker" style="padding:4px 0"></div>
+        </div>
       </div>
     </div>
+
   </section>
+
+  <!-- FIELD
 
   <!-- FIELD BREAKDOWN -->
   <section class="section" id="sec-field">
@@ -2500,53 +2505,191 @@ function tickPGACountdown() {
   setTimeout(tickPGACountdown, 60000);
 }
 
+// ── PICK SHEET REVEAL GATE ───────────────────────────────────
+const PICKS_REVEAL_TIME = new Date('2026-05-13T17:00:00-07:00');
+
+function checkPickReveal() {
+  const locked = document.getElementById('picksRevealLocked');
+  const open   = document.getElementById('picksRevealOpen');
+  if (!locked || !open) return;
+  if (Date.now() >= PICKS_REVEAL_TIME.getTime()) {
+    locked.style.display = 'none';
+    open.style.display = 'block';
+    renderPicks();
+  } else {
+    tickPickRevealCountdown();
+  }
+}
+
+function tickPickRevealCountdown() {
+  const el = document.getElementById('pickRevealCountdown');
+  if (!el) return;
+  const diff = PICKS_REVEAL_TIME.getTime() - Date.now();
+  if (diff <= 0) { checkPickReveal(); return; }
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor(diff%86400000/3600000);
+  const m = Math.floor(diff%3600000/60000);
+  const s = Math.floor(diff%60000/1000);
+  el.textContent = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
+  setTimeout(tickPickRevealCountdown, 1000);
+}
+
 // ── PICK SUBMISSION ──────────────────────────────────────────
 const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
 const PICKS_OPEN_TIME  = new Date('2026-05-12T07:00:00-07:00');
 const PICKS_CLOSE_TIME = new Date('2026-05-13T17:00:00-07:00');
 
 const PGA_FIELD = [
-  {name:"Scottie Scheffler",owgr:true},{name:"Rory McIlroy",owgr:true},
-  {name:"Xander Schauffele",owgr:true},{name:"Collin Morikawa",owgr:true},
-  {name:"Ludvig Aberg",owgr:true},{name:"Tommy Fleetwood",owgr:true},
-  {name:"Viktor Hovland",owgr:true},{name:"Jon Rahm",owgr:true},
-  {name:"Shane Lowry",owgr:true},{name:"Bryson DeChambeau",owgr:true},
-  {name:"Cameron Young",owgr:false},{name:"Max Homa",owgr:false},
-  {name:"Justin Rose",owgr:false},{name:"Russell Henley",owgr:false},
-  {name:"Sam Burns",owgr:false},{name:"Jake Knapp",owgr:false},
-  {name:"Patrick Cantlay",owgr:false},{name:"Keegan Bradley",owgr:false},
-  {name:"Matt Fitzpatrick",owgr:false},{name:"Jordan Spieth",owgr:false},
-  {name:"Brooks Koepka",owgr:false},{name:"Jason Day",owgr:false},
-  {name:"Adam Scott",owgr:false},{name:"Hideki Matsuyama",owgr:false},
-  {name:"Corey Conners",owgr:false},{name:"Justin Thomas",owgr:false},
-  {name:"Tyrrell Hatton",owgr:false},{name:"Chris Gotterup",owgr:false},
-  {name:"Sepp Straka",owgr:false},{name:"Patrick Reed",owgr:false},
-  {name:"Wyndham Clark",owgr:false},{name:"Harris English",owgr:false},
-  {name:"Akshay Bhatia",owgr:false},{name:"Nick Taylor",owgr:false},
-  {name:"Robert Macintyre",owgr:false},{name:"Tom Kim",owgr:false},
-  {name:"Min Woo Lee",owgr:false},{name:"Sungjae Im",owgr:false},
-  {name:"Eric Cole",owgr:false},{name:"Davis Riley",owgr:false},
-  {name:"Ben Griffin",owgr:false},{name:"Maverick McNealy",owgr:false},
-  {name:"Jacob Bridgeman",owgr:false},{name:"Sahith Theegala",owgr:false},
-  {name:"Alex Noren",owgr:false},{name:"Haotong Li",owgr:false},
-  {name:"Taylor Pendrith",owgr:false},{name:"Tom Hoge",owgr:false},
-  {name:"Gary Woodland",owgr:false},{name:"Cameron Smith",owgr:false},
-].sort((a,b) => a.name.localeCompare(b.name));
-
-let existingPicks = [];
+  // ★ OWGR Top 10 in field (max 2 allowed in main picks)
+  {name:"Scottie Scheffler",         owgr:true,  rank:1},
+  {name:"Rory McIlroy",              owgr:true,  rank:2},
+  {name:"Cameron Young",             owgr:true,  rank:3},
+  {name:"Matt Fitzpatrick",          owgr:true,  rank:4},
+  {name:"Justin Rose",               owgr:true,  rank:5},
+  {name:"Collin Morikawa",           owgr:true,  rank:6},
+  {name:"Tommy Fleetwood",           owgr:true,  rank:7},
+  {name:"Russell Henley",            owgr:true,  rank:8},
+  {name:"Xander Schauffele",         owgr:true,  rank:10},
+  // Full field (sorted by last name)
+  {name:"Ludvig Aberg",              owgr:false, rank:15},
+  {name:"Daniel Berger",             owgr:false, rank:40},
+  {name:"Christiaan Bezuidenhout",   owgr:false, rank:95},
+  {name:"Akshay Bhatia",             owgr:false, rank:24},
+  {name:"Keegan Bradley",            owgr:false, rank:30},
+  {name:"Michael Brennan",           owgr:false, rank:51},
+  {name:"Jacob Bridgeman",           owgr:false, rank:19},
+  {name:"Daniel Brown",              owgr:false, rank:96},
+  {name:"Sam Burns",                 owgr:false, rank:31},
+  {name:"Brian Campbell",            owgr:false, rank:null},
+  {name:"Patrick Cantlay",           owgr:false, rank:33},
+  {name:"Bud Cauley",                owgr:false, rank:65},
+  {name:"Wyndham Clark",             owgr:false, rank:70},
+  {name:"Corey Conners",             owgr:false, rank:49},
+  {name:"Pierceson Coody",           owgr:false, rank:56},
+  {name:"Jason Day",                 owgr:false, rank:38},
+  {name:"Bryson DeChambeau",         owgr:false, rank:29},
+  {name:"Thomas Detry",              owgr:false, rank:63},
+  {name:"Luke Donald",               owgr:false, rank:null},
+  {name:"Jason Dufner",              owgr:false, rank:null},
+  {name:"Nico Echavarria",           owgr:false, rank:44},
+  {name:"Harris English",            owgr:false, rank:22},
+  {name:"Ryan Fox",                  owgr:false, rank:55},
+  {name:"Ryan Gerard",               owgr:false, rank:32},
+  {name:"Chris Gotterup",            owgr:false, rank:11},
+  {name:"Max Greyserman",            owgr:false, rank:68},
+  {name:"Ben Griffin",               owgr:false, rank:14},
+  {name:"Harry Hall",                owgr:false, rank:64},
+  {name:"Brian Harman",              owgr:false, rank:53},
+  {name:"Tyrrell Hatton",            owgr:false, rank:25},
+  {name:"Garrick Higgo",             owgr:false, rank:82},
+  {name:"Daniel Hillier",            owgr:false, rank:92},
+  {name:"Ryo Hisatsune",             owgr:false, rank:58},
+  {name:"Tom Hoge",                  owgr:false, rank:null},
+  {name:"Nicolai Hojgaard",          owgr:false, rank:37},
+  {name:"Rasmus Hojgaard",           owgr:false, rank:61},
+  {name:"Viktor Hovland",            owgr:false, rank:26},
+  {name:"Max Homa",                  owgr:false, rank:null},
+  {name:"Sungjae Im",                owgr:false, rank:77},
+  {name:"Casey Jarvis",              owgr:false, rank:72},
+  {name:"Stephan Jaeger",            owgr:false, rank:98},
+  {name:"Dustin Johnson",            owgr:false, rank:null},
+  {name:"John Keefer",               owgr:false, rank:71},
+  {name:"Tom Kim",                   owgr:false, rank:null},
+  {name:"Si Woo Kim",                owgr:false, rank:20},
+  {name:"Michael Kim",               owgr:false, rank:41},
+  {name:"Kurt Kitayama",             owgr:false, rank:34},
+  {name:"Jake Knapp",                owgr:false, rank:36},
+  {name:"Brooks Koepka",             owgr:false, rank:null},
+  {name:"Min Woo Lee",               owgr:false, rank:27},
+  {name:"David Lipsky",              owgr:false, rank:91},
+  {name:"Haotong Li",                owgr:false, rank:79},
+  {name:"Shane Lowry",               owgr:false, rank:35},
+  {name:"Robert MacIntyre",          owgr:false, rank:12},
+  {name:"Hideki Matsuyama",          owgr:false, rank:16},
+  {name:"Matt McCarty",              owgr:false, rank:45},
+  {name:"Denny McCarthy",            owgr:false, rank:94},
+  {name:"Tom McKibbin",              owgr:false, rank:100},
+  {name:"Maverick McNealy",          owgr:false, rank:28},
+  {name:"Alex Noren",                owgr:false, rank:18},
+  {name:"Andrew Novak",              owgr:false, rank:54},
+  {name:"Marco Penge",               owgr:false, rank:39},
+  {name:"Taylor Pendrith",           owgr:false, rank:83},
+  {name:"Patrick Reed",              owgr:false, rank:23},
+  {name:"Rasmus Neergaard-Petersen", owgr:false, rank:76},
+  {name:"Aldrich Potgieter",         owgr:false, rank:74},
+  {name:"J.T. Poston",               owgr:false, rank:80},
+  {name:"David Puig",                owgr:false, rank:59},
+  {name:"Aaron Rai",                 owgr:false, rank:42},
+  {name:"Jon Rahm",                  owgr:false, rank:21},
+  {name:"Kristoffer Reitan",         owgr:false, rank:48},
+  {name:"Patrick Rodgers",           owgr:false, rank:73},
+  {name:"Adrien Saddier",            owgr:false, rank:99},
+  {name:"Jayden Schaper",            owgr:false, rank:66},
+  {name:"Matti Schmid",              owgr:false, rank:93},
+  {name:"Adam Scott",                owgr:false, rank:43},
+  {name:"Alex Smalley",              owgr:false, rank:87},
+  {name:"Elvis Smylie",              owgr:false, rank:89},
+  {name:"Jordan Smith",              owgr:false, rank:67},
+  {name:"Austin Smotherman",         owgr:false, rank:88},
+  {name:"Cameron Smith",             owgr:false, rank:null},
+  {name:"Jordan Spieth",             owgr:false, rank:50},
+  {name:"J.J. Spaun",               owgr:false, rank:9},
+  {name:"Samuel Stevens",            owgr:false, rank:46},
+  {name:"Sepp Straka",               owgr:false, rank:13},
+  {name:"Nick Taylor",               owgr:false, rank:60},
+  {name:"Sahith Theegala",           owgr:false, rank:75},
+  {name:"Justin Thomas",             owgr:false, rank:17},
+  {name:"Michael Thorbjornsen",      owgr:false, rank:62},
+  {name:"Sami Valimaki",             owgr:false, rank:57},
+  {name:"Matt Wallace",              owgr:false, rank:69},
+  {name:"Gary Woodland",             owgr:false, rank:47},
+  {name:"Rickie Fowler",             owgr:false, rank:52},
+  {name:"Lucas Glover",              owgr:false, rank:90},
+  {name:"Max McGreevy",              owgr:false, rank:78},
+  {name:"Richard Hoey",              owgr:false, rank:81},
+  {name:"John Parry",                owgr:false, rank:85},
+  {name:"Andrew Putnam",             owgr:false, rank:84},
+  {name:"Ricky Castillo",            owgr:false, rank:86},
+].sort((a,b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
 
 function initPickForm() {
   ['pick1','pick2','pick3','pick4'].forEach((id,i) => {
     const sel = document.getElementById(id);
     if (!sel) return;
     sel.innerHTML = `<option value="">${i===3 ? '— Alternate —' : `— Pick ${i+1} —`}</option>`;
-    PGA_FIELD.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.name;
-      opt.textContent = p.owgr ? `★ ${p.name}` : p.name;
-      opt.dataset.owgr = p.owgr ? '1' : '0';
-      sel.appendChild(opt);
-    });
+    // Group: OWGR top 10 first, then rest
+    const top10 = PGA_FIELD.filter(p => p.owgr);
+    const rest  = PGA_FIELD.filter(p => !p.owgr);
+    if (i < 3) {
+      const grp1 = document.createElement('optgroup');
+      grp1.label = '★ OWGR Top 10';
+      top10.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = `#${p.rank} ${p.name}`;
+        opt.dataset.owgr = '1';
+        grp1.appendChild(opt);
+      });
+      sel.appendChild(grp1);
+      const grp2 = document.createElement('optgroup');
+      grp2.label = 'Full Field';
+      rest.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name;
+        opt.dataset.owgr = '0';
+        grp2.appendChild(opt);
+      });
+      sel.appendChild(grp2);
+    } else {
+      PGA_FIELD.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.owgr ? `★ ${p.name}` : p.name;
+        opt.dataset.owgr = p.owgr ? '1' : '0';
+        sel.appendChild(opt);
+      });
+    }
   });
 }
 
@@ -2577,7 +2720,8 @@ function tickLockedCountdown() {
   const el = document.getElementById('lockedCountdown');
   if (!el) return;
   const diff = PICKS_OPEN_TIME.getTime() - Date.now();
-  if (diff <= 0) { checkPicksLock(); return; }
+  if (diff <= 0) { checkPicksLock();
+checkPickReveal(); return; }
   const d = Math.floor(diff/86400000);
   const h = Math.floor(diff%86400000/3600000);
   const m = Math.floor(diff%3600000/60000);
@@ -2703,6 +2847,7 @@ function showPickSuccess(payload) {
 loadWinProbHistory();
 tickPGACountdown();
 checkPicksLock();
+checkPickReveal();
 seedFinalScores();
 renderAll();
 restoreActiveTab();
