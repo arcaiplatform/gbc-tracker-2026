@@ -2267,7 +2267,7 @@ function renderField() {
   document.getElementById("fieldStats").innerHTML = `
     <div class="stat-card"><div class="stat-label">Field size</div><div class="stat-value">${PGA_FIELD.length}</div><div class="stat-sub">${fieldFilter === 'picked' ? 'showing picked only' : 'confirmed starters'}</div></div>
     <div class="stat-card"><div class="stat-label">OWGR #1</div><div class="stat-value" style="font-size:14px">Scheffler</div><div class="stat-sub">World #1 · defending champ</div></div>
-    <div class="stat-card"><div class="stat-label">Top 10 in field</div><div class="stat-value">9</div><div class="stat-sub">OWGR Top 10 · Spaun not entered</div></div>
+    <div class="stat-card"><div class="stat-label">Top 10 in field</div><div class="stat-value">10</div><div class="stat-sub">Full OWGR Top 10 playing</div></div>
     <div class="stat-card"><div class="stat-label">Win odds source</div><div class="stat-value" style="font-size:13px">${hasDG ? 'DataGolf Live' : 'OWGR Rank'}</div><div class="stat-sub">${hasDG ? 'Live tournament data' : 'Pre-tournament · updates at R1'}</div></div>`;
 
   const tbody = document.getElementById("fieldBody");
@@ -2551,7 +2551,7 @@ function tickPickRevealCountdown() {
 }
 
 // ── PICK SUBMISSION ──────────────────────────────────────────
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQmZlJXDCLRRtCYbUpGNIu93AO5ks1Lrp7mlDH99k3doHMi2_Vee0t4uMr2vnfi1Vnjg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhK8CxGg0Tpj_XFsYWWwqxvLMYK3Fn4v6iyLv9GUW5pF8yJHduNOGcRk0WeDPQJbnsLw/exec';
 const PICKS_OPEN_TIME  = new Date('2026-05-12T07:00:00-07:00');
 const PICKS_CLOSE_TIME = new Date('2026-05-13T17:00:00-07:00');
 
@@ -2614,7 +2614,7 @@ const PGA_FIELD = [
   {name:"Si Woo Kim",                owgr:false, rank:20},
   {name:"Michael Kim",               owgr:false, rank:41},
   {name:"Kurt Kitayama",             owgr:false, rank:34},
-  {name:"Jake Knapp",                owgr:false, rank:36},
+  {name:"Tom Hoge",                  owgr:false, rank:null},
   {name:"Brooks Koepka",             owgr:false, rank:null},
   {name:"Min Woo Lee",               owgr:false, rank:27},
   {name:"David Lipsky",              owgr:false, rank:91},
@@ -2649,7 +2649,7 @@ const PGA_FIELD = [
   {name:"Austin Smotherman",         owgr:false, rank:88},
   {name:"Cameron Smith",             owgr:false, rank:null},
   {name:"Jordan Spieth",             owgr:false, rank:50},
-  {name:"J.J. Spaun",               owgr:false, rank:9},
+  {name:"J.J. Spaun",               owgr:true,  rank:8},
   {name:"Samuel Stevens",            owgr:false, rank:46},
   {name:"Sepp Straka",               owgr:false, rank:13},
   {name:"Nick Taylor",               owgr:false, rank:60},
