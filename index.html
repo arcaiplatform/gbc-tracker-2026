@@ -285,10 +285,9 @@
         <thead>
           <tr>
             <th style="width:36px">#</th>
-            <th>Better</th>
-            <th>Picks</th>
-            <th class="num" style="width:80px">Thru</th>
+            <th>Better &amp; Picks</th>
             <th class="num" style="width:70px">Score</th>
+            <th class="num" style="width:90px">Thru</th>
             <th class="num" style="width:70px">Win %</th>
           </tr>
         </thead>
@@ -738,28 +737,28 @@
 // ============================================================
 const BETTERS = [
   { name: "Jordan Jones",          short: "Jordan Jones",       gbc: false, paid: false, picks: ["Rory McIlroy","Xander Schauffele","Bryson DeChambeau","Tommy Fleetwood"] },
-  { name: "Scott Stevens",         short: "Scott Stevens",      gbc: true,  paid: false, picks: ["Cameron Young","Jon Rahm","Scottie Scheffler","Ludvig Aberg"] },
+  { name: "Scott Stevens",         short: "Scott Stevens",      gbc: true,  paid: true,  picks: ["Cameron Young","Jon Rahm","Scottie Scheffler","Ludvig Aberg"] },
   { name: "Mike Carpenter",        short: "Mike Carpenter",     gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Jon Rahm","Patrick Reed"] },
-  { name: "Joe Caselle",           short: "Joe Caselle",        gbc: true,  paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Ludvig Aberg","Bryson DeChambeau"] },
+  { name: "Joe Caselle",           short: "Joe Caselle",        gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Ludvig Aberg","Bryson DeChambeau"] },
   { name: "Anthony Fassari",       short: "Anthony Fassari",    gbc: true,  paid: false, picks: ["Cameron Young","Justin Rose","Xander Schauffele","Jon Rahm"] },
-  { name: "Brian McCarthy",        short: "Brian McCarthy",     gbc: true,  paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
-  { name: "Tom Van Ormer",         short: "Tom Van Ormer",      gbc: true,  paid: false, picks: ["Cameron Young","Scottie Scheffler","Jordan Spieth","Xander Schauffele"] },
-  { name: "Jason Henderson",       short: "Jason Henderson",    gbc: false, paid: false, picks: ["Scottie Scheffler","Tommy Fleetwood","Hideki Matsuyama","Ludvig Aberg"] },
-  { name: "Doug Colliau",          short: "Doug Colliau",       gbc: true,  paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Rickie Fowler","Ludvig Aberg"] },
+  { name: "Brian McCarthy",        short: "Brian McCarthy",     gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
+  { name: "Tom Van Ormer",         short: "Tom Van Ormer",      gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Jordan Spieth","Xander Schauffele"] },
+  { name: "Jason Henderson",       short: "Jason Henderson",    gbc: false, paid: true,  picks: ["Scottie Scheffler","Tommy Fleetwood","Hideki Matsuyama","Ludvig Aberg"] },
+  { name: "Doug Colliau",          short: "Doug Colliau",       gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Rickie Fowler","Ludvig Aberg"] },
   { name: "Matt Mingrone",         short: "Matt Mingrone",      gbc: true,  paid: false, picks: ["Scottie Scheffler","Cameron Young","Ludvig Aberg","Rickie Fowler"] },
   { name: "Christian Fassari",     short: "Christian Fassari",  gbc: true,  paid: false, picks: ["Cameron Young","Matt Fitzpatrick","Xander Schauffele","Viktor Hovland"] },
-  { name: "Joseph Pehanick",       short: "J.J. Pehanick",      gbc: true,  paid: false, picks: ["Scottie Scheffler","Cameron Young","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Geoff White",           short: "Geoff White",        gbc: true,  paid: false, picks: ["Cameron Young","Chris Gotterup","Joe Highsmith","Bryson DeChambeau"] },
+  { name: "Joseph Pehanick",       short: "J.J. Pehanick",      gbc: true,  paid: true,  picks: ["Scottie Scheffler","Cameron Young","Xander Schauffele","Ludvig Aberg"] },
+  { name: "Geoff White",           short: "Geoff White",        gbc: true,  paid: true,  picks: ["Cameron Young","Chris Gotterup","Joe Highsmith","Bryson DeChambeau"] },
   { name: "Kevin Shinar",          short: "Kevin Shinar",       gbc: true,  paid: false, picks: ["Matt Fitzpatrick","Scottie Scheffler","Tyrrell Hatton","Justin Thomas"] },
-  { name: "Greg Hawley",           short: "Greg Hawley",        gbc: false, paid: false, picks: ["Scottie Scheffler","Cameron Young","Justin Thomas","Xander Schauffele"] },
+  { name: "Greg Hawley",           short: "Greg Hawley",        gbc: false, paid: true,  picks: ["Scottie Scheffler","Cameron Young","Justin Thomas","Xander Schauffele"] },
   { name: "Rod Walters",           short: "Rod Walters",        gbc: true,  paid: false, picks: ["Cameron Young","Scottie Scheffler","Jon Rahm","Rickie Fowler"] },
-  { name: "Jim Stankiewicz",       short: "Jim Stankiewicz",    gbc: true,  paid: false, picks: ["Scottie Scheffler","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
+  { name: "Jim Stankiewicz",       short: "Jim Stankiewicz",    gbc: true,  paid: true,  picks: ["Scottie Scheffler","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
   { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",    gbc: true,  paid: false, picks: ["Scottie Scheffler","Patrick Cantlay","Rory McIlroy","Patrick Reed"] },
-  { name: "Tom Counts",            short: "Tom Counts",         gbc: true,  paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Xander Schauffele","Sepp Straka"] },
-  { name: "George Pehanick",       short: "George Pehanick",    gbc: true,  paid: false, picks: ["Cameron Young","Scottie Scheffler","Xander Schauffele","Harris English"] },
+  { name: "Tom Counts",            short: "Tom Counts",         gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Xander Schauffele","Sepp Straka"] },
+  { name: "George Pehanick",       short: "George Pehanick",    gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Xander Schauffele","Harris English"] },
 ];
 
-// Name normalization — ESPN uses different casings
+// Name normalization — DataGolf uses different casings and "Last, First" format
 const NAME_MAP = {
   "rory mcilroy": "Rory McIlroy",
   "scottie scheffler": "Scottie Scheffler",
@@ -1017,7 +1016,7 @@ function seedFinalScores() {
 }
 
 // ============================================================
-// ESPN API — multi-proxy fallback chain
+// DataGolf API — routed through Cloudflare Worker proxy
 // ============================================================
 const WORKER_URL = "https://gbc-espn-proxy.jpehanick.workers.dev";
 const DG_LIVE_URL = "https://feeds.datagolf.com/preds/in-play?tour=pga&dead_heat=no&odds_format=percent&key=e37ccc106060200fec040a5afdf1";
@@ -1127,7 +1126,7 @@ async function loadScores() {
     console.error(err);
     if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     document.getElementById("statusBar").className = "status-bar error-bar";
-    document.getElementById("statusText").textContent = "⚠ Could not reach ESPN live data";
+    document.getElementById("statusText").textContent = "⚠ Could not reach DataGolf live data";
     document.getElementById("statusSub").textContent = firstLoad ? "Could not load scores. Try refreshing." : "Showing last known scores. Will retry automatically.";
     document.getElementById("lastUpdated").textContent = "Failed — retrying in 60s";
     if (firstLoad) { firstLoad = false; seedFinalScores(); renderAll(); }
