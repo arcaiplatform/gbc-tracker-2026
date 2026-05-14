@@ -2112,12 +2112,18 @@ function renderLeaderboard() {
     });
   }, 50); // slight delay so DOM is ready
 
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("lbTable").style.display = "table";
-  document.getElementById("statPlayers").textContent = BETTERS.length;
-  document.getElementById("statGBC").textContent = BETTERS.filter(b => b.gbc).length;
-  document.getElementById("statPool").textContent = "$" + (BETTERS.length * 200).toLocaleString();
-  document.getElementById("statPoolSub").textContent = BETTERS.length + " entries × $200";
+  const loadingEl = document.getElementById("loading");
+  if (loadingEl) loadingEl.style.display = "none";
+  const lbTableEl = document.getElementById("lbTable");
+  if (lbTableEl) lbTableEl.style.display = "table";
+  const sp = document.getElementById("statPlayers");
+  if (sp) sp.textContent = BETTERS.length;
+  const sgEl = document.getElementById("statGBC");
+  if (sgEl) sgEl.textContent = BETTERS.filter(b => b.gbc).length;
+  const spool = document.getElementById("statPool");
+  if (spool) spool.textContent = "$" + (BETTERS.length * 200).toLocaleString();
+  const spoolSub = document.getElementById("statPoolSub");
+  if (spoolSub) spoolSub.textContent = BETTERS.length + " entries × $200";
 }
 
 // ============================================================
