@@ -1172,7 +1172,9 @@ function parseESPN(json) {
         const toPar = parseInt(p.current_score, 10) || 0;
         const thru = p.thru === 18 ? 18 : (parseInt(p.thru, 10) || null);
         const pos = String(p.current_pos || '');
-        const isMC = pos === 'MC' || pos === 'CUT' || pos === 'WD' || pos === 'DQ' || p.make_cut === 0;
+        // MC ONLY if position explicitly says so. make_cut is a probability (0-1), not a flag.
+        // Cuts don't happen until after R2, so pre-R3 we cannot have any MCs.
+        const isMC = pos === 'MC' || pos === 'CUT' || pos === 'WD' || pos === 'DQ';
         DG_DATA[name.toLowerCase()] = { win: p.win||0, top5: p.top_5||0, top10: p.top_10||0, makeCut: p.make_cut||0, today: p.today||null };
         golferScores[name.toLowerCase()] = { name, toPar, thru, pos, isMC, status: '', _pgaLive: true };
         if (rawName.toLowerCase() !== name.toLowerCase())
@@ -1184,22 +1186,9 @@ function parseESPN(json) {
       document.getElementById("statusSub").textContent = `Round ${round} · ${players.length} golfers · DataGolf Live`;
       document.getElementById("statusBar").className = "status-bar";
 
-      // Manual MC overrides — keeping for R3/R4 safety until DataGolf confirms
-      const CONFIRMED_MC = [
-        "Bryson DeChambeau",
-        "Akshay Bhatia",
-        "Robert Macintyre",
-      ];
-      CONFIRMED_MC.forEach(n => {
-        const name = normName(n);
-        const key = name.toLowerCase();
-        if (golferScores[key]) {
-          golferScores[key].isMC = true;
-          golferScores[key].pos = 'MC';
-        } else {
-          golferScores[key] = { name, toPar: 5, thru: 18, pos: 'MC', isMC: true, status: '' };
-        }
-      });
+      // Note: Masters-era CONFIRMED_MC overrides removed.
+      // The PGA Championship cut happens after R2 (Friday May 15 evening).
+      // DataGolf will set current_pos="MC" automatically when cuts are official.
       return;
     }
 
@@ -1346,11 +1335,12 @@ function calcBetter(better) {
     : usedGolfers.reduce((sum, g) => sum + (g.toPar || 0), 0);
 
   const thruVals = usedGolfers.map(g => {
-    if (g.isMC) return 18;
+    if (g.isMC) return 36; // MC = 2 rounds played
     return (g.thru !== null && g.thru !== undefined) ? g.thru : 0;
   });
   const holesPlayed = thruVals.reduce((a, b) => a + b, 0);
-  const thruInfo = holesPlayed > 0 ? `${holesPlayed}/54` : "–";
+  // 3 picks × 4 rounds × 18 holes = 216 total possible. Display "X/216" or simplified "X/72" per-pick avg
+  const thruInfo = holesPlayed > 0 ? `${holesPlayed}/216` : "–";
 
   return { totalScore, twoMC, gbcSub, golferData, usedGolfers, thruInfo };
 }
@@ -2003,7 +1993,7 @@ function renderLeaderboard() {
         ${thruInfo !== "–" ? `
           <div style="font-weight:600;margin-bottom:3px">${thruInfo}</div>
           <div style="background:var(--border);border-radius:3px;height:4px;width:60px;margin-left:auto">
-            <div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((parseInt(thruInfo)||0)/54*100)}%"></div>
+            <div style="background:var(--green);height:4px;border-radius:3px;width:${Math.round((parseInt(thruInfo)||0)/216*100)}%"></div>
           </div>` : "–"}
       </td>
       <td class="num" style="min-width:70px" id="wp_${betterKey}">–</td>`;
