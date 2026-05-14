@@ -1408,9 +1408,17 @@ function snapshotBetterWinProbs(winCounts, N) {
 
 function snapshotWinProbs() {
   const now = Date.now();
+  // Only snapshot golfers actually in the PGA Championship field
+  const pgaFieldSet = new Set(
+    (typeof PGA_FIELD !== 'undefined' ? PGA_FIELD : [])
+      .map(p => normName(p.name).toLowerCase())
+  );
   Object.entries(DG_DATA).forEach(([key, dg]) => {
     if (!dg.win || dg.win === 0) return;
     const name = golferScores[key]?.name || key;
+    const nameKey = normName(name).toLowerCase();
+    // Skip golfers not in this tournament's field (prevents stale data leakage)
+    if (pgaFieldSet.size > 0 && !pgaFieldSet.has(nameKey)) return;
     if (!WIN_PROB_HISTORY[name]) WIN_PROB_HISTORY[name] = [];
     WIN_PROB_HISTORY[name].push({ t: now, w: dg.win });
     if (WIN_PROB_HISTORY[name].length > 300) WIN_PROB_HISTORY[name].shift();
@@ -1434,21 +1442,43 @@ function saveWinProbHistory() {
 
 function loadWinProbHistory() {
   try {
-    // One-time cleanup of old Masters keys
+    // Cleanup of old Masters keys
     if (localStorage.getItem('gbc_golfer_history')) {
       localStorage.removeItem('gbc_golfer_history');
       localStorage.removeItem('gbc_better_history');
       console.log('Cleared Masters win prob history from localStorage');
     }
+
+    // Sanity check: if the PGA history contains anyone NOT in the PGA field
+    // (i.e. stale Masters data leaked in), wipe and start fresh
     const g = localStorage.getItem(LS_GOLFER_KEY);
-    const b = localStorage.getItem(LS_BETTER_KEY);
     if (g) {
-      const parsed = JSON.parse(g);
-      Object.entries(parsed).forEach(([k,v]) => {
-        parsed[k] = v.filter(d => d.w <= 1.0 && d.w >= 0);
-      });
-      Object.assign(WIN_PROB_HISTORY, parsed);
+      try {
+        const parsed = JSON.parse(g);
+        const pgaFieldNames = new Set(
+          (typeof PGA_FIELD !== 'undefined' ? PGA_FIELD : [])
+            .map(p => normName(p.name).toLowerCase())
+        );
+        const hasStaleData = Object.keys(parsed).some(k => {
+          const nameKey = normName(k).toLowerCase();
+          return pgaFieldNames.size > 0 && !pgaFieldNames.has(nameKey);
+        });
+        if (hasStaleData) {
+          localStorage.removeItem(LS_GOLFER_KEY);
+          localStorage.removeItem(LS_BETTER_KEY);
+          console.log('Cleared stale win prob history (non-PGA golfers detected)');
+          return;
+        }
+        Object.entries(parsed).forEach(([k,v]) => {
+          parsed[k] = v.filter(d => d.w <= 1.0 && d.w >= 0);
+        });
+        Object.assign(WIN_PROB_HISTORY, parsed);
+      } catch(e) {
+        localStorage.removeItem(LS_GOLFER_KEY);
+        localStorage.removeItem(LS_BETTER_KEY);
+      }
     }
+    const b = localStorage.getItem(LS_BETTER_KEY);
     if (b) {
       const parsed = JSON.parse(b);
       Object.entries(parsed).forEach(([k,v]) => {
