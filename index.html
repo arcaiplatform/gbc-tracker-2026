@@ -1080,13 +1080,14 @@ async function loadScores() {
       }
     } catch (e) { console.log("In-play fetch failed:", e.message); }
 
-    // Fall back to pre-tournament
+    // Fall back to pre-tournament (returns baseline array, not data)
     try {
       const res = await fetch(WORKER_URL + "?src=pretournament&t=" + Date.now(), { cache: "no-cache" });
       const json = await res.json();
-      if (json.data && Array.isArray(json.data) && json.data[0]?.player_name) {
+      const arr = json.baseline || json.data;
+      if (arr && Array.isArray(arr) && arr[0]?.player_name) {
         console.log("DataGolf pre-tournament returned data");
-        return { json, source: "pre-tournament" };
+        return { json: { data: arr }, source: "pre-tournament" };
       }
     } catch (e) { console.log("Pre-tournament fetch failed:", e.message); }
 
