@@ -1974,12 +1974,56 @@ function renderLeaderboard() {
   });
 
   // ── Monte Carlo pool win probability ──────────────────────────
-  // Uses realistic Augusta volatility: ~3-4 strokes std dev per round remaining
-  // Weighted toward DataGolf top5 probability for more meaningful spread
+  // Pre-tournament: derive better win% directly from DataGolf top_5 probabilities
+  // (no current scores to simulate yet). Live tournament: full Monte Carlo.
   setTimeout(() => {
     const N = 8000;
     const wins = {};
     BETTERS.forEach(b => wins[b.name] = 0);
+
+    // Detect if tournament is live (any golfer has a non-zero score or thru > 0)
+    const isLive = Object.values(golferScores).some(g =>
+      (g.toPar !== 0 && g.toPar !== null) || (g.thru !== null && g.thru > 0)
+    );
+
+    if (!isLive) {
+      // Pre-tournament fallback: better win% = 1 - product(1 - top5 of each pick)
+      // This is "probability at least one of your golfers finishes top 5"
+      // Then normalize across the pool so it sums to ~100%
+      const rawProbs = {};
+      let totalRaw = 0;
+      BETTERS.forEach(b => {
+        const picks = (b.picks || []).slice(0, 3);
+        let combinedTop5 = 0;
+        if (picks.length > 0) {
+          // Combined probability at least one picks finishes top 5
+          combinedTop5 = 1 - picks.reduce((acc, p) => {
+            const top5 = DG_DATA[normName(p).toLowerCase()]?.top5 || 0;
+            return acc * (1 - top5);
+          }, 1);
+        }
+        rawProbs[b.name] = combinedTop5;
+        totalRaw += combinedTop5;
+      });
+      // Normalize so all probs sum to 1 (relative pool win odds)
+      BETTERS.forEach(b => {
+        const normProb = totalRaw > 0 ? rawProbs[b.name] / totalRaw : 1 / BETTERS.length;
+        wins[b.name] = Math.round(normProb * N);
+      });
+      // Skip the sim, jump straight to rendering
+      snapshotBetterWinProbs(wins, N);
+      BETTERS.forEach(b => {
+        const prob = wins[b.name] / N;
+        const key = b.name.replace(/[^a-z0-9]/gi,'_');
+        const el = document.getElementById('wp_' + key);
+        if (!el) return;
+        el.innerHTML = prob < 0.01 ? `<span style="color:var(--text-muted)">&lt;1%</span>`
+          : prob >= 0.15 ? `<span style="color:#c8a84b;font-weight:700">${Math.round(prob*100)}%</span>`
+          : prob >= 0.08 ? `<span style="color:#0f2540;font-weight:700">${Math.round(prob*100)}%</span>`
+          : `<span style="color:#0f2540">${Math.round(prob*100)}%</span>`;
+      });
+      return;
+    }
 
     // Detect rounds remaining from live data
     const currentRound = parseInt(document.getElementById('roundInfo')?.textContent?.match(/Round (\d)/)?.[1] || '3', 10);
