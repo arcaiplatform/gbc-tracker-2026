@@ -266,6 +266,36 @@
       <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">Picks close Wednesday May 13 · 5:00 PM PST</div>
     </div>
 
+    <!-- BETTERS LEADERBOARD -->
+    <div id="bettersLeaderboard" class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Betters Leaderboard</div>
+          <div class="card-sub" id="lbSubtitle">Locked picks — live scoring begins Thursday at R1 tee-off</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="lbSort" onchange="renderLeaderboard()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:white">
+            <option value="score">Sort: Total Score</option>
+            <option value="name">Sort: Name</option>
+            <option value="winpct">Sort: Win % (sim)</option>
+          </select>
+        </div>
+      </div>
+      <table id="leaderboardTable" style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Better</th>
+            <th>Picks</th>
+            <th class="num" style="width:80px">Thru</th>
+            <th class="num" style="width:70px">Score</th>
+            <th class="num" style="width:70px">Win %</th>
+          </tr>
+        </thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+    </div>
+
     <!-- OPEN — shown after May 12 7AM PST -->
     <div id="picksOpen" style="display:none">
 
@@ -1027,23 +1057,61 @@ async function loadScores() {
   if (btn) { btn.textContent = "↻ Loading..."; btn.disabled = true; }
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
-  // Always fetch DataGolf for win probabilities (separate from score source)
-  fetch(WORKER_URL + "?src=datagolf&t=" + Date.now(), { cache: "no-cache" })
-    .then(r => r.json())
-    .then(json => {
-      if (json.data && Array.isArray(json.data) && json.data[0]?.player_name) {
-        Object.keys(DG_DATA).forEach(k => delete DG_DATA[k]);
-        json.data.forEach(p => {
-          const raw = p.player_name || '';
-          const parts = raw.split(',');
-          const name = parts.length === 2 ? `${parts[1].trim()} ${parts[0].trim()}` : raw.trim();
-          DG_DATA[name.toLowerCase()] = { win: p.win||0, top5: p.top_5||0, top10: p.top_10||0, makeCut: p.make_cut||0, today: p.today||null };
+  // Try in-play first (active tournament), fall back to pre-tournament if empty
+  // Pre-tournament is used Monday-Thursday morning before R1 starts
+  async function fetchDataGolf() {
+    // Try in-play first
+    try {
+      const res = await fetch(WORKER_URL + "?src=datagolf&t=" + Date.now(), { cache: "no-cache" });
+      const json = await res.json();
+      if (json.data && Array.isArray(json.data) && json.data[0]?.player_name && json.data.length > 20) {
+        // Check this is PGA data (Aronimink field), not stale Masters
+        // Look for known PGA field players
+        const knownPGA = ['scheffler', 'spaun', 'reed', 'fowler'];
+        const hasPGAPlayer = json.data.some(p => {
+          const lowerName = (p.player_name || '').toLowerCase();
+          return knownPGA.some(k => lowerName.includes(k));
         });
-        console.log("DG_DATA populated:", Object.keys(DG_DATA).length, "players", Object.keys(DG_DATA).slice(0,3));
-        setTimeout(renderField, 100); // slight delay so DOM is ready
+        if (hasPGAPlayer) {
+          console.log("DataGolf in-play returned PGA data");
+          return { json, source: "in-play" };
+        }
+        console.log("DataGolf in-play returned non-PGA data (stale Masters?), trying pre-tournament");
       }
-    })
-    .catch(e => console.log("DG separate fetch failed:", e.message));
+    } catch (e) { console.log("In-play fetch failed:", e.message); }
+
+    // Fall back to pre-tournament
+    try {
+      const res = await fetch(WORKER_URL + "?src=pretournament&t=" + Date.now(), { cache: "no-cache" });
+      const json = await res.json();
+      if (json.data && Array.isArray(json.data) && json.data[0]?.player_name) {
+        console.log("DataGolf pre-tournament returned data");
+        return { json, source: "pre-tournament" };
+      }
+    } catch (e) { console.log("Pre-tournament fetch failed:", e.message); }
+
+    return null;
+  }
+
+  fetchDataGolf().then(result => {
+    if (!result) return;
+    const { json, source } = result;
+    Object.keys(DG_DATA).forEach(k => delete DG_DATA[k]);
+    json.data.forEach(p => {
+      const raw = p.player_name || '';
+      const parts = raw.split(',');
+      const name = parts.length === 2 ? `${parts[1].trim()} ${parts[0].trim()}` : raw.trim();
+      DG_DATA[name.toLowerCase()] = {
+        win: p.win || 0,
+        top5: p.top_5 || 0,
+        top10: p.top_10 || 0,
+        makeCut: p.make_cut || 0,
+        today: p.today || null
+      };
+    });
+    console.log(`DG_DATA populated from ${source}:`, Object.keys(DG_DATA).length, "players");
+    setTimeout(() => { renderField(); renderLeaderboard(); }, 100);
+  });
 
   try {
     const data = await fetchWithProxy(WORKER_URL);
@@ -1334,21 +1402,30 @@ function snapshotWinProbs() {
   renderWinProbChart();
 }
 
-// localStorage persistence
+// localStorage persistence — versioned per tournament
+const TOURNAMENT_KEY = "pga_2026";
+const LS_GOLFER_KEY = `gbc_golfer_history_${TOURNAMENT_KEY}`;
+const LS_BETTER_KEY = `gbc_better_history_${TOURNAMENT_KEY}`;
+
 function saveWinProbHistory() {
   try {
-    localStorage.setItem('gbc_golfer_history', JSON.stringify(WIN_PROB_HISTORY));
-    localStorage.setItem('gbc_better_history', JSON.stringify(BETTER_WIN_HISTORY));
+    localStorage.setItem(LS_GOLFER_KEY, JSON.stringify(WIN_PROB_HISTORY));
+    localStorage.setItem(LS_BETTER_KEY, JSON.stringify(BETTER_WIN_HISTORY));
   } catch(e) {}
 }
 
 function loadWinProbHistory() {
   try {
-    const g = localStorage.getItem('gbc_golfer_history');
-    const b = localStorage.getItem('gbc_better_history');
+    // One-time cleanup of old Masters keys
+    if (localStorage.getItem('gbc_golfer_history')) {
+      localStorage.removeItem('gbc_golfer_history');
+      localStorage.removeItem('gbc_better_history');
+      console.log('Cleared Masters win prob history from localStorage');
+    }
+    const g = localStorage.getItem(LS_GOLFER_KEY);
+    const b = localStorage.getItem(LS_BETTER_KEY);
     if (g) {
       const parsed = JSON.parse(g);
-      // Clean any values over 1.0
       Object.entries(parsed).forEach(([k,v]) => {
         parsed[k] = v.filter(d => d.w <= 1.0 && d.w >= 0);
       });
@@ -1356,7 +1433,6 @@ function loadWinProbHistory() {
     }
     if (b) {
       const parsed = JSON.parse(b);
-      // Clean bad better data — hard cap 75% for 27-person pool
       Object.entries(parsed).forEach(([k,v]) => {
         parsed[k] = v.filter(d => d.w <= 0.75 && d.w >= 0);
       });
@@ -1790,6 +1866,10 @@ function renderLeaderboard() {
   }
 
   const tbody = document.getElementById("lbBody");
+  if (!tbody) {
+    console.log('renderLeaderboard: lbBody not in DOM — skipping');
+    return;
+  }
   tbody.innerHTML = "";
   let rank = 1;
 
@@ -2264,13 +2344,15 @@ function renderField() {
   const consensusArr = allRows.filter(r => r.pickedEntry && r.dg.win);
   const consensus = consensusArr.length ? consensusArr.reduce((s,r) => s + (r.dg.win||0), 0) / consensusArr.length : 0;
 
-  document.getElementById("fieldStats").innerHTML = `
+  const fieldStatsEl = document.getElementById("fieldStats");
+  if (fieldStatsEl) fieldStatsEl.innerHTML = `
     <div class="stat-card"><div class="stat-label">Field size</div><div class="stat-value">${PGA_FIELD.length}</div><div class="stat-sub">${fieldFilter === 'picked' ? 'showing picked only' : 'confirmed starters'}</div></div>
     <div class="stat-card"><div class="stat-label">OWGR #1</div><div class="stat-value" style="font-size:14px">Scheffler</div><div class="stat-sub">World #1 · defending champ</div></div>
     <div class="stat-card"><div class="stat-label">Top 10 in field</div><div class="stat-value">10</div><div class="stat-sub">Full OWGR Top 10 playing</div></div>
     <div class="stat-card"><div class="stat-label">Win odds source</div><div class="stat-value" style="font-size:13px">${hasDG ? 'DataGolf Live' : 'OWGR Rank'}</div><div class="stat-sub">${hasDG ? 'Live tournament data' : 'Pre-tournament · updates at R1'}</div></div>`;
 
   const tbody = document.getElementById("fieldBody");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   allRows.forEach((row, i) => {
