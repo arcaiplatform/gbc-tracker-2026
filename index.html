@@ -1801,8 +1801,15 @@ function tiebreak(tiedBetters) {
 }
 
 function checkTournamentComplete() {
+  // HARD GATE: tournament cannot be complete before Sunday May 17 evening
+  // R4 final groups typically finish around 7-9 PM ET (= 23:00-01:00 UTC Sunday/Monday)
+  const TOURNAMENT_EARLIEST_FINISH = new Date('2026-05-17T22:00:00Z').getTime();
+  if (Date.now() < TOURNAMENT_EARLIEST_FINISH) return false;
+
   const activeGolfers = Object.values(golferScores).filter(g => !g.isMC);
-  if (activeGolfers.length === 0) return false;
+  // Require a meaningful field size — PGA has ~70 post-cut golfers.
+  // If we have <30 active golfers in our data, something is wrong (data not loaded yet)
+  if (activeGolfers.length < 30) return false;
   // Only complete when ALL active golfers have finished R4 (thru=18)
   const allDone = activeGolfers.every(g => g.thru === 18);
   if (!allDone) return false;
