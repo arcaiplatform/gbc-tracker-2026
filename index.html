@@ -1023,10 +1023,14 @@ const DG_LIVE_URL = "https://feeds.datagolf.com/preds/in-play?tour=pga&dead_heat
 const MASTERS_URL = "https://www.masters.com/en_US/scores/feeds/2026/scores.json";
 
 async function fetchWithProxy(url) {
-  const targets = [
-    WORKER_URL + "?src=datagolf&t=" + Date.now(),
-    WORKER_URL + "?src=masters&t=" + Date.now(),
-  ];
+  // PGA Championship 2026 — DataGolf sources only. No Masters fallback (would pull stale Masters data).
+  // Pre-tournament endpoint is used until R1 tees off Thursday May 14 7AM ET.
+  const TOURNAMENT_START_FOR_FETCH = new Date('2026-05-14T11:00:00Z').getTime();
+  const isTournamentLive = Date.now() >= TOURNAMENT_START_FOR_FETCH;
+
+  const targets = isTournamentLive
+    ? [WORKER_URL + "?src=datagolf&t=" + Date.now()]
+    : [WORKER_URL + "?src=pretournament&t=" + Date.now()];
 
   for (const target of targets) {
     try {
@@ -1037,16 +1041,19 @@ async function fetchWithProxy(url) {
       if (!res.ok) { console.log("Worker non-ok:", res.status, target); continue; }
       const json = await res.json();
       // Validate we got something useful
-      const isDG = json.data && Array.isArray(json.data) && json.data[0]?.player_name;
-      const isMasters = json.data && typeof json.data === 'object' && !Array.isArray(json.data);
-      if (isDG || isMasters) {
-        console.log("Got data from:", target, isDG ? "DataGolf" : "Masters.com");
+      // In-play returns {data: [...]}, pre-tournament returns {baseline: [...]}
+      const arr = json.data || json.baseline;
+      const isUsable = Array.isArray(arr) && arr.length > 0 && arr[0]?.player_name;
+      if (isUsable) {
+        console.log("Got data from:", target, "—", arr.length, "players");
+        // Normalize: pretournament returns 'baseline', flip to 'data' so parseESPN handles both
+        if (!json.data && json.baseline) json.data = json.baseline;
         return json;
       }
       console.log("Response had no usable data from:", target);
     } catch (e) { console.log("Fetch error:", e.message, target); }
   }
-  throw new Error("All sources failed");
+  throw new Error("All DataGolf sources failed");
 }
 
 let firstLoad = true;
