@@ -2508,9 +2508,16 @@ function renderGBCSeason() {
     const mastersByName = {};
     data.rows.forEach(r => { mastersByName[r.name] = r.masters; });
 
+    // Alias map: BETTERS name → GBC_DATA name (handles name variations between datasets)
+    const GBC_NAME_ALIASES = {
+      "Joseph Pehanick": "Joseph Jamie Pehanick",
+      "Jim Stankiewicz": "Jim Stankiwicz",
+    };
+
     // Build live GBC roster from BETTERS (filter to GBC members)
     const gbcRoster = BETTERS.filter(b => b.gbc).map(b => {
-      const masters = mastersByName[b.name] ?? null;
+      const gbcName = GBC_NAME_ALIASES[b.name] || b.name;
+      const masters = mastersByName[gbcName] ?? null;
 
       // PGA score: DQ if no picks submitted, else use live calcBetter total
       let pga = null;
