@@ -738,7 +738,7 @@
 const BETTERS = [
   { name: "Jordan Jones",          short: "Jordan Jones",       gbc: false, paid: true,  picks: ["Rory McIlroy","Xander Schauffele","Bryson DeChambeau","Tommy Fleetwood"] },
   { name: "Scott Stevens",         short: "Scott Stevens",      gbc: true,  paid: true,  picks: ["Cameron Young","Jon Rahm","Scottie Scheffler","Ludvig Aberg"] },
-  { name: "Mike Carpenter",        short: "Mike Carpenter",     gbc: false, paid: false, picks: ["Scottie Scheffler","Rory McIlroy","Jon Rahm","Patrick Reed"] },
+  { name: "Mike Carpenter",        short: "Mike Carpenter",     gbc: false, paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Jon Rahm","Patrick Reed"] },
   { name: "Joe Caselle",           short: "Joe Caselle",        gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Ludvig Aberg","Bryson DeChambeau"] },
   { name: "Anthony Fassari",       short: "Anthony Fassari",    gbc: true,  paid: true,  picks: ["Cameron Young","Justin Rose","Xander Schauffele","Jon Rahm"] },
   { name: "Brian McCarthy",        short: "Brian McCarthy",     gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
@@ -751,11 +751,12 @@ const BETTERS = [
   { name: "Geoff White",           short: "Geoff White",        gbc: true,  paid: true,  picks: ["Cameron Young","Chris Gotterup","Joe Highsmith","Bryson DeChambeau"] },
   { name: "Kevin Shinar",          short: "Kevin Shinar",       gbc: true,  paid: true,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Tyrrell Hatton","Justin Thomas"] },
   { name: "Greg Hawley",           short: "Greg Hawley",        gbc: false, paid: true,  picks: ["Scottie Scheffler","Cameron Young","Justin Thomas","Xander Schauffele"] },
-  { name: "Rod Walters",           short: "Rod Walters",        gbc: true,  paid: false, picks: ["Cameron Young","Scottie Scheffler","Jon Rahm","Rickie Fowler"] },
+  { name: "Rod Walters",           short: "Rod Walters",        gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Jon Rahm","Rickie Fowler"] },
   { name: "Jim Stankiewicz",       short: "Jim Stankiewicz",    gbc: true,  paid: true,  picks: ["Scottie Scheffler","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",    gbc: true,  paid: true,  picks: ["Scottie Scheffler","Patrick Cantlay","Rory McIlroy","Patrick Reed"] },
+  { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",    gbc: false, paid: true,  picks: ["Scottie Scheffler","Patrick Cantlay","Rory McIlroy","Patrick Reed"] },
   { name: "Tom Counts",            short: "Tom Counts",         gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Xander Schauffele","Sepp Straka"] },
   { name: "George Pehanick",       short: "George Pehanick",    gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Xander Schauffele","Harris English"] },
+  { name: "David Andres Morgan",   short: "David A. Morgan",    gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
 ];
 
 // Name normalization — DataGolf uses different casings and "Last, First" format
@@ -1961,7 +1962,8 @@ function renderLeaderboard() {
           ${better.name}
           ${getMedalForBetter(better.name)}
           ${better.gbc ? '<span class="gbc-tag">GBC</span>' : ''}
-          ${!better.paid ? '<span style="font-size:10px;font-weight:700;background:var(--red-light);color:var(--red);padding:1px 6px;border-radius:3px;border:1px solid #fca5a5">NOT PAID</span>' : ''}
+          ${better.noPicksThisEvent ? '<span style="font-size:10px;font-weight:600;background:#f3f4f6;color:#6b7280;padding:1px 6px;border-radius:3px;border:1px solid #e5e7eb">No Picks</span>' : ''}
+          ${!better.paid && !better.noPicksThisEvent ? '<span style="font-size:10px;font-weight:700;background:var(--red-light);color:var(--red);padding:1px 6px;border-radius:3px;border:1px solid #fca5a5">NOT PAID</span>' : ''}
         </div>
         ${pillsHTML}
       </td>
@@ -2307,7 +2309,14 @@ function renderPicks() {
 
   let sorted = [...BETTERS];
   if (sortVal === 'name') sorted.sort((a,b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
-  else if (sortVal === 'score') sorted.sort((a,b) => { const ca=calcBetter(a), cb=calcBetter(b); if(ca.twoMC && !a.gbc) return 1; if(cb.twoMC && !b.gbc) return -1; return (ca.totalScore??99)-(cb.totalScore??99); });
+  else if (sortVal === 'score') sorted.sort((a,b) => {
+    if (a.noPicksThisEvent && !b.noPicksThisEvent) return 1;
+    if (b.noPicksThisEvent && !a.noPicksThisEvent) return -1;
+    const ca=calcBetter(a), cb=calcBetter(b);
+    if(ca.twoMC && !a.gbc) return 1;
+    if(cb.twoMC && !b.gbc) return -1;
+    return (ca.totalScore??99)-(cb.totalScore??99);
+  });
   else if (sortVal === 'winpct') sorted.sort((a,b) => { const wa=WIN_PROB_HISTORY[a.name]?.at(-1)?.w||0, wb=WIN_PROB_HISTORY[b.name]?.at(-1)?.w||0; return wb-wa; });
 
   // Apply search filter
@@ -2470,17 +2479,17 @@ function renderGBCSeason() {
   if (yr === 2026) {
     const gbcBetters = BETTERS.filter(b => b.gbc);
     const gbcPool = gbcBetters.length * 200;
-    // PGA countdown
-    const pgaOpen = new Date('2026-05-12T07:00:00-07:00').getTime();
-    const msLeft = pgaOpen - Date.now();
+    // US Open countdown (next major)
+    const usOpenDate = new Date('2026-06-11T11:00:00Z').getTime();
+    const msLeft = usOpenDate - Date.now();
     const dLeft = Math.floor(msLeft / 86400000);
     const hLeft = Math.floor((msLeft % 86400000) / 3600000);
-    const cdStr = msLeft > 0 ? `${dLeft}d ${hLeft}h` : 'Open now';
+    const cdStr = msLeft > 0 ? `${dLeft}d ${hLeft}h` : 'In Progress';
     statRow.innerHTML = `
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">Masters complete</div></div>
-      <div class="stat-card"><div class="stat-label">PGA Picks Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">May 12 · 7 AM PST</div></div>`;
+      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">PGA Championship in play</div></div>
+      <div class="stat-card"><div class="stat-label">US Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">Oakmont · Jun 11–14</div></div>`;
   } else {
     const [w1,w2,w3] = data.winners;
     statRow.innerHTML = `
@@ -2494,13 +2503,63 @@ function renderGBCSeason() {
   tbody.innerHTML = "";
 
   if (yr === 2026) {
-    data.rows.forEach((row, i) => {
+    // Live mode: compute PGA score from BETTERS array, total = masters + pga
+    // Map GBC_DATA rows by name to pull masters baseline scores
+    const mastersByName = {};
+    data.rows.forEach(r => { mastersByName[r.name] = r.masters; });
+
+    // Build live GBC roster from BETTERS (filter to GBC members)
+    const gbcRoster = BETTERS.filter(b => b.gbc).map(b => {
+      const masters = mastersByName[b.name] ?? null;
+
+      // PGA score: DQ if no picks submitted, else use live calcBetter total
+      let pga = null;
+      let pgaDQ = false;
+      if (b.noPicksThisEvent) {
+        pgaDQ = true; // Sent dead last regardless of other scoring
+      } else {
+        const calc = calcBetter(b);
+        // Only show PGA score once tournament has live data (not pre-tournament)
+        const hasLiveData = Object.keys(golferScores).length > 0;
+        if (hasLiveData && calc.totalScore !== null && calc.totalScore !== undefined) {
+          pga = calc.totalScore;
+        }
+      }
+
+      const total = pgaDQ
+        ? (masters !== null ? masters : 0)   // skipper: total = masters only, no PGA points
+        : (masters !== null && pga !== null
+            ? masters + pga
+            : (masters !== null ? masters : null));
+
+      return { name: b.name, masters, pga, pgaDQ, total };
+    });
+
+    // Sort: DQ'd skippers always at the bottom; rest by total ascending (lowest wins)
+    gbcRoster.sort((a, b) => {
+      if (a.pgaDQ && !b.pgaDQ) return 1;
+      if (b.pgaDQ && !a.pgaDQ) return -1;
+      return (a.total ?? 99) - (b.total ?? 99);
+    });
+
+    gbcRoster.forEach((row, i) => {
       const tr = document.createElement("tr");
       const mDisp = row.masters !== null ? fmtScore(row.masters) : '–';
       const mCls = row.masters !== null ? scoreCls(row.masters) : 'even';
       const tDisp = row.total !== null ? fmtScore(row.total) : '–';
       const tCls = row.total !== null ? scoreCls(row.total) : 'even';
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
+      const pgaDisp = row.pgaDQ
+        ? '<span style="color:var(--text-muted);font-size:11px">No picks submitted</span>'
+        : (row.pga !== null
+            ? `<span class="${scoreCls(row.pga)}">${fmtScore(row.pga)}</span>`
+            : '<span style="color:var(--text-muted)">In Play</span>');
+
+      if (row.pgaDQ) {
+        tr.style.color = 'var(--text-muted)';
+        tr.style.opacity = '0.6';
+      }
+
+      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num">${pgaDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
       tbody.appendChild(tr);
     });
   } else {
