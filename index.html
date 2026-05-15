@@ -1028,30 +1028,36 @@ async function fetchWithProxy(url) {
   const TOURNAMENT_START_FOR_FETCH = new Date('2026-05-14T11:00:00Z').getTime();
   const isTournamentLive = Date.now() >= TOURNAMENT_START_FOR_FETCH;
 
-  const targets = isTournamentLive
-    ? [WORKER_URL + "?src=datagolf&t=" + Date.now()]
-    : [WORKER_URL + "?src=pretournament&t=" + Date.now()];
+  // Try both in case primary fails — but prefer the right one for current state
+  const primary = isTournamentLive ? "datagolf" : "pretournament";
+  const secondary = isTournamentLive ? "pretournament" : "datagolf";
+  const targets = [
+    WORKER_URL + "?src=" + primary + "&t=" + Date.now(),
+    WORKER_URL + "?src=" + secondary + "&t=" + Date.now(),
+  ];
+
+  // Promise.race timeout — avoids AbortController cross-context bugs
+  const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout " + ms + "ms")), ms));
 
   for (const target of targets) {
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 8000);
-      const res = await fetch(target, { cache: "no-cache", signal: controller.signal });
-      clearTimeout(timer);
+      const res = await Promise.race([
+        fetch(target, { cache: "no-cache" }),
+        timeout(10000)
+      ]);
       if (!res.ok) { console.log("Worker non-ok:", res.status, target); continue; }
       const json = await res.json();
-      // Validate we got something useful
-      // In-play returns {data: [...]}, pre-tournament returns {baseline: [...]}
       const arr = json.data || json.baseline;
       const isUsable = Array.isArray(arr) && arr.length > 0 && arr[0]?.player_name;
       if (isUsable) {
         console.log("Got data from:", target, "—", arr.length, "players");
-        // Normalize: pretournament returns 'baseline', flip to 'data' so parseESPN handles both
         if (!json.data && json.baseline) json.data = json.baseline;
         return json;
       }
       console.log("Response had no usable data from:", target);
-    } catch (e) { console.log("Fetch error:", e.message, target); }
+    } catch (e) {
+      console.log("Fetch error:", e.message, "—", target);
+    }
   }
   throw new Error("All DataGolf sources failed");
 }
@@ -1063,44 +1069,15 @@ async function loadScores() {
   if (btn) { btn.textContent = "↻ Loading..."; btn.disabled = true; }
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
-  // Try in-play first (active tournament), fall back to pre-tournament if empty
-  // Pre-tournament is used Monday-Thursday morning before R1 starts
-  async function fetchDataGolf() {
-    // Check if tournament has started — if not, skip in-play (it returns stale prior event data)
-    const TOURNAMENT_START_DG = new Date('2026-05-14T11:00:00Z').getTime();
-    const tournamentStarted = Date.now() >= TOURNAMENT_START_DG;
+  // Tournament start: Thursday May 14, 7 AM ET (= 11:00 UTC)
+  const TOURNAMENT_START = new Date('2026-05-14T11:00:00Z').getTime();
+  const isTournamentLive = Date.now() >= TOURNAMENT_START;
 
-    // Try in-play only if tournament has actually started
-    if (tournamentStarted) {
-      try {
-        const res = await fetch(WORKER_URL + "?src=datagolf&t=" + Date.now(), { cache: "no-cache" });
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data[0]?.player_name && json.data.length > 20) {
-          console.log("DataGolf in-play returned data");
-          return { json, source: "in-play" };
-        }
-      } catch (e) { console.log("In-play fetch failed:", e.message); }
-    } else {
-      console.log("Pre-tournament window — skipping in-play, using pre-tournament endpoint");
-    }
+  try {
+    // Single fetch — fetchWithProxy handles pre-tournament vs in-play based on time
+    const json = await fetchWithProxy(WORKER_URL);
 
-    // Fall back to pre-tournament (returns baseline array, not data)
-    try {
-      const res = await fetch(WORKER_URL + "?src=pretournament&t=" + Date.now(), { cache: "no-cache" });
-      const json = await res.json();
-      const arr = json.baseline || json.data;
-      if (arr && Array.isArray(arr) && arr[0]?.player_name) {
-        console.log("DataGolf pre-tournament returned data");
-        return { json: { data: arr }, source: "pre-tournament" };
-      }
-    } catch (e) { console.log("Pre-tournament fetch failed:", e.message); }
-
-    return null;
-  }
-
-  fetchDataGolf().then(result => {
-    if (!result) return;
-    const { json, source } = result;
+    // Populate DG_DATA (used by Field Breakdown, Win Prob tracker)
     Object.keys(DG_DATA).forEach(k => delete DG_DATA[k]);
     json.data.forEach(p => {
       const raw = p.player_name || '';
@@ -1114,41 +1091,27 @@ async function loadScores() {
         today: p.today || null
       };
     });
-    console.log(`DG_DATA populated from ${source}:`, Object.keys(DG_DATA).length, "players");
-    setTimeout(() => { renderField(); renderLeaderboard(); }, 100);
-  });
+    console.log("DG_DATA populated:", Object.keys(DG_DATA).length, "players");
 
-  // Only parse live scores once the PGA Championship has actually started
-  // R1 tee-off: Thursday May 14, 7 AM ET (= 11:00 UTC)
-  const TOURNAMENT_START = new Date('2026-05-14T11:00:00Z').getTime();
-  const isTournamentLive = Date.now() >= TOURNAMENT_START;
+    // Only parse into live golferScores if tournament is actually live
+    if (isTournamentLive) {
+      parseESPN(json);
+    } else {
+      // Pre-tournament: don't populate golferScores (no live scores exist yet)
+      golferScores = {};
+      document.getElementById("statusText").textContent = "PGA Championship 2026 — Picks Locked";
+      document.getElementById("statusSub").textContent = "Aronimink GC · Newtown Square, PA · May 14–17 · Live scoring begins Thursday";
+      document.getElementById("statusBar").className = "status-bar";
+    }
 
-  if (!isTournamentLive) {
-    // Pre-tournament: don't fetch in-play scores (avoids contaminating golferScores
-    // with stale data from the previous tournament). Just refresh DataGolf and re-render.
-    golferScores = {}; // ensure no stale live scores leak in
     lastFetch = new Date();
     document.getElementById("lastUpdated").textContent = "Updated " + lastFetch.toLocaleTimeString();
     if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     firstLoad = false;
-    document.getElementById("statusText").textContent = "PGA Championship 2026 — Picks Locked";
-    document.getElementById("statusSub").textContent = "Aronimink GC · Newtown Square, PA · May 14–17 · Live scoring begins Thursday";
-    document.getElementById("statusBar").className = "status-bar";
-    setTimeout(() => renderAll(), 200); // let DG fetch complete first
-    return;
-  }
-
-  try {
-    const data = await fetchWithProxy(WORKER_URL);
-    parseESPN(data);
-    lastFetch = new Date();
-    document.getElementById("lastUpdated").textContent = "Updated " + lastFetch.toLocaleTimeString();
-    if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
-    firstLoad = false;
-    snapshotWinProbs();
+    if (isTournamentLive) snapshotWinProbs();
     renderAll();
   } catch (err) {
-    console.error(err);
+    console.error("loadScores error:", err);
     if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     document.getElementById("statusBar").className = "status-bar error-bar";
     document.getElementById("statusText").textContent = "⚠ Could not reach DataGolf live data";
