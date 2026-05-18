@@ -547,6 +547,15 @@
 
   <!-- RECORDS -->
   <section class="section" id="sec-records">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:var(--navy)">📖 GBC Record Book</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Historical major champions and season-long winners</div>
+      </div>
+      <button onclick="exportCurrentEvent()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+        ⬇ Export Current Event (PGA 2026)
+      </button>
+    </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px" id="recordsGrid">
 
       <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
@@ -2622,6 +2631,229 @@ function renderRecords() {
       entries.map(e => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${e.n}${e.s ? `<span style="font-size:11px;color:var(--text-muted);margin-left:6px">${e.s}</span>` : ''}</span><span style="font-weight:600;color:var(--text-muted)">${e.y}</span></div>`).join('');
     grid.appendChild(card);
   });
+}
+
+// ============================================================
+// EXPORT CURRENT EVENT — generates a downloadable record book file
+// with current standings, scores, and picks for the PGA Championship
+// ============================================================
+function exportCurrentEvent() {
+  const now = new Date();
+  const ts = now.toLocaleString();
+
+  // Build sorted standings (same logic as leaderboard)
+  const rows = BETTERS.map(b => {
+    const calc = calcBetter(b);
+    return { better: b, ...calc };
+  });
+  rows.sort((a, b) => {
+    if (a.better.noPicksThisEvent && !b.better.noPicksThisEvent) return 1;
+    if (b.better.noPicksThisEvent && !a.better.noPicksThisEvent) return -1;
+    const aOut = a.twoMC && !a.better.gbc;
+    const bOut = b.twoMC && !b.better.gbc;
+    if (aOut && !bOut) return 1;
+    if (!aOut && bOut) return -1;
+    if (a.totalScore === null && b.totalScore !== null) return 1;
+    if (a.totalScore !== null && b.totalScore === null) return -1;
+    return (a.totalScore ?? 0) - (b.totalScore ?? 0);
+  });
+
+  // Detect ties at each position
+  let rank = 1;
+  const ranked = rows.map((row, i) => {
+    if (i > 0) {
+      const prev = rows[i-1];
+      const sameScore = prev.totalScore === row.totalScore && !row.better.noPicksThisEvent && !prev.better.noPicksThisEvent;
+      if (!sameScore) rank = i + 1;
+    }
+    return { ...row, rank };
+  });
+
+  // Detect tied groups for the T notation
+  const scoreCounts = {};
+  ranked.forEach(r => {
+    if (r.better.noPicksThisEvent) return;
+    const key = r.totalScore;
+    scoreCounts[key] = (scoreCounts[key] || 0) + 1;
+  });
+
+  // Tournament status
+  const isLive = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
+  const status = isLive ? "LIVE — In Progress" : "Pre-Tournament";
+
+  // Build HTML
+  let html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>GBC 2026 PGA Championship — Record Book Export</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 900px; margin: 40px auto; padding: 0 24px; color: #1f2937; line-height: 1.5; }
+  h1 { color: #0f2540; border-bottom: 3px solid #c8a84b; padding-bottom: 12px; margin-bottom: 4px; }
+  h2 { color: #0f2540; margin-top: 36px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+  h3 { color: #374151; margin-top: 24px; font-size: 16px; }
+  .meta { color: #6b7280; font-size: 13px; margin-bottom: 28px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; font-family: -apple-system, sans-serif; font-size: 13px; }
+  th { background: #0f2540; color: white; text-align: left; padding: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+  tr:nth-child(even) td { background: #f9fafb; }
+  .rank { width: 50px; font-weight: 700; color: #0f2540; }
+  .name { font-weight: 600; }
+  .score-neg { color: #166534; font-weight: 700; }
+  .score-pos { color: #991b1b; font-weight: 700; }
+  .score-even { color: #6b7280; }
+  .mc { background: #fee2e2; color: #991b1b; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; }
+  .alt { background: #dcfce7; color: #166534; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; }
+  .nopicks { color: #9ca3af; font-style: italic; }
+  .gbc { background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; }
+  .pick-list { font-size: 12px; color: #4b5563; margin-top: 2px; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; text-align: center; }
+  @media print { body { margin: 20px; } h1 { page-break-before: avoid; } table { page-break-inside: auto; } tr { page-break-inside: avoid; } }
+</style>
+</head><body>
+
+<h1>2026 PGA Championship</h1>
+<div class="meta">Aronimink Golf Club · Newtown Square, PA · May 14–17, 2026<br>
+Status: <strong>${status}</strong> · Exported ${ts}<br>
+Pool: 20 entries × $200 = <strong>$4,000</strong></div>
+
+<h2>Final Standings</h2>
+<table>
+<thead><tr><th class="rank">#</th><th>Better</th><th class="num">Score</th><th class="num">Thru</th><th>Notes</th></tr></thead>
+<tbody>`;
+
+  ranked.forEach(r => {
+    const b = r.better;
+    const tied = scoreCounts[r.totalScore] > 1 && !b.noPicksThisEvent;
+    const rankStr = b.noPicksThisEvent ? '—' : (tied ? `T${r.rank}` : r.rank);
+    const scoreStr = b.noPicksThisEvent
+      ? '<span class="nopicks">No picks</span>'
+      : r.totalScore === null
+        ? '–'
+        : `<span class="${r.totalScore < 0 ? 'score-neg' : r.totalScore > 0 ? 'score-pos' : 'score-even'}">${fmtScore(r.totalScore)}</span>`;
+    const thruStr = b.noPicksThisEvent ? '—' : (r.thruInfo || '–');
+    const notes = [];
+    if (b.gbc) notes.push('<span class="gbc">GBC</span>');
+    if (r.twoMC && !b.gbc) notes.push('<span class="mc">2+ MC · ELIM</span>');
+    if (r.twoMC && b.gbc) notes.push('<span class="mc">2+ MC · GBC Sub</span>');
+    if (b.noPicksThisEvent) notes.push('<span class="nopicks">Did not submit picks</span>');
+
+    html += `<tr>
+      <td class="rank">${rankStr}</td>
+      <td class="name">${b.name}${b.noPicksThisEvent ? '' : `<div class="pick-list">${formatPicksForExport(r)}</div>`}</td>
+      <td class="num">${scoreStr}</td>
+      <td class="num">${thruStr}</td>
+      <td>${notes.join(' ')}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+
+  // GBC Season standings
+  html += `<h2>GBC 2026 Season Standings</h2>
+<table>
+<thead><tr><th class="rank">#</th><th>Better</th><th class="num">Total</th><th class="num">Masters</th><th class="num">PGA</th><th class="num">US Open</th><th class="num">The Open</th></tr></thead>
+<tbody>`;
+
+  // Build GBC roster same way renderGBCSeason does
+  const GBC_NAME_ALIASES = { "Joseph Pehanick": "Joseph Jamie Pehanick", "Jim Stankiewicz": "Jim Stankiwicz" };
+  const mastersData = GBC_DATA[2026]?.rows || [];
+  const mastersByName = {};
+  mastersData.forEach(r => { mastersByName[r.name] = r.masters; });
+  const gbcRoster = BETTERS.filter(b => b.gbc).map(b => {
+    const gbcName = GBC_NAME_ALIASES[b.name] || b.name;
+    const masters = mastersByName[gbcName] ?? null;
+    let pga = null;
+    let pgaDQ = false;
+    if (b.noPicksThisEvent) {
+      pgaDQ = true;
+    } else {
+      const calc = calcBetter(b);
+      if (isLive && calc.totalScore !== null && calc.totalScore !== undefined) pga = calc.totalScore;
+    }
+    const total = pgaDQ ? (masters ?? 0) : (masters !== null && pga !== null ? masters + pga : (masters ?? null));
+    return { name: b.name, masters, pga, pgaDQ, total };
+  });
+  gbcRoster.sort((a, b) => {
+    if (a.pgaDQ && !b.pgaDQ) return 1;
+    if (b.pgaDQ && !a.pgaDQ) return -1;
+    return (a.total ?? 99) - (b.total ?? 99);
+  });
+
+  const scoreFmt = (s) => {
+    if (s === null || s === undefined) return '<span class="score-even">–</span>';
+    return `<span class="${s < 0 ? 'score-neg' : s > 0 ? 'score-pos' : 'score-even'}">${fmtScore(s)}</span>`;
+  };
+
+  gbcRoster.forEach((r, i) => {
+    html += `<tr>
+      <td class="rank">${i+1}</td>
+      <td class="name">${r.name}</td>
+      <td class="num">${scoreFmt(r.total)}</td>
+      <td class="num">${scoreFmt(r.masters)}</td>
+      <td class="num">${r.pgaDQ ? '<span class="nopicks">No picks</span>' : scoreFmt(r.pga)}</td>
+      <td class="num score-even">TBD</td>
+      <td class="num score-even">TBD</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+
+  // All Picks reference table
+  html += `<h2>All Picks Submitted</h2>
+<table>
+<thead><tr><th>Better</th><th>Pick 1</th><th>Pick 2</th><th>Pick 3</th><th>Alternate</th></tr></thead>
+<tbody>`;
+
+  BETTERS.filter(b => !b.noPicksThisEvent).forEach(b => {
+    html += `<tr>
+      <td class="name">${b.name}${b.gbc ? ' <span class="gbc">GBC</span>' : ''}</td>
+      <td>${b.picks[0] || '–'}</td>
+      <td>${b.picks[1] || '–'}</td>
+      <td>${b.picks[2] || '–'}</td>
+      <td>${b.picks[3] || '–'}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>
+
+<div class="footer">
+  Golf Betters Cup · 2026 Major Season · arcaiplatform.github.io/gbc-tracker-2026<br>
+  Auto-generated from live DataGolf feed at time of export
+</div>
+
+</body></html>`;
+
+  // Trigger download
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `GBC_2026_PGA_RecordBook_${now.toISOString().slice(0,10)}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Helper: format picks for export with MC tags and ALT IN notation
+function formatPicksForExport(calc) {
+  if (!calc || !calc.golferData) return '';
+  const golfers = calc.golferData.slice(0, 3);
+  const alt = calc.golferData[3];
+  const usedNames = new Set((calc.usedGolfers || []).map(g => g.name));
+
+  const parts = golfers.map(g => {
+    const score = g.isMC ? '<span class="mc">MC</span>' : (g.toPar !== null && g.toPar !== undefined ? fmtScore(g.toPar) : 'E');
+    const dropped = !usedNames.has(g.name);
+    return `${g.name} ${score}${dropped ? ' <small style="color:#9ca3af">(dropped)</small>' : ''}`;
+  });
+
+  if (alt) {
+    const altUsed = usedNames.has(alt.name);
+    const altScore = alt.isMC ? '<span class="mc">MC</span>' : (alt.toPar !== null && alt.toPar !== undefined ? fmtScore(alt.toPar) : 'E');
+    parts.push(`${altUsed ? '<span class="alt">ALT IN</span> ' : 'Alt: '}${alt.name} ${altScore}`);
+  }
+  return parts.join(' · ');
 }
 
 // ============================================================
