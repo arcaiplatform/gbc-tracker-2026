@@ -302,7 +302,7 @@
         <div class="card-header"><div class="card-title">📋 Pick Rules</div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 0 8px">
           <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">3 + 1</span>3 main picks + 1 alternate. Top 3 scores count.</div>
-          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">★ MAX 2</span>Max 2 OWGR Top 10 players in your main picks.</div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">★ MAX 2</span>Max 2 OWGR Top 10 players across all 4 picks (alternate counts).</div>
           <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">ALT</span>If 1 MCs, alternate scores in their place.</div>
           <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text-muted)"><span style="background:var(--navy);color:#c8a84b;border-radius:6px;padding:2px 8px;font-weight:700;font-size:11px;flex-shrink:0;white-space:nowrap">≠</span>Picks 1–3 in exact order cannot duplicate another entry.</div>
         </div>
@@ -351,7 +351,7 @@
         </div>
 
         <div id="owgrTracker" style="display:flex;align-items:center;justify-content:space-between;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:10px 14px;margin-top:4px;font-size:12px">
-          <div style="color:#92400e;font-weight:500">OWGR Top 10 used in main picks (max 2)</div>
+          <div style="color:#92400e;font-weight:500">OWGR Top 10 across all picks (max 2 · incl. alternate)</div>
           <div id="owgrCount" style="font-weight:700;color:#92400e;font-size:15px">0 / 2</div>
         </div>
         <div id="msgError" style="display:none;background:#fee2e2;border:1px solid #fca5a5;border-radius:9px;padding:12px 16px;font-size:13px;color:#991b1b;font-weight:500;margin-top:10px">⚠️ <span id="msgErrorText"></span></div>
@@ -641,9 +641,9 @@
             <span class="sched-status" style="background:#dcfce7;color:#166534">✓ Complete</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Apr 10–13, 2026</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Picks opened</span><span class="sched-row-val">Mon Apr 6 · 7 AM PST</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Picks closed</span><span class="sched-row-val">Wed Apr 8 · 5 PM PST</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#166534">✓ Locked in · 27 betters</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Winner</span><span class="sched-row-val" style="color:#166534">Tom Counts (-30)</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Tournament winner</span><span class="sched-row-val">Rory McIlroy (-12)</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#166534">✓ Complete · 18 betters</span></div>
         </div>
       </div>
     </div>
@@ -656,13 +656,13 @@
           <div class="sched-header">
             <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#1e3a5f"/><rect x="20" y="28" width="8" height="3" fill="#c8a84b"/><rect x="17" y="31" width="14" height="2.5" rx="1" fill="#c8a84b"/><path d="M17 14 Q24 10 31 14 L31 26 Q24 30 17 26 Z" fill="#c8a84b"/><path d="M17 18 Q14 18 14 22 Q14 26 17 26" fill="none" stroke="#c8a84b" stroke-width="1.5"/><path d="M31 18 Q34 18 34 22 Q34 26 31 26" fill="none" stroke="#c8a84b" stroke-width="1.5"/></svg>
             <div style="flex:1;min-width:0"><div class="sched-name">PGA Championship</div><div class="sched-course">Aronimink GC · Newtown Square, PA</div></div>
-            <span class="sched-status" style="background:#fef9c3;color:#854d0e">Next up</span>
+            <span class="sched-status" style="background:#dcfce7;color:#166534">✓ Complete</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">May 14–17, 2026</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Winner</span><span class="sched-row-val" style="color:#166534">Mike Carpenter &amp; Brian McCarthy (-12, T)</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Field winner</span><span class="sched-row-val">Aaron Rai (-9)</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Tournament winner</span><span class="sched-row-val">Aaron Rai (-9)</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#166534">✓ Complete · 20 betters</span></div>
-          <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-pga">–</span></div>
+          
         </div>
       </div>
     </div>
@@ -675,7 +675,7 @@
           <div class="sched-header">
             <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#0a2240"/><rect x="8" y="10" width="32" height="4" fill="#b22234"/><rect x="8" y="18" width="32" height="4" fill="#b22234"/><rect x="8" y="26" width="32" height="4" fill="#b22234"/><rect x="8" y="34" width="32" height="4" fill="#b22234"/><rect x="8" y="10" width="14" height="12" fill="#3c3b6e"/><circle cx="12" cy="14" r="1.2" fill="white"/><circle cx="16" cy="14" r="1.2" fill="white"/><circle cx="20" cy="14" r="1.2" fill="white"/><circle cx="14" cy="17" r="1.2" fill="white"/><circle cx="18" cy="17" r="1.2" fill="white"/></svg>
             <div style="flex:1;min-width:0"><div class="sched-name">US Open</div><div class="sched-course">Shinnecock Hills · Southampton, NY</div></div>
-            <span class="sched-status" style="background:var(--gray-light);color:var(--text-muted)">Upcoming</span>
+            <span class="sched-status" style="background:#fef9c3;color:#854d0e">Next up</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Jun 18–21, 2026</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Tue Jun 16 · 7 AM PST</span></div>
@@ -3033,7 +3033,7 @@ function tickPGACountdown() {
 }
 
 // ── PICK SHEET REVEAL GATE ───────────────────────────────────
-const PICKS_REVEAL_TIME = new Date('2026-05-13T17:00:00-07:00');
+const PICKS_REVEAL_TIME = new Date('2026-06-17T17:00:00-07:00');
 
 function checkPickReveal() {
   const locked = document.getElementById('picksRevealLocked');
@@ -3249,10 +3249,10 @@ function validatePicks() {
   const unique = new Set(all);
   if (unique.size !== 4) return 'All 4 selections must be different golfers.';
 
-  // Max 2 OWGR top 10 in main picks (alt does not count)
+  // Max 2 OWGR top 10 across ALL 4 picks (main + alternate)
   const owgrSet = new Set(PGA_FIELD.filter(p => p.owgr).map(p => p.name));
-  const owgrMainCount = [p1, p2, p3].filter(n => owgrSet.has(n)).length;
-  if (owgrMainCount > 2) return 'Max 2 OWGR Top 10 golfers allowed in your main 3 picks (the ★ players).';
+  const owgrCount = [p1, p2, p3, alt].filter(n => owgrSet.has(n)).length;
+  if (owgrCount > 2) return 'Max 2 OWGR Top 10 golfers allowed across all 4 picks (★ players · alternate counts).';
 
   return null;
 }
@@ -3315,18 +3315,37 @@ async function submitPicks() {
 }
 
 function showPickSuccess(payload) {
+  // Build a short confirmation number from the timestamp (last 8 digits)
+  const ts = new Date(payload.timestamp);
+  const confNum = 'GBC-' + ts.getTime().toString().slice(-8);
+  const submittedDate = ts.toLocaleString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+  });
   document.getElementById('picksOpen').innerHTML = `
-    <div style="text-align:center;background:white;border:1px solid var(--border);border-radius:14px;padding:48px 24px">
-      <div style="font-size:52px;margin-bottom:16px">🏆</div>
-      <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:8px">You're in!</div>
-      <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 US Open</div>
-      <div style="background:#f8f9fa;border-radius:10px;padding:16px;text-align:left;font-size:13px;margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 1</span><strong>${payload.pick1}</strong></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 2</span><strong>${payload.pick2}</strong></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 3</span><strong>${payload.pick3}</strong></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Alternate</span><strong>${payload.alternate}</strong></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0"><span style="color:#6b7280">Submitted by</span><strong>${payload.name}</strong></div>
+    <div style="max-width:520px;margin:0 auto;text-align:center;background:white;border:2px solid var(--gold);border-radius:14px;padding:48px 28px;box-shadow:0 8px 24px rgba(15,37,64,0.12)">
+      <div style="font-size:56px;margin-bottom:12px">🏆</div>
+      <div style="font-family:Georgia,serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:6px">You're in!</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:6px">Picks submitted for the 2026 US Open</div>
+      <div style="display:inline-block;background:var(--navy);color:#c8a84b;font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:6px;margin-bottom:22px">${confNum}</div>
+
+      <div style="background:#f8f9fa;border:1px solid #e5e7eb;border-radius:10px;padding:18px;text-align:left;font-size:13px;margin-bottom:18px">
+        <div style="font-size:11px;font-weight:700;color:var(--navy);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #e5e7eb">Your Picks</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">Pick 1</span><strong>${payload.pick1}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">Pick 2</span><strong>${payload.pick2}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">Pick 3</span><strong>${payload.pick3}</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><span style="color:#6b7280">Alternate</span><strong>${payload.alternate}</strong></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280">
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Submitted by</span><strong style="color:var(--text)">${payload.name}</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Email</span><strong style="color:var(--text)">${payload.email}</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Timestamp</span><strong style="color:var(--text)">${submittedDate}</strong></div>
+        </div>
       </div>
+
+      <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:14px">
+        📸 <strong>Screenshot this confirmation</strong> for your records. Picks reveal Wed Jun 17 at 5 PM PST.
+      </div>
+
       <div style="color:var(--text-muted);font-size:13px">Good luck — may your picks make the cut! ⛳</div>
     </div>`;
 }
