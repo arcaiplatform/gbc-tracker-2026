@@ -210,7 +210,7 @@
       </svg>
       <div>
         <div class="logo-text">Golf Betters Cup</div>
-        <div class="logo-sub">2026 Major Season · PGA Championship Next</div>
+        <div class="logo-sub">2026 Major Season · US Open Next</div>
       </div>
     </div>
     <div class="header-meta">
@@ -241,8 +241,8 @@
 
     <div id="statusBar" class="status-bar">
       <div>
-        <div class="status-text" id="statusText">PGA Championship 2026 — Picks Locked</div>
-        <div class="status-sub" id="statusSub">Aronimink GC · Newtown Square, PA · May 14–17 · Live scoring begins Thursday</div>
+        <div class="status-text" id="statusText">US Open 2026 — Picks Open</div>
+        <div class="status-sub" id="statusSub">Shinnecock Hills GC · Southampton, NY · June 18–21 · Live scoring begins Thursday</div>
       </div>
       <div style="font-size:11px;color:var(--text-muted)" id="roundInfo"></div>
     </div>
@@ -250,8 +250,8 @@
     <div class="stat-row" id="statRow">
       <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value">20</div><div class="stat-sub">Picks locked</div></div>
       <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">$4,000</div><div class="stat-sub">20 entries × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Tournament</div><div class="stat-value" style="font-size:14px">PGA Championship</div><div class="stat-sub">Aronimink · May 14–17</div></div>
-      <div class="stat-card"><div class="stat-label">Round 1 Tees Off</div><div class="stat-value" style="font-size:14px;color:#185fa5" id="r1Countdown">–</div><div class="stat-sub">Thu May 14 · 7 AM ET</div></div>
+      <div class="stat-card"><div class="stat-label">Tournament</div><div class="stat-value" style="font-size:14px">US Open</div><div class="stat-sub">Shinnecock · Jun 18–21</div></div>
+      <div class="stat-card"><div class="stat-label">Round 1 Tees Off</div><div class="stat-value" style="font-size:14px;color:#185fa5" id="r1Countdown">–</div><div class="stat-sub">Thu Jun 18 · 7 AM ET</div></div>
     </div>
 
     <!-- LOCKED — shown before May 12 7AM PST -->
@@ -364,7 +364,7 @@
       <div id="successScreen" style="display:none;text-align:center;background:white;border:1px solid var(--border);border-radius:14px;padding:48px 24px;margin-top:16px">
         <div style="font-size:52px;margin-bottom:16px">🏆</div>
         <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:8px">You're in!</div>
-        <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 PGA Championship</div>
+        <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 US Open</div>
         <div id="picksSummary" style="background:#f8f9fa;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:13px"></div>
         <div style="color:var(--text-muted);font-size:13px">Good luck — may your picks make the cut! ⛳</div>
       </div>
@@ -401,7 +401,7 @@
 
     <div class="card">
       <div class="card-header">
-        <div><div class="card-title">PGA Championship — Golfer Scores</div><div class="card-sub">Live scores from DataGolf · Used to calculate betters' standings</div></div>
+        <div><div class="card-title">US Open — Golfer Scores</div><div class="card-sub">Live scores from DataGolf · Used to calculate betters' standings</div></div>
         <input class="search-input" style="width:200px;flex:none" placeholder="Search golfer..." oninput="filterGolfers(this.value)" />
       </div>
       <table id="golferTable">
@@ -431,7 +431,7 @@
         <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Reveals in</div>
         <div id="pickRevealCountdown" style="font-size:28px;font-weight:700;color:#c8a84b;font-family:Georgia,serif">–</div>
       </div>
-      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">PGA Championship · Aronimink GC · May 14–17, 2026</div>
+      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">US Open · Shinnecock Hills GC · June 18–21, 2026</div>
     </div>
 
     <!-- REVEALED after Wed May 13 5PM PST -->
@@ -439,7 +439,7 @@
       <div class="card" style="margin-bottom:14px">
         <div class="card-header">
           <div>
-            <div class="card-title">Pick Sheet — 2026 PGA Championship</div>
+            <div class="card-title">Pick Sheet — 2026 US Open</div>
             <div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -482,8 +482,8 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">PGA Championship · Field & OWGR Rankings</div>
-          <div class="card-sub">Full 156-player field · Aronimink GC · ★ = OWGR Top 10 · sorted by DataGolf win% when live, OWGR rank pre-tournament</div>
+          <div class="card-title">US Open · Field & OWGR Rankings</div>
+          <div class="card-sub">Full field · Shinnecock Hills · ★ = OWGR Top 10 · sorted by DataGolf win% when live, OWGR rank pre-tournament</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="fieldFilterBtns">
           <button onclick="setFieldFilter('all',this)" class="flt-btn flt-active">Full Field</button>
@@ -526,7 +526,7 @@
 
     <div class="card">
       <div class="card-header">
-        <div class="card-title" id="gbcTableTitle">GBC 2026 Standings — PGA Championship Live</div>
+        <div class="card-title" id="gbcTableTitle">GBC 2026 Standings — US Open Live</div>
       </div>
       <table>
         <thead>
@@ -553,7 +553,7 @@
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Historical major champions and season-long winners</div>
       </div>
       <button onclick="exportCurrentEvent()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-        ⬇ Export Current Event (PGA 2026)
+        ⬇ Export Current Event (US Open 2026)
       </button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px" id="recordsGrid">
@@ -583,7 +583,7 @@
 
       <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
         <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">🏌️ PGA Championship</div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Mike Carpenter &amp; Brian McCarthy <span style="font-size:11px;color:#6b7280">T-1</span></span><span style="font-weight:600;color:#6b7280">2026</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Mike Carpenter &amp; Brian McCarthy <span style="font-size:11px;color:#6b7280">-12 (T)</span></span><span style="font-weight:600;color:#6b7280">2026</span></div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Jason Henderson <span style="font-size:11px;color:#6b7280">-20</span></span><span style="font-weight:600;color:#6b7280">2025</span></div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Doug Colliau <span style="font-size:11px;color:#6b7280">-45</span></span><span style="font-weight:600;color:#6b7280">2024</span></div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joseph J. Pehanick <span style="font-size:11px;color:#6b7280">-16</span></span><span style="font-weight:600;color:#6b7280">2023</span></div>
@@ -659,9 +659,9 @@
             <span class="sched-status" style="background:#fef9c3;color:#854d0e">Next up</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">May 14–17, 2026</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Tue May 12 · 7 AM PST</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Picks close</span><span class="sched-row-val">Wed May 13 · 5 PM PST</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:var(--text-muted)">Not yet open</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Winner</span><span class="sched-row-val" style="color:#166534">Mike Carpenter &amp; Brian McCarthy (-12, T)</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Field winner</span><span class="sched-row-val">Aaron Rai (-9)</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#166534">✓ Complete · 20 betters</span></div>
           <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-pga">–</span></div>
         </div>
       </div>
@@ -680,7 +680,7 @@
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Jun 18–21, 2026</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Mon Jun 15 · 7 AM PST</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks close</span><span class="sched-row-val">Wed Jun 17 · 5 PM PST</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:var(--text-muted)">Not yet open</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#b45309;font-weight:600">⏳ Picks open · Awaiting submissions</span></div>
           <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-uso">–</span></div>
         </div>
       </div>
@@ -743,30 +743,32 @@
 
 <script>
 // ============================================================
-// PLAYER DATA — 2026 PGA CHAMPIONSHIP (FINAL — picks locked May 13, 5PM PST)
+// PLAYER DATA — 2026 US OPEN (picks collected via Google Form)
 // ============================================================
 const BETTERS = [
-  { name: "Jordan Jones",          short: "Jordan Jones",       gbc: false, paid: true,  picks: ["Rory McIlroy","Xander Schauffele","Bryson DeChambeau","Tommy Fleetwood"] },
-  { name: "Scott Stevens",         short: "Scott Stevens",      gbc: true,  paid: true,  picks: ["Cameron Young","Jon Rahm","Scottie Scheffler","Ludvig Aberg"] },
-  { name: "Mike Carpenter",        short: "Mike Carpenter",     gbc: false, paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Jon Rahm","Patrick Reed"] },
-  { name: "Joe Caselle",           short: "Joe Caselle",        gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Ludvig Aberg","Bryson DeChambeau"] },
-  { name: "Anthony Fassari",       short: "Anthony Fassari",    gbc: true,  paid: true,  picks: ["Cameron Young","Justin Rose","Xander Schauffele","Jon Rahm"] },
-  { name: "Brian McCarthy",        short: "Brian McCarthy",     gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Bryson DeChambeau","Jon Rahm"] },
-  { name: "Tom Van Ormer",         short: "Tom Van Ormer",      gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Jordan Spieth","Xander Schauffele"] },
-  { name: "Jason Henderson",       short: "Jason Henderson",    gbc: false, paid: true,  picks: ["Scottie Scheffler","Tommy Fleetwood","Hideki Matsuyama","Ludvig Aberg"] },
-  { name: "Doug Colliau",          short: "Doug Colliau",       gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Rickie Fowler","Ludvig Aberg"] },
-  { name: "Matt Mingrone",         short: "Matt Mingrone",      gbc: true,  paid: true,  picks: ["Scottie Scheffler","Cameron Young","Ludvig Aberg","Rickie Fowler"] },
-  { name: "Christian Fassari",     short: "Christian Fassari",  gbc: true,  paid: true,  picks: ["Cameron Young","Matt Fitzpatrick","Xander Schauffele","Viktor Hovland"] },
-  { name: "Joseph Pehanick",       short: "J.J. Pehanick",      gbc: true,  paid: true,  picks: ["Scottie Scheffler","Cameron Young","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Geoff White",           short: "Geoff White",        gbc: true,  paid: true,  picks: ["Cameron Young","Chris Gotterup","Joe Highsmith","Bryson DeChambeau"] },
-  { name: "Kevin Shinar",          short: "Kevin Shinar",       gbc: true,  paid: true,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Tyrrell Hatton","Justin Thomas"] },
-  { name: "Greg Hawley",           short: "Greg Hawley",        gbc: false, paid: true,  picks: ["Scottie Scheffler","Cameron Young","Justin Thomas","Xander Schauffele"] },
-  { name: "Rod Walters",           short: "Rod Walters",        gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Jon Rahm","Rickie Fowler"] },
-  { name: "Jim Stankiewicz",       short: "Jim Stankiewicz",    gbc: true,  paid: true,  picks: ["Scottie Scheffler","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",    gbc: false, paid: true,  picks: ["Scottie Scheffler","Patrick Cantlay","Rory McIlroy","Patrick Reed"] },
-  { name: "Tom Counts",            short: "Tom Counts",         gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Xander Schauffele","Sepp Straka"] },
-  { name: "George Pehanick",       short: "George Pehanick",    gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Xander Schauffele","Harris English"] },
-  { name: "David Andres Morgan",   short: "David A. Morgan",    gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  // 2026 US Open BETTERS — picks pending until submission window closes
+  // GBC roster locked from start of season: David Andres Morgan removed (forfeited PGA, out of GBC)
+  // David may still play US Open as one-event entry — add him manually if/when he submits
+  { name: "Jordan Jones",          short: "Jordan Jones",       gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Scott Stevens",         short: "Scott Stevens",      gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Mike Carpenter",        short: "Mike Carpenter",     gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Joe Caselle",           short: "Joe Caselle",        gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Anthony Fassari",       short: "Anthony Fassari",    gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Brian McCarthy",        short: "Brian McCarthy",     gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Tom Van Ormer",         short: "Tom Van Ormer",      gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Jason Henderson",       short: "Jason Henderson",    gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Doug Colliau",          short: "Doug Colliau",       gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Matt Mingrone",         short: "Matt Mingrone",      gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Christian Fassari",     short: "Christian Fassari",  gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Joseph Pehanick",       short: "J.J. Pehanick",      gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Geoff White",           short: "Geoff White",        gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Kevin Shinar",          short: "Kevin Shinar",       gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Greg Hawley",           short: "Greg Hawley",        gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Rod Walters",           short: "Rod Walters",        gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Jim Stankiewicz",       short: "Jim Stankiewicz",    gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Joseph M Pehanick",     short: "Joe M. Pehanick",    gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Tom Counts",            short: "Tom Counts",         gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "George Pehanick",       short: "George Pehanick",    gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
 ];
 
 // Name normalization — DataGolf uses different casings and "Last, First" format
@@ -809,29 +811,30 @@ function normName(n) {
 // ============================================================
 const GBC_DATA = {
   2026: {
-    label: "GBC 2026 — PGA Championship Live",
-    sub: "Masters complete · PGA Championship in play · US Open & The Open scores TBD",
+    label: "GBC 2026 — US Open Live",
+    sub: "Masters & PGA Championship complete · US Open in play · The Open TBD",
     winners: ["TBD","TBD","TBD"],
     pool: null,
     live: false,
     liveGBC: true,
     rows: [
-      { name:"Tom Counts",           total:-30, masters:-30, pga:null, usOpen:null, theOpen:null },
-      { name:"Joe Caselle",          total:-28, masters:-28, pga:null, usOpen:null, theOpen:null },
-      { name:"Brian McCarthy",       total:-26, masters:-26, pga:null, usOpen:null, theOpen:null },
-      { name:"Anthony Fassari",      total:-24, masters:-24, pga:null, usOpen:null, theOpen:null },
-      { name:"Joseph Jamie Pehanick",total:-23, masters:-23, pga:null, usOpen:null, theOpen:null },
-      { name:"Scott Stevens",        total:-22, masters:-22, pga:null, usOpen:null, theOpen:null },
-      { name:"David Andres Morgan",  total:-22, masters:-22, pga:null, usOpen:null, theOpen:null },
-      { name:"Doug Colliau",         total:-15, masters:-15, pga:null, usOpen:null, theOpen:null },
-      { name:"Jim Stankiwicz",       total:-14, masters:-14, pga:null, usOpen:null, theOpen:null },
-      { name:"Matt Mingrone",        total:-13, masters:-13, pga:null, usOpen:null, theOpen:null },
-      { name:"Kevin Shinar",         total:-13, masters:-13, pga:null, usOpen:null, theOpen:null },
-      { name:"George Pehanick",      total:-12, masters:-12, pga:null, usOpen:null, theOpen:null },
-      { name:"Tom Van Ormer",        total:-11, masters:-11, pga:null, usOpen:null, theOpen:null },
-      { name:"Geoff White",          total:-10, masters:-10, pga:null, usOpen:null, theOpen:null },
-      { name:"Christian Fassari",    total:-8,  masters:-8,  pga:null, usOpen:null, theOpen:null },
-      { name:"Rod Walters",          total:-6,  masters:-6,  pga:null, usOpen:null, theOpen:null },
+      // Total = Masters + PGA Championship final score
+      // GBC roster: David Andres Morgan removed (forfeited PGA by not submitting picks)
+      { name:"Brian McCarthy",       total:-38, masters:-26, pga:-12, usOpen:null, theOpen:null },
+      { name:"Joe Caselle",          total:-39, masters:-28, pga:-11, usOpen:null, theOpen:null },
+      { name:"Tom Counts",           total:-40, masters:-30, pga:-10, usOpen:null, theOpen:null },
+      { name:"Anthony Fassari",      total:-31, masters:-24, pga:-7,  usOpen:null, theOpen:null },
+      { name:"Joseph Jamie Pehanick",total:-29, masters:-23, pga:-6,  usOpen:null, theOpen:null },
+      { name:"Scott Stevens",        total:-30, masters:-22, pga:-8,  usOpen:null, theOpen:null },
+      { name:"Doug Colliau",         total:-17, masters:-15, pga:-2,  usOpen:null, theOpen:null },
+      { name:"Jim Stankiwicz",       total:-22, masters:-14, pga:-8,  usOpen:null, theOpen:null },
+      { name:"Matt Mingrone",        total:-20, masters:-13, pga:-7,  usOpen:null, theOpen:null },
+      { name:"Kevin Shinar",         total:-22, masters:-13, pga:-9,  usOpen:null, theOpen:null },
+      { name:"George Pehanick",      total:-18, masters:-12, pga:-6,  usOpen:null, theOpen:null },
+      { name:"Tom Van Ormer",        total:-14, masters:-11, pga:-3,  usOpen:null, theOpen:null },
+      { name:"Geoff White",          total:-12, masters:-10, pga:-2,  usOpen:null, theOpen:null },
+      { name:"Christian Fassari",    total:-14, masters:-8,  pga:-6,  usOpen:null, theOpen:null },
+      { name:"Rod Walters",          total:-14, masters:-6,  pga:-8,  usOpen:null, theOpen:null },
     ],
   },
   2025: {
@@ -929,7 +932,7 @@ const RECORDS = {
     {y:2015,n:"George Pehanick",s:""},
   ],
   "PGA Championship": [
-    {y:2026,n:"Mike Carpenter & Brian McCarthy",s:"T-1"},
+    {y:2026,n:"Mike Carpenter & Brian McCarthy",s:"-12 (T)"},
     {y:2025,n:"Jason Henderson",s:"-20"},
     {y:2024,n:"Doug Colliau",s:"-45"},
     {y:2023,n:"Joseph J. Pehanick",s:"-16"},
@@ -1021,10 +1024,50 @@ const FINAL_MASTERS_2026 = {
   "robert macintyre":      { name:"Robert Macintyre",      toPar:99,  thru:18, pos:"MC",  isMC:true  },
 };
 
+// ============================================================
+// FINAL_PGA_2026 — Historical archive of PGA Championship 2026
+// Aronimink GC · May 14-17 · Winner: Aaron Rai (-9)
+// GBC Co-Champions: Mike Carpenter & Brian McCarthy (-12, split 1st+2nd: $1,700 each)
+// Used for record book lookup only — NOT seeded into live golferScores
+// ============================================================
+const FINAL_PGA_2026 = {
+  "aaron rai":             { name:"Aaron Rai",             toPar:-9, thru:18, pos:"1",   isMC:false },
+  "jon rahm":              { name:"Jon Rahm",              toPar:-6, thru:18, pos:"T2",  isMC:false },
+  "alex smalley":          { name:"Alex Smalley",          toPar:-6, thru:18, pos:"T2",  isMC:false },
+  "justin thomas":         { name:"Justin Thomas",         toPar:-5, thru:18, pos:"T4",  isMC:false },
+  "ludvig aberg":          { name:"Ludvig Aberg",          toPar:-5, thru:18, pos:"T4",  isMC:false },
+  "matti schmid":          { name:"Matti Schmid",          toPar:-5, thru:18, pos:"T4",  isMC:false },
+  "cameron smith":         { name:"Cameron Smith",         toPar:-4, thru:18, pos:"T7",  isMC:false },
+  "rory mcilroy":          { name:"Rory McIlroy",          toPar:-4, thru:18, pos:"T7",  isMC:false },
+  "xander schauffele":     { name:"Xander Schauffele",     toPar:-4, thru:18, pos:"T7",  isMC:false },
+  "kurt kitayama":         { name:"Kurt Kitayama",         toPar:-3, thru:18, pos:"T10", isMC:false },
+  "chris gotterup":        { name:"Chris Gotterup",        toPar:-3, thru:18, pos:"T10", isMC:false },
+  "justin rose":           { name:"Justin Rose",           toPar:-3, thru:18, pos:"T10", isMC:false },
+  "patrick reed":          { name:"Patrick Reed",          toPar:-3, thru:18, pos:"T10", isMC:false },
+  "matt fitzpatrick":      { name:"Matt Fitzpatrick",      toPar:-2, thru:18, pos:"T14", isMC:false },
+  "scottie scheffler":     { name:"Scottie Scheffler",     toPar:-2, thru:18, pos:"T14", isMC:false },
+  "ben griffin":           { name:"Ben Griffin",           toPar:-2, thru:18, pos:"T14", isMC:false },
+  "jordan spieth":         { name:"Jordan Spieth",         toPar:-1, thru:18, pos:"T18", isMC:false },
+  "harris english":        { name:"Harris English",        toPar:-1, thru:18, pos:"T18", isMC:false },
+  "maverick mcnealy":      { name:"Maverick McNealy",      toPar:-1, thru:18, pos:"T18", isMC:false },
+  "cameron young":         { name:"Cameron Young",         toPar:0,  thru:18, pos:"T26", isMC:false },
+  "hideki matsuyama":      { name:"Hideki Matsuyama",      toPar:0,  thru:18, pos:"T26", isMC:false },
+  "patrick cantlay":       { name:"Patrick Cantlay",       toPar:1,  thru:18, pos:"T35", isMC:false },
+  "nicolai hojgaard":      { name:"Nicolai Hojgaard",      toPar:2,  thru:18, pos:"T44", isMC:false },
+  "rickie fowler":         { name:"Rickie Fowler",         toPar:4,  thru:18, pos:"T60", isMC:false },
+  // Missed Cut at PGA 2026:
+  "tommy fleetwood":       { name:"Tommy Fleetwood",       toPar:99, thru:18, pos:"MC",  isMC:true  },
+  "bryson dechambeau":     { name:"Bryson DeChambeau",     toPar:99, thru:18, pos:"MC",  isMC:true  },
+  "viktor hovland":        { name:"Viktor Hovland",        toPar:99, thru:18, pos:"MC",  isMC:true  },
+  "tyrrell hatton":        { name:"Tyrrell Hatton",        toPar:99, thru:18, pos:"MC",  isMC:true  },
+  "joe highsmith":         { name:"Joe Highsmith",         toPar:99, thru:18, pos:"MC",  isMC:true  },
+  "sepp straka":           { name:"Sepp Straka",           toPar:99, thru:18, pos:"MC",  isMC:true  },
+};
+
 function seedFinalScores() {
-  // PGA Championship mode — do NOT seed Masters scores into live golferScores
+  // US Open mode — do NOT seed Masters/PGA scores into live golferScores
   // The Masters data is preserved in FINAL_MASTERS_2026 for Record Book lookup only
-  console.log('PGA Championship mode — awaiting live DataGolf data, Masters seed skipped');
+  console.log('US Open mode — awaiting live DataGolf data, prior tournament seeds skipped');
 }
 
 // ============================================================
@@ -1035,9 +1078,9 @@ const DG_LIVE_URL = "https://feeds.datagolf.com/preds/in-play?tour=pga&dead_heat
 const MASTERS_URL = "https://www.masters.com/en_US/scores/feeds/2026/scores.json";
 
 async function fetchWithProxy(url) {
-  // PGA Championship 2026 — DataGolf sources only. No Masters fallback (would pull stale Masters data).
-  // Pre-tournament endpoint is used until R1 tees off Thursday May 14 7AM ET.
-  const TOURNAMENT_START_FOR_FETCH = new Date('2026-05-14T11:00:00Z').getTime();
+  // US Open 2026 — DataGolf sources only. No Masters fallback (would pull stale Masters data).
+  // Pre-tournament endpoint is used until R1 tees off Thursday June 18 7AM ET.
+  const TOURNAMENT_START_FOR_FETCH = new Date('2026-06-18T11:00:00Z').getTime();
   const isTournamentLive = Date.now() >= TOURNAMENT_START_FOR_FETCH;
 
   // Try both in case primary fails — but prefer the right one for current state
@@ -1081,8 +1124,8 @@ async function loadScores() {
   if (btn) { btn.textContent = "↻ Loading..."; btn.disabled = true; }
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
-  // Tournament start: Thursday May 14, 7 AM ET (= 11:00 UTC)
-  const TOURNAMENT_START = new Date('2026-05-14T11:00:00Z').getTime();
+  // Tournament start: Thursday June 18, 7 AM ET (= 11:00 UTC)
+  const TOURNAMENT_START = new Date('2026-06-18T11:00:00Z').getTime();
   const isTournamentLive = Date.now() >= TOURNAMENT_START;
 
   try {
@@ -1111,8 +1154,8 @@ async function loadScores() {
     } else {
       // Pre-tournament: don't populate golferScores (no live scores exist yet)
       golferScores = {};
-      document.getElementById("statusText").textContent = "PGA Championship 2026 — Picks Locked";
-      document.getElementById("statusSub").textContent = "Aronimink GC · Newtown Square, PA · May 14–17 · Live scoring begins Thursday";
+      document.getElementById("statusText").textContent = "US Open 2026 — Picks Open";
+      document.getElementById("statusSub").textContent = "Shinnecock Hills GC · Southampton, NY · June 18–21 · Live scoring begins Thursday";
       document.getElementById("statusBar").className = "status-bar";
     }
 
@@ -1164,12 +1207,12 @@ function parseESPN(json) {
       });
       const round = players[0]?.round || '';
       document.getElementById("roundInfo").textContent = `Round ${round} · In Progress`;
-      document.getElementById("statusText").textContent = "PGA Championship 2026 — LIVE";
+      document.getElementById("statusText").textContent = "US Open 2026 — LIVE";
       document.getElementById("statusSub").textContent = `Round ${round} · ${players.length} golfers · DataGolf Live`;
       document.getElementById("statusBar").className = "status-bar";
 
       // Note: Masters-era CONFIRMED_MC overrides removed.
-      // The PGA Championship cut happens after R2 (Friday May 15 evening).
+      // The US Open cut happens after R2 (Friday June 19 evening).
       // DataGolf will set current_pos="MC" automatically when cuts are official.
       return;
     }
@@ -1380,7 +1423,7 @@ function snapshotBetterWinProbs(winCounts, N) {
 
 function snapshotWinProbs() {
   const now = Date.now();
-  // Only snapshot golfers actually in the PGA Championship field
+  // Only snapshot golfers actually in the US Open field
   const pgaFieldSet = new Set(
     (typeof PGA_FIELD !== 'undefined' ? PGA_FIELD : [])
       .map(p => normName(p.name).toLowerCase())
@@ -1401,7 +1444,7 @@ function snapshotWinProbs() {
 }
 
 // localStorage persistence — versioned per tournament
-const TOURNAMENT_KEY = "pga_2026";
+const TOURNAMENT_KEY = "us_open_2026";
 const LS_GOLFER_KEY = `gbc_golfer_history_${TOURNAMENT_KEY}`;
 const LS_BETTER_KEY = `gbc_better_history_${TOURNAMENT_KEY}`;
 
@@ -1421,7 +1464,7 @@ function loadWinProbHistory() {
       console.log('Cleared Masters win prob history from localStorage');
     }
 
-    // Sanity check: if the PGA history contains anyone NOT in the PGA field
+    // Sanity check: if the US Open history contains anyone NOT in the US Open field
     // (i.e. stale Masters data leaked in), wipe and start fresh
     const g = localStorage.getItem(LS_GOLFER_KEY);
     if (g) {
@@ -1783,13 +1826,13 @@ function tiebreak(tiedBetters) {
 }
 
 function checkTournamentComplete() {
-  // HARD GATE: tournament cannot be complete before Sunday May 17 evening
+  // HARD GATE: tournament cannot be complete before Sunday June 21 evening
   // R4 final groups typically finish around 7-9 PM ET (= 23:00-01:00 UTC Sunday/Monday)
-  const TOURNAMENT_EARLIEST_FINISH = new Date('2026-05-17T22:00:00Z').getTime();
+  const TOURNAMENT_EARLIEST_FINISH = new Date('2026-06-21T22:00:00Z').getTime();
   if (Date.now() < TOURNAMENT_EARLIEST_FINISH) return false;
 
   const activeGolfers = Object.values(golferScores).filter(g => !g.isMC);
-  // Require a meaningful field size — PGA has ~70 post-cut golfers.
+  // Require a meaningful field size — US Open has ~65 post-cut golfers.
   // If we have <30 active golfers in our data, something is wrong (data not loaded yet)
   if (activeGolfers.length < 30) return false;
   // Only complete when ALL active golfers have finished R4 (thru=18)
@@ -2491,16 +2534,16 @@ function renderGBCSeason() {
     const gbcBetters = BETTERS.filter(b => b.gbc);
     const gbcPool = gbcBetters.length * 200;
     // US Open countdown (next major)
-    const usOpenDate = new Date('2026-06-11T11:00:00Z').getTime();
-    const msLeft = usOpenDate - Date.now();
+    const theOpenDate = new Date('2026-07-16T11:00:00Z').getTime();
+    const msLeft = theOpenDate - Date.now();
     const dLeft = Math.floor(msLeft / 86400000);
     const hLeft = Math.floor((msLeft % 86400000) / 3600000);
     const cdStr = msLeft > 0 ? `${dLeft}d ${hLeft}h` : 'In Progress';
     statRow.innerHTML = `
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">1 of 4</div><div class="stat-sub">PGA Championship in play</div></div>
-      <div class="stat-card"><div class="stat-label">US Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">Oakmont · Jun 11–14</div></div>`;
+      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">2 of 4</div><div class="stat-sub">US Open in play</div></div>
+      <div class="stat-card"><div class="stat-label">The Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">Royal Birkdale · Jul 16–19</div></div>`;
   } else {
     const [w1,w2,w3] = data.winners;
     statRow.innerHTML = `
@@ -2514,10 +2557,15 @@ function renderGBCSeason() {
   tbody.innerHTML = "";
 
   if (yr === 2026) {
-    // Live mode: compute PGA score from BETTERS array, total = masters + pga
-    // Map GBC_DATA rows by name to pull masters baseline scores
+    // Live mode (US Open era): PGA scores are now HISTORICAL/FIXED (read from GBC_DATA),
+    // US Open score is the live one computed from each better's current picks.
+    // Total = Masters + PGA (fixed) + US Open (live, when available)
     const mastersByName = {};
-    data.rows.forEach(r => { mastersByName[r.name] = r.masters; });
+    const pgaByName = {};
+    data.rows.forEach(r => {
+      mastersByName[r.name] = r.masters;
+      pgaByName[r.name] = r.pga;
+    });
 
     // Alias map: BETTERS name → GBC_DATA name (handles name variations between datasets)
     const GBC_NAME_ALIASES = {
@@ -2529,55 +2577,52 @@ function renderGBCSeason() {
     const gbcRoster = BETTERS.filter(b => b.gbc).map(b => {
       const gbcName = GBC_NAME_ALIASES[b.name] || b.name;
       const masters = mastersByName[gbcName] ?? null;
+      const pga = pgaByName[gbcName] ?? null;
 
-      // PGA score: DQ if no picks submitted, else use live calcBetter total
-      let pga = null;
-      let pgaDQ = false;
+      // US Open score: DQ if no picks submitted, else use live calcBetter total
+      let usOpen = null;
+      let usOpenDQ = false;
       if (b.noPicksThisEvent) {
-        pgaDQ = true; // Sent dead last regardless of other scoring
+        usOpenDQ = true; // Pre-submission state OR forfeited this event
       } else {
         const calc = calcBetter(b);
-        // Only show PGA score once tournament has live data (not pre-tournament)
+        // Only show US Open score once tournament has live data (not pre-tournament)
         const hasLiveData = Object.keys(golferScores).length > 0;
         if (hasLiveData && calc.totalScore !== null && calc.totalScore !== undefined) {
-          pga = calc.totalScore;
+          usOpen = calc.totalScore;
         }
       }
 
-      const total = pgaDQ
-        ? (masters !== null ? masters : 0)   // skipper: total = masters only, no PGA points
-        : (masters !== null && pga !== null
-            ? masters + pga
-            : (masters !== null ? masters : null));
+      // Total = Masters + PGA + US Open (if all known)
+      let total = null;
+      if (masters !== null) {
+        total = masters;
+        if (pga !== null) total += pga;
+        if (usOpen !== null) total += usOpen;
+      }
 
-      return { name: b.name, masters, pga, pgaDQ, total };
+      return { name: b.name, masters, pga, usOpen, usOpenDQ, total };
     });
 
-    // Sort: DQ'd skippers always at the bottom; rest by total ascending (lowest wins)
-    gbcRoster.sort((a, b) => {
-      if (a.pgaDQ && !b.pgaDQ) return 1;
-      if (b.pgaDQ && !a.pgaDQ) return -1;
-      return (a.total ?? 99) - (b.total ?? 99);
-    });
+    // Sort by running total ascending (lowest score wins).
+    // US Open DQ doesn't push to bottom — they still have Masters + PGA totals counted.
+    gbcRoster.sort((a, b) => (a.total ?? 99) - (b.total ?? 99));
 
     gbcRoster.forEach((row, i) => {
       const tr = document.createElement("tr");
       const mDisp = row.masters !== null ? fmtScore(row.masters) : '–';
       const mCls = row.masters !== null ? scoreCls(row.masters) : 'even';
+      const pDisp = row.pga !== null ? fmtScore(row.pga) : '–';
+      const pCls = row.pga !== null ? scoreCls(row.pga) : 'even';
       const tDisp = row.total !== null ? fmtScore(row.total) : '–';
       const tCls = row.total !== null ? scoreCls(row.total) : 'even';
-      const pgaDisp = row.pgaDQ
-        ? '<span style="color:var(--text-muted);font-size:11px">No picks submitted</span>'
-        : (row.pga !== null
-            ? `<span class="${scoreCls(row.pga)}">${fmtScore(row.pga)}</span>`
+      const usDisp = row.usOpenDQ
+        ? '<span style="color:var(--text-muted);font-size:11px">Awaiting picks</span>'
+        : (row.usOpen !== null
+            ? `<span class="${scoreCls(row.usOpen)}">${fmtScore(row.usOpen)}</span>`
             : '<span style="color:var(--text-muted)">In Play</span>');
 
-      if (row.pgaDQ) {
-        tr.style.color = 'var(--text-muted)';
-        tr.style.opacity = '0.6';
-      }
-
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num">${pgaDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
+      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${pCls}">${pDisp}</td><td class="num">${usDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
       tbody.appendChild(tr);
     });
   } else {
@@ -2830,7 +2875,7 @@ Pool: 20 entries × $200 = <strong>$4,000</strong></div>
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `GBC_2026_PGA_RecordBook_${now.toISOString().slice(0,10)}.html`;
+  a.download = `GBC_2026_USOpen_RecordBook_${now.toISOString().slice(0,10)}.html`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -2958,8 +3003,8 @@ schedCountdown('2026-07-13', 'sched-cd-open');
 function tickPGACountdown() {
   const el = document.getElementById('r1Countdown') || document.getElementById('pgaCountdown');
   if (!el) return;
-  // Round 1 tees off Thu May 14 at 7:00 AM ET (= 4:00 AM PST)
-  const target = new Date('2026-05-14T07:00:00-04:00').getTime();
+  // Round 1 tees off Thu Jun 18 at 7:00 AM ET (= 4:00 AM PST)
+  const target = new Date('2026-06-18T07:00:00-04:00').getTime();
   const diff = target - Date.now();
   if (diff <= 0) { el.textContent = 'LIVE'; el.style.color = '#16a34a'; return; }
   const d = Math.floor(diff / 86400000);
@@ -3000,164 +3045,116 @@ function tickPickRevealCountdown() {
 
 // ── PICK SUBMISSION ──────────────────────────────────────────
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhK8CxGg0Tpj_XFsYWWwqxvLMYK3Fn4v6iyLv9GUW5pF8yJHduNOGcRk0WeDPQJbnsLw/exec';
-const PICKS_OPEN_TIME  = new Date('2026-05-12T07:00:00-07:00');
-const PICKS_CLOSE_TIME = new Date('2026-05-13T17:00:00-07:00');
+// US Open 2026 pick window: Mon Jun 15 7AM PST → Wed Jun 17 5PM PST
+const PICKS_OPEN_TIME  = new Date('2026-06-15T07:00:00-07:00');
+const PICKS_CLOSE_TIME = new Date('2026-06-17T17:00:00-07:00');
+let existingPicks = [];
 
+// PGA_FIELD constant — now holds the 2026 US Open field at Shinnecock Hills
+// (Variable name kept as PGA_FIELD for backwards compat with rendering code)
 const PGA_FIELD = [
   // ★ OWGR Top 10 in field (max 2 allowed in main picks)
-  {name:"Scottie Scheffler",         owgr:true,  rank:1},
-  {name:"Rory McIlroy",              owgr:true,  rank:2},
-  {name:"Cameron Young",             owgr:true,  rank:3},
-  {name:"Matt Fitzpatrick",          owgr:true,  rank:4},
-  {name:"Justin Rose",               owgr:true,  rank:7},
-  {name:"Collin Morikawa",           owgr:true,  rank:5},
-  {name:"Tommy Fleetwood",           owgr:true,  rank:6},
-  {name:"Russell Henley",            owgr:true,  rank:9},
-  {name:"Xander Schauffele",         owgr:false, rank:11},
-  // Full field (sorted by last name)
-  {name:"Ludvig Aberg",              owgr:false, rank:15},
-  {name:"Daniel Berger",             owgr:false, rank:40},
-  {name:"Christiaan Bezuidenhout",   owgr:false, rank:95},
-  {name:"Akshay Bhatia",             owgr:false, rank:24},
-  {name:"Keegan Bradley",            owgr:false, rank:30},
-  {name:"Michael Brennan",           owgr:false, rank:51},
-  {name:"Jacob Bridgeman",           owgr:false, rank:19},
-  {name:"Daniel Brown",              owgr:false, rank:96},
-  {name:"Sam Burns",                 owgr:false, rank:31},
-  {name:"Brian Campbell",            owgr:false, rank:null},
-  {name:"Patrick Cantlay",           owgr:false, rank:33},
-  {name:"Bud Cauley",                owgr:false, rank:65},
-  {name:"Wyndham Clark",             owgr:false, rank:70},
-  {name:"Corey Conners",             owgr:false, rank:49},
-  {name:"Pierceson Coody",           owgr:false, rank:56},
-  {name:"Jason Day",                 owgr:false, rank:38},
-  {name:"Bryson DeChambeau",         owgr:false, rank:29},
-  {name:"Thomas Detry",              owgr:false, rank:63},
-  {name:"Luke Donald",               owgr:false, rank:null},
-  {name:"Jason Dufner",              owgr:false, rank:null},
-  {name:"Nico Echavarria",           owgr:false, rank:44},
-  {name:"Harris English",            owgr:false, rank:22},
-  {name:"Ryan Fox",                  owgr:false, rank:55},
-  {name:"Ryan Gerard",               owgr:false, rank:32},
-  {name:"Chris Gotterup",            owgr:true,  rank:10},
-  {name:"Max Greyserman",            owgr:false, rank:68},
-  {name:"Ben Griffin",               owgr:false, rank:14},
-  {name:"Harry Hall",                owgr:false, rank:64},
-  {name:"Brian Harman",              owgr:false, rank:53},
-  {name:"Tyrrell Hatton",            owgr:false, rank:25},
-  {name:"Garrick Higgo",             owgr:false, rank:82},
-  {name:"Daniel Hillier",            owgr:false, rank:92},
-  {name:"Ryo Hisatsune",             owgr:false, rank:58},
-  {name:"Tom Hoge",                  owgr:false, rank:null},
-  {name:"Nicolai Hojgaard",          owgr:false, rank:37},
-  {name:"Rasmus Hojgaard",           owgr:false, rank:61},
-  {name:"Viktor Hovland",            owgr:false, rank:26},
-  {name:"Max Homa",                  owgr:false, rank:null},
-  {name:"Sungjae Im",                owgr:false, rank:77},
-  {name:"Casey Jarvis",              owgr:false, rank:72},
-  {name:"Stephan Jaeger",            owgr:false, rank:98},
-  {name:"Dustin Johnson",            owgr:false, rank:null},
-  {name:"John Keefer",               owgr:false, rank:71},
-  {name:"Tom Kim",                   owgr:false, rank:null},
-  {name:"Si Woo Kim",                owgr:false, rank:20},
-  {name:"Michael Kim",               owgr:false, rank:41},
-  {name:"Kurt Kitayama",             owgr:false, rank:34},
-  {name:"Tom Hoge",                  owgr:false, rank:null},
-  {name:"Brooks Koepka",             owgr:false, rank:null},
-  {name:"Min Woo Lee",               owgr:false, rank:27},
-  {name:"David Lipsky",              owgr:false, rank:91},
-  {name:"Haotong Li",                owgr:false, rank:79},
-  {name:"Shane Lowry",               owgr:false, rank:35},
-  {name:"Robert MacIntyre",          owgr:false, rank:12},
-  {name:"Hideki Matsuyama",          owgr:false, rank:16},
-  {name:"Matt McCarty",              owgr:false, rank:45},
-  {name:"Denny McCarthy",            owgr:false, rank:94},
-  {name:"Tom McKibbin",              owgr:false, rank:100},
-  {name:"Maverick McNealy",          owgr:false, rank:28},
-  {name:"Alex Noren",                owgr:false, rank:18},
-  {name:"Andrew Novak",              owgr:false, rank:54},
-  {name:"Marco Penge",               owgr:false, rank:39},
-  {name:"Taylor Pendrith",           owgr:false, rank:83},
-  {name:"Patrick Reed",              owgr:false, rank:23},
-  {name:"Rasmus Neergaard-Petersen", owgr:false, rank:76},
-  {name:"Aldrich Potgieter",         owgr:false, rank:74},
-  {name:"J.T. Poston",               owgr:false, rank:80},
-  {name:"David Puig",                owgr:false, rank:59},
-  {name:"Aaron Rai",                 owgr:false, rank:42},
-  {name:"Jon Rahm",                  owgr:false, rank:21},
-  {name:"Kristoffer Reitan",         owgr:false, rank:48},
-  {name:"Patrick Rodgers",           owgr:false, rank:73},
-  {name:"Adrien Saddier",            owgr:false, rank:99},
-  {name:"Jayden Schaper",            owgr:false, rank:66},
-  {name:"Matti Schmid",              owgr:false, rank:93},
-  {name:"Adam Scott",                owgr:false, rank:43},
-  {name:"Alex Smalley",              owgr:false, rank:87},
-  {name:"Elvis Smylie",              owgr:false, rank:89},
-  {name:"Jordan Smith",              owgr:false, rank:67},
-  {name:"Austin Smotherman",         owgr:false, rank:88},
-  {name:"Cameron Smith",             owgr:false, rank:null},
-  {name:"Jordan Spieth",             owgr:false, rank:50},
-  {name:"J.J. Spaun",               owgr:true,  rank:8},
-  {name:"Samuel Stevens",            owgr:false, rank:46},
-  {name:"Sepp Straka",               owgr:false, rank:13},
-  {name:"Nick Taylor",               owgr:false, rank:60},
-  {name:"Sahith Theegala",           owgr:false, rank:75},
-  {name:"Justin Thomas",             owgr:false, rank:17},
-  {name:"Michael Thorbjornsen",      owgr:false, rank:62},
-  {name:"Sami Valimaki",             owgr:false, rank:57},
-  {name:"Matt Wallace",              owgr:false, rank:69},
-  {name:"Gary Woodland",             owgr:false, rank:47},
-  {name:"Rickie Fowler",             owgr:false, rank:52},
-  {name:"Lucas Glover",              owgr:false, rank:90},
-  {name:"Max McGreevy",              owgr:false, rank:78},
-  {name:"Joe Highsmith",              owgr:false, rank:null},
-  {name:"Richard Hoey",              owgr:false, rank:81},
-  {name:"John Parry",                owgr:false, rank:85},
-  {name:"Andrew Putnam",             owgr:false, rank:84},
-  {name:"Ricky Castillo",            owgr:false, rank:86},
-].sort((a,b) => a.name.split(' ').pop().localeCompare(b.name.split(' ').pop()));
+  {name:"Scottie Scheffler",           owgr:true,  rank:1},
+  {name:"Rory McIlroy",                owgr:true,  rank:2},
+  {name:"Xander Schauffele",           owgr:true,  rank:3},
+  {name:"Collin Morikawa",             owgr:true,  rank:4},
+  {name:"Justin Thomas",               owgr:true,  rank:5},
+  {name:"Ludvig Aberg",                owgr:true,  rank:6},
+  {name:"Russell Henley",              owgr:true,  rank:7},
+  {name:"Sepp Straka",                 owgr:true,  rank:8},
+  {name:"Hideki Matsuyama",            owgr:true,  rank:9},
+  {name:"Bryson DeChambeau",           owgr:true,  rank:10},
+  // Full field (additional confirmed entries)
+  {name:"Tommy Fleetwood",             owgr:false, rank:11},
+  {name:"Matt Fitzpatrick",            owgr:false, rank:12},
+  {name:"Sam Burns",                   owgr:false, rank:13},
+  {name:"Maverick McNealy",            owgr:false, rank:14},
+  {name:"Shane Lowry",                 owgr:false, rank:15},
+  {name:"Viktor Hovland",              owgr:false, rank:16},
+  {name:"Ben Griffin",                 owgr:false, rank:17},
+  {name:"Patrick Cantlay",             owgr:false, rank:18},
+  {name:"Justin Rose",                 owgr:false, rank:19},
+  {name:"Tyrrell Hatton",              owgr:false, rank:20},
+  {name:"Jon Rahm",                    owgr:false, rank:21},
+  {name:"Wyndham Clark",               owgr:false, rank:22},
+  {name:"Robert MacIntyre",            owgr:false, rank:23},
+  {name:"Aaron Rai",                   owgr:false, rank:24},
+  {name:"Brian Harman",                owgr:false, rank:25},
+  {name:"Corey Conners",               owgr:false, rank:26},
+  {name:"Sungjae Im",                  owgr:false, rank:27},
+  {name:"Nick Taylor",                 owgr:false, rank:28},
+  {name:"Jason Day",                   owgr:false, rank:29},
+  {name:"Andrew Novak",                owgr:false, rank:30},
+  {name:"Ryan Fox",                    owgr:false, rank:31},
+  {name:"Max Greyserman",              owgr:false, rank:32},
+  {name:"Daniel Berger",               owgr:false, rank:33},
+  {name:"Taylor Pendrith",             owgr:false, rank:34},
+  {name:"Si Woo Kim",                  owgr:false, rank:35},
+  {name:"Cameron Young",               owgr:false, rank:36},
+  {name:"Cameron Smith",               owgr:false, rank:37},
+  {name:"Harris English",              owgr:false, rank:38},
+  {name:"Keegan Bradley",              owgr:false, rank:39},
+  {name:"Akshay Bhatia",               owgr:false, rank:40},
+  {name:"Patrick Reed",                owgr:false, rank:41},
+  {name:"Joaquin Niemann",             owgr:false, rank:42},
+  {name:"Kristoffer Reitan",           owgr:false, rank:43},
+  {name:"Nicolai Hojgaard",            owgr:false, rank:44},
+  {name:"Alex Noren",                  owgr:false, rank:45},
+  {name:"Jacob Bridgeman",             owgr:false, rank:46},
+  {name:"Bud Cauley",                  owgr:false, rank:47},
+  {name:"Alex Fitzpatrick",            owgr:false, rank:48},
+  {name:"Eric Cole",                   owgr:false, rank:49},
+  {name:"Brooks Koepka",               owgr:false, rank:50},
+  {name:"Michael Thorbjornsen",        owgr:false, rank:51},
+  {name:"Harry Hall",                  owgr:false, rank:52},
+  {name:"Keith Mitchell",              owgr:false, rank:53},
+  {name:"Tony Finau",                  owgr:false, rank:54},
+  {name:"Michael Brennan",             owgr:false, rank:55},
+  {name:"Sahith Theegala",             owgr:false, rank:56},
+  {name:"Jordan Smith",                owgr:false, rank:57},
+  {name:"Davis Thompson",              owgr:false, rank:58},
+  {name:"Rico Hoey",                   owgr:false, rank:59},
+  {name:"JJ Spaun",                    owgr:false, rank:60},
+  {name:"Dustin Johnson",              owgr:false, rank:61},
+  {name:"Gary Woodland",               owgr:false, rank:62},
+  {name:"Carlos Ortiz",                owgr:false, rank:63},
+  {name:"Padraig Harrington",          owgr:false, rank:64},
+  {name:"Jordan Spieth",               owgr:false, rank:65},
+  {name:"Adam Scott",                  owgr:false, rank:66},
+  {name:"Tom Kim",                     owgr:false, rank:67},
+  {name:"Stephan Jaeger",              owgr:false, rank:68},
+  {name:"Matti Schmid",                owgr:false, rank:69},
+  {name:"Chris Gotterup",              owgr:false, rank:70},
+  {name:"Sam Stevens",                 owgr:false, rank:71},
+  {name:"Sami Valimaki",               owgr:false, rank:72},
+  {name:"Min Woo Lee",                 owgr:false, rank:73},
+  {name:"Ryan Gerard",                 owgr:false, rank:74},
+  {name:"Rickie Fowler",               owgr:false, rank:75},
+  {name:"Jake Knapp",                  owgr:false, rank:76},
+  {name:"Marco Penge",                 owgr:false, rank:77},
+  {name:"Michael Kim",                 owgr:false, rank:78},
+  {name:"Matt McCarty",                owgr:false, rank:79},
+  {name:"Nicolas Echavarria",          owgr:false, rank:80},
+  {name:"David Puig",                  owgr:false, rank:81},
+  {name:"Ryo Hisatsune",               owgr:false, rank:82},
+  {name:"Pierceson Coody",             owgr:false, rank:83},
+  {name:"Rasmus Hojgaard",             owgr:false, rank:84},
+  {name:"Christiaan Bezuidenhout",     owgr:false, rank:85},
+  {name:"Tom Hoge",                    owgr:false, rank:86},
+  {name:"Mackenzie Hughes",            owgr:false, rank:87},
+  {name:"Lucas Glover",                owgr:false, rank:89},
+  {name:"Adam Hadwin",                 owgr:false, rank:90},
+  {name:"Matt Wallace",                owgr:false, rank:91},
+  {name:"Chris Kirk",                  owgr:false, rank:92},
+  {name:"Denny McCarthy",              owgr:false, rank:93},
+  {name:"Andrew Putnam",               owgr:false, rank:94},
+  {name:"Doug Ghim",                   owgr:false, rank:95},
+  {name:"Davis Riley",                 owgr:false, rank:96},
+  {name:"Patrick Rodgers",             owgr:false, rank:97},
+  {name:"Sudarshan Yellamaraju",       owgr:false, rank:98},
+];
 
-function initPickForm() {
-  ['pick1','pick2','pick3','pick4'].forEach((id,i) => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    sel.innerHTML = `<option value="">${i===3 ? '— Alternate —' : `— Pick ${i+1} —`}</option>`;
-    // Group: OWGR top 10 first, then rest
-    const top10 = PGA_FIELD.filter(p => p.owgr);
-    const rest  = PGA_FIELD.filter(p => !p.owgr);
-    if (i < 3) {
-      const grp1 = document.createElement('optgroup');
-      grp1.label = '★ OWGR Top 10';
-      top10.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        opt.textContent = `#${p.rank} ${p.name}`;
-        opt.dataset.owgr = '1';
-        grp1.appendChild(opt);
-      });
-      sel.appendChild(grp1);
-      const grp2 = document.createElement('optgroup');
-      grp2.label = 'Full Field';
-      rest.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        opt.textContent = p.name;
-        opt.dataset.owgr = '0';
-        grp2.appendChild(opt);
-      });
-      sel.appendChild(grp2);
-    } else {
-      PGA_FIELD.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        opt.textContent = p.owgr ? `★ ${p.name}` : p.name;
-        opt.dataset.owgr = p.owgr ? '1' : '0';
-        sel.appendChild(opt);
-      });
-    }
-  });
-}
-
+// ── PICK FORM LOGIC ──────────────────────────────────────────
 function checkPicksLock() {
   const now = Date.now();
   const locked = document.getElementById('picksLocked');
@@ -3167,7 +3164,8 @@ function checkPicksLock() {
   if (now >= PICKS_OPEN_TIME.getTime() && now < PICKS_CLOSE_TIME.getTime()) {
     locked.style.display = 'none';
     open.style.display = 'block';
-    if (!document.getElementById('pick1').options.length || document.getElementById('pick1').options.length < 2) {
+    const p1 = document.getElementById('pick1');
+    if (p1 && (!p1.options.length || p1.options.length < 2)) {
       initPickForm();
       loadExistingPicks();
     }
@@ -3185,8 +3183,7 @@ function tickLockedCountdown() {
   const el = document.getElementById('lockedCountdown');
   if (!el) return;
   const diff = PICKS_OPEN_TIME.getTime() - Date.now();
-  if (diff <= 0) { checkPicksLock();
-checkPickReveal(); return; }
+  if (diff <= 0) { checkPicksLock(); checkPickReveal(); return; }
   const d = Math.floor(diff/86400000);
   const h = Math.floor(diff%86400000/3600000);
   const m = Math.floor(diff%3600000/60000);
@@ -3195,55 +3192,63 @@ checkPickReveal(); return; }
   setTimeout(tickLockedCountdown, 1000);
 }
 
-function getPickData(id) {
-  const sel = document.getElementById(id);
-  if (!sel || !sel.value) return null;
-  const opt = sel.querySelector(`option[value="${sel.value}"]`);
-  return { name: sel.value, owgr: opt?.dataset.owgr === '1' };
-}
-
-function onPickChange() {
-  ['pick1','pick2','pick3'].forEach((id,i) => {
-    const p = getPickData(id);
-    const badge = document.getElementById(`badge${i+1}`);
-    if (!badge) return;
-    if (!p) { badge.style.visibility = 'hidden'; return; }
-    badge.style.visibility = 'visible';
-    if (p.owgr) { badge.style.background='#fef3c7'; badge.style.color='#92400e'; badge.textContent='★ TOP 10'; }
-    else { badge.style.background='#dcfce7'; badge.style.color='#166534'; badge.textContent='✓ OK'; }
+function initPickForm() {
+  // Populate the 4 pick dropdowns with US Open field
+  const fields = ['pick1','pick2','pick3','pick4'];
+  fields.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Select golfer —</option>';
+    PGA_FIELD.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.owgr ? `★ ${p.name}` : p.name;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', () => {
+      // Hide any prior error/dupe messages on user edit
+      const err = document.getElementById('msgError');
+      const dupe = document.getElementById('msgDupe');
+      if (err) err.style.display = 'none';
+      if (dupe) dupe.style.display = 'none';
+    });
   });
-  const owgrUsed = ['pick1','pick2','pick3'].filter(id => getPickData(id)?.owgr).length;
-  document.getElementById('owgrCount').textContent = `${owgrUsed} / 2`;
-  const tracker = document.getElementById('owgrTracker');
-  if (tracker) {
-    tracker.style.background = owgrUsed > 2 ? '#fee2e2' : '#fffbeb';
-    tracker.style.borderColor = owgrUsed > 2 ? '#fca5a5' : '#fde68a';
-    tracker.querySelector('div').style.color = owgrUsed > 2 ? '#991b1b' : '#92400e';
-    document.getElementById('owgrCount').style.color = owgrUsed > 2 ? '#991b1b' : '#92400e';
-  }
-  document.getElementById('msgError').style.display = 'none';
-  document.getElementById('msgDupe').style.display = 'none';
 }
 
 function validatePicks() {
-  const name = document.getElementById('betterName').value.trim();
+  const p1 = document.getElementById('pick1').value;
+  const p2 = document.getElementById('pick2').value;
+  const p3 = document.getElementById('pick3').value;
+  const alt = document.getElementById('pick4').value;
+  const name = document.getElementById('betterName')?.value?.trim();
+  const email = document.getElementById('betterEmail')?.value?.trim();
+
   if (!name) return 'Please enter your name.';
-  const picks = ['pick1','pick2','pick3','pick4'].map(getPickData);
-  if (!picks[0]||!picks[1]||!picks[2]) return 'Please select all 3 main picks.';
-  if (!picks[3]) return 'Please select an alternate.';
-  const names = picks.map(p => p.name);
-  if (new Set(names).size < 4) return 'All 4 picks must be different players.';
-  const owgr = picks.slice(0,3).filter(p => p.owgr).length;
-  if (owgr > 2) return `You have ${owgr} OWGR Top 10 picks — maximum is 2.`;
+  if (!email || !email.includes('@')) return 'Please enter a valid email address.';
+  if (!p1 || !p2 || !p3 || !alt) return 'Please choose 3 picks plus 1 alternate.';
+
+  const all = [p1, p2, p3, alt];
+  const unique = new Set(all);
+  if (unique.size !== 4) return 'All 4 selections must be different golfers.';
+
+  // Max 2 OWGR top 10 in main picks (alt does not count)
+  const owgrSet = new Set(PGA_FIELD.filter(p => p.owgr).map(p => p.name));
+  const owgrMainCount = [p1, p2, p3].filter(n => owgrSet.has(n)).length;
+  if (owgrMainCount > 2) return 'Max 2 OWGR Top 10 golfers allowed in your main 3 picks (the ★ players).';
+
   return null;
 }
 
 async function loadExistingPicks() {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=get`);
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) return;
+    const res = await fetch(APPS_SCRIPT_URL, { method: 'GET', cache: 'no-cache' });
+    if (!res.ok) return;
     const data = await res.json();
-    existingPicks = data.picks || [];
+    if (data && Array.isArray(data.picks)) {
+      existingPicks = data.picks;
+      console.log('Loaded', existingPicks.length, 'existing picks');
+    }
   } catch(e) { console.warn('Could not load picks:', e); }
 }
 
@@ -3296,7 +3301,7 @@ function showPickSuccess(payload) {
     <div style="text-align:center;background:white;border:1px solid var(--border);border-radius:14px;padding:48px 24px">
       <div style="font-size:52px;margin-bottom:16px">🏆</div>
       <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:8px">You're in!</div>
-      <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 PGA Championship</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 US Open</div>
       <div style="background:#f8f9fa;border-radius:10px;padding:16px;text-align:left;font-size:13px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 1</span><strong>${payload.pick1}</strong></div>
         <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb"><span style="color:#6b7280">Pick 2</span><strong>${payload.pick2}</strong></div>
