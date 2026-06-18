@@ -748,28 +748,26 @@
 // PLAYER DATA — 2026 US OPEN (picks collected via Google Form)
 // ============================================================
 const BETTERS = [
-  // 2026 US Open BETTERS — picks pending until submission window closes
-  // GBC roster: David Andres Morgan removed (forfeited PGA, out of GBC). Mike Carpenter (non-GBC) not playing US Open.
-  // David may still play US Open as one-event entry — add him manually if/when he submits
-  { name: "Jordan Jones",            short: "Jordan Jones",          gbc: false, paid: true,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Xander Schauffele","Justin Thomas"] },
-  { name: "Scott Stevens",           short: "Scott Stevens",         gbc: true,  paid: true,  picks: ["Scottie Scheffler","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Joe Caselle",             short: "Joe Caselle",           gbc: true,  paid: true,  picks: ["Scottie Scheffler","Xander Schauffele","Matt Fitzpatrick","Ludvig Aberg"] },
-  { name: "Anthony Fassari",         short: "Anthony Fassari",       gbc: true,  paid: true,  picks: ["Cameron Young","Scottie Scheffler","Tyrrell Hatton","Si Woo Kim"] },
-  { name: "Brian McCarthy",          short: "Brian McCarthy",        gbc: true,  paid: true,  picks: ["Scottie Scheffler","Rory McIlroy","Aaron Rai","Ludvig Aberg"] },
-  { name: "Tom Van Ormer",           short: "Tom Van Ormer",         gbc: true,  paid: true,  picks: ["Tommy Fleetwood","Matt Fitzpatrick","Wyndham Clark","Patrick Reed"] },
-  { name: "Jason Henderson",         short: "Jason Henderson",       gbc: false, paid: true,  picks: ["Scottie Scheffler","Russell Henley","Si Woo Kim","Tyrrell Hatton"] },
-  { name: "Doug Colliau",            short: "Doug Colliau",          gbc: true,  paid: true,  picks: ["Cameron Young","J.J. Spaun","Ludvig Aberg","Chris Gotterup"] },
-  { name: "Matt Mingrone",           short: "Matt Mingrone",         gbc: true,  paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Chris Gotterup","Xander Schauffele"] },
-  { name: "Christian Fassari",       short: "Christian Fassari",     gbc: true,  paid: true,  picks: ["Rory McIlroy","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Joseph Pehanick",         short: "J.J. Pehanick",         gbc: true,  paid: true,  picks: ["Scottie Scheffler","Cameron Young","Sam Burns","Ludvig Aberg"] },
-  { name: "Geoff White",             short: "Geoff White",           gbc: true,  paid: true,  picks: ["Scottie Scheffler","Russell Henley","Chris Gotterup","Ludvig Aberg"] },
-  { name: "Kevin Shinar",            short: "Kevin Shinar",          gbc: true,  paid: true,  picks: ["Matt Fitzpatrick","Xander Schauffele","Rory McIlroy","Ludvig Aberg"] },
-  { name: "Greg Hawley",             short: "Greg Hawley",           gbc: false, paid: true,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Ludvig Aberg","Robert MacIntyre"] },
-  { name: "Rod Walters",           short: "Rod Walters",        gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
-  { name: "Jim Stankiewicz",         short: "Jim Stankiewicz",       gbc: true,  paid: true,  picks: ["Scottie Scheffler","Jon Rahm","Aaron Rai","Ben Griffin"] },
-  { name: "Joseph M Pehanick",       short: "Joe M. Pehanick",       gbc: false, paid: true,  picks: ["Rory McIlroy","Matt Fitzpatrick","Ludvig Aberg","Wyndham Clark"] },
-  { name: "Tom Counts",              short: "Tom Counts",            gbc: true,  paid: true,  picks: ["Scottie Scheffler","Xander Schauffele","Rory McIlroy","Justin Thomas"] },
-  { name: "George Pehanick",         short: "George Pehanick",       gbc: true,  paid: true,  picks: ["Rory McIlroy","Jon Rahm","Chris Gotterup","Wyndham Clark"] },
+  // 2026 US Open BETTERS — 18 entries · Rod Walters removed (no submission)
+  // Joseph J. Pehanick is the user (J.J.); Joseph M Pehanick is Joe M. (his dad); George Pehanick separate
+  { name: "Jordan Jones",            short: "Jordan Jones",          gbc: false, paid: false,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Xander Schauffele","Justin Thomas"] },
+  { name: "Scott Stevens",           short: "Scott Stevens",         gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
+  { name: "Joe Caselle",             short: "Joe Caselle",           gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Xander Schauffele","Matt Fitzpatrick","Ludvig Aberg"] },
+  { name: "Anthony Fassari",         short: "Anthony Fassari",       gbc: true,  paid: false,  picks: ["Cameron Young","Scottie Scheffler","Tyrrell Hatton","Si Woo Kim"] },
+  { name: "Brian McCarthy",          short: "Brian McCarthy",        gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Rory McIlroy","Aaron Rai","Ludvig Aberg"] },
+  { name: "Tom Van Ormer",           short: "Tom Van Ormer",         gbc: true,  paid: true ,  picks: ["Tommy Fleetwood","Matt Fitzpatrick","Wyndham Clark","Patrick Reed"] },
+  { name: "Jason Henderson",         short: "Jason Henderson",       gbc: false, paid: true ,  picks: ["Scottie Scheffler","Russell Henley","Si Woo Kim","Tyrrell Hatton"] },
+  { name: "Doug Colliau",            short: "Doug Colliau",          gbc: true,  paid: true ,  picks: ["Cameron Young","J.J. Spaun","Ludvig Aberg","Chris Gotterup"] },
+  { name: "Matt Mingrone",           short: "Matt Mingrone",         gbc: true,  paid: false,  picks: ["Scottie Scheffler","Jon Rahm","Chris Gotterup","Xander Schauffele"] },
+  { name: "Christian Fassari",       short: "Christian Fassari",     gbc: true,  paid: true ,  picks: ["Rory McIlroy","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
+  { name: "Joseph Pehanick",         short: "J.J. Pehanick",         gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Cameron Young","Sam Burns","Ludvig Aberg"] },
+  { name: "Geoff White",             short: "Geoff White",           gbc: true,  paid: false,  picks: ["Scottie Scheffler","Russell Henley","Chris Gotterup","Ludvig Aberg"] },
+  { name: "Kevin Shinar",            short: "Kevin Shinar",          gbc: true,  paid: false,  picks: ["Matt Fitzpatrick","Xander Schauffele","Rory McIlroy","Ludvig Aberg"] },
+  { name: "Greg Hawley",             short: "Greg Hawley",           gbc: false, paid: true ,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Ludvig Aberg","Robert MacIntyre"] },
+  { name: "Jim Stankiewicz",         short: "Jim Stankiewicz",       gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Jon Rahm","Aaron Rai","Ben Griffin"] },
+  { name: "Joseph M Pehanick",       short: "Joe M. Pehanick",       gbc: false, paid: true ,  picks: ["Rory McIlroy","Matt Fitzpatrick","Ludvig Aberg","Wyndham Clark"] },
+  { name: "Tom Counts",              short: "Tom Counts",            gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Xander Schauffele","Rory McIlroy","Justin Thomas"] },
+  { name: "George Pehanick",         short: "George Pehanick",       gbc: true,  paid: true ,  picks: ["Rory McIlroy","Jon Rahm","Chris Gotterup","Wyndham Clark"] },
 ];
 
 // Name normalization — DataGolf uses different casings and "Last, First" format
@@ -1460,7 +1458,7 @@ function snapshotWinProbs() {
 // Set to true once all US Open picks are in and you want the tracker
 // to start pulling DataGolf pre-tournament odds + live in-play data.
 // When false: tracker shows OWGR-only field display, no API calls made.
-const API_ENABLED = true;  // ✓ Activated: all picks in (18/19); Rod Walters DQ this event
+const API_ENABLED = true;  // ✓ Activated: 18 betters submitted picks · Rod Walters out for US Open
 
 const TOURNAMENT_KEY = "us_open_2026";
 const LS_GOLFER_KEY = `gbc_golfer_history_${TOURNAMENT_KEY}`;
