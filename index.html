@@ -257,13 +257,13 @@
     <!-- LOCKED — shown before Tue Jun 16 7AM PST -->
     <div id="picksLocked" class="card" style="text-align:center;padding:48px 24px">
       <div style="font-size:52px;margin-bottom:16px">🔒</div>
-      <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px">Picks Not Yet Open</div>
-      <div style="color:var(--text-muted);font-size:14px;margin-bottom:28px">Pick submission opens Tuesday June 16 at 7:00 AM PST</div>
+      <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px">The Open Championship — Picks Open Soon</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:28px">Royal Birkdale · Jul 16–19 · Pick submission opens Tuesday July 14 at 7:00 AM PST</div>
       <div style="display:inline-block;background:var(--navy);border-radius:12px;padding:20px 40px">
         <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Opens in</div>
         <div id="lockedCountdown" style="font-size:28px;font-weight:700;color:#c8a84b;font-family:Georgia,serif">–</div>
       </div>
-      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">Picks close Wednesday June 17 · 5:00 PM PST</div>
+      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">Picks close Wednesday July 15 · 5:00 PM PST</div>
     </div>
 
     <!-- OPEN — shown after Tue Jun 16 7AM PST -->
@@ -330,12 +330,12 @@
       </div>
 
       <button id="submitBtn" onclick="submitPicks()" style="width:100%;padding:16px;background:var(--navy);color:white;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;font-family:Georgia,serif;box-shadow:0 4px 20px rgba(15,37,64,0.25)">Submit <span style="color:#c8a84b">My Picks</span> →</button>
-      <div style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:10px">Picks close Wednesday June 17 · 5:00 PM PST</div>
+      <div style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:10px">Picks close Wednesday July 15 · 5:00 PM PST</div>
 
       <div id="successScreen" style="display:none;text-align:center;background:white;border:1px solid var(--border);border-radius:14px;padding:48px 24px;margin-top:16px">
         <div style="font-size:52px;margin-bottom:16px">🏆</div>
         <div style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:8px">You're in!</div>
-        <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 US Open</div>
+        <div style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Picks submitted for the 2026 The Open</div>
         <div id="picksSummary" style="background:#f8f9fa;border-radius:10px;padding:16px;text-align:left;margin-bottom:16px;font-size:13px"></div>
         <div style="color:var(--text-muted);font-size:13px">Good luck — may your picks make the cut! ⛳</div>
       </div>
@@ -428,7 +428,7 @@
     <div id="picksRevealLocked" class="card" style="text-align:center;padding:48px 24px">
       <div style="font-size:48px;margin-bottom:16px">🔒</div>
       <div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px">Pick Sheet — Confidential</div>
-      <div style="color:var(--text-muted);font-size:14px;margin-bottom:24px">Picks will be revealed after submissions close on Wednesday June 17 at 5:00 PM PST</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:24px">Picks will be revealed after submissions close on Wednesday July 15 at 5:00 PM PST</div>
       <div style="display:inline-block;background:var(--navy);border-radius:12px;padding:20px 40px">
         <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Reveals in</div>
         <div id="pickRevealCountdown" style="font-size:28px;font-weight:700;color:#c8a84b;font-family:Georgia,serif">–</div>
@@ -441,7 +441,7 @@
       <div class="card" style="margin-bottom:14px">
         <div class="card-header">
           <div>
-            <div class="card-title">Pick Sheet — 2026 US Open</div>
+            <div class="card-title">Pick Sheet — 2026 The Open Championship</div>
             <div class="card-sub">Each better's 4 picks · Top 3 count for score · 4th is alternate</div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -750,26 +750,27 @@
 // PLAYER DATA — 2026 US OPEN (picks collected via Google Form)
 // ============================================================
 const BETTERS = [
-  // 2026 US Open BETTERS — 18 entries · Rod Walters removed (no submission)
+  // 2026 INTERMISSION — leaderboard paused between US Open and The Open
+  // All picks cleared; reopens when The Open picks window starts (Tue Jul 14 7AM PST)
   // Joseph J. Pehanick is the user (J.J.); Joseph M Pehanick is Joe M. (his dad); George Pehanick separate
-  { name: "Jordan Jones",            short: "Jordan Jones",          gbc: false, paid: true ,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Xander Schauffele","Justin Thomas"] },
-  { name: "Scott Stevens",           short: "Scott Stevens",         gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Joe Caselle",             short: "Joe Caselle",           gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Xander Schauffele","Matt Fitzpatrick","Ludvig Aberg"] },
-  { name: "Anthony Fassari",         short: "Anthony Fassari",       gbc: true,  paid: true ,  picks: ["Cameron Young","Scottie Scheffler","Tyrrell Hatton","Si Woo Kim"] },
-  { name: "Brian McCarthy",          short: "Brian McCarthy",        gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Rory McIlroy","Aaron Rai","Ludvig Aberg"] },
-  { name: "Tom Van Ormer",           short: "Tom Van Ormer",         gbc: true,  paid: true ,  picks: ["Tommy Fleetwood","Matt Fitzpatrick","Wyndham Clark","Patrick Reed"] },
-  { name: "Jason Henderson",         short: "Jason Henderson",       gbc: false, paid: true ,  picks: ["Scottie Scheffler","Russell Henley","Si Woo Kim","Tyrrell Hatton"] },
-  { name: "Doug Colliau",            short: "Doug Colliau",          gbc: true,  paid: true ,  picks: ["Cameron Young","J.J. Spaun","Ludvig Aberg","Chris Gotterup"] },
-  { name: "Matt Mingrone",           short: "Matt Mingrone",         gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Jon Rahm","Chris Gotterup","Xander Schauffele"] },
-  { name: "Christian Fassari",       short: "Christian Fassari",     gbc: true,  paid: true ,  picks: ["Rory McIlroy","Matt Fitzpatrick","Xander Schauffele","Ludvig Aberg"] },
-  { name: "Joseph Pehanick",         short: "J.J. Pehanick",         gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Cameron Young","Sam Burns","Ludvig Aberg"] },
-  { name: "Geoff White",             short: "Geoff White",           gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Russell Henley","Chris Gotterup","Ludvig Aberg"] },
-  { name: "Kevin Shinar",            short: "Kevin Shinar",          gbc: true,  paid: true ,  picks: ["Matt Fitzpatrick","Xander Schauffele","Rory McIlroy","Ludvig Aberg"] },
-  { name: "Greg Hawley",             short: "Greg Hawley",           gbc: false, paid: true ,  picks: ["Matt Fitzpatrick","Scottie Scheffler","Ludvig Aberg","Robert MacIntyre"] },
-  { name: "Jim Stankiewicz",         short: "Jim Stankiewicz",       gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Jon Rahm","Aaron Rai","Ben Griffin"] },
-  { name: "Joseph M Pehanick",       short: "Joe M. Pehanick",       gbc: false, paid: true ,  picks: ["Rory McIlroy","Matt Fitzpatrick","Ludvig Aberg","Wyndham Clark"] },
-  { name: "Tom Counts",              short: "Tom Counts",            gbc: true,  paid: true ,  picks: ["Scottie Scheffler","Xander Schauffele","Rory McIlroy","Justin Thomas"] },
-  { name: "George Pehanick",         short: "George Pehanick",       gbc: true,  paid: true ,  picks: ["Rory McIlroy","Jon Rahm","Chris Gotterup","Wyndham Clark"] },
+  { name: "Jordan Jones",            short: "Jordan Jones",          gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Scott Stevens",           short: "Scott Stevens",         gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Joe Caselle",             short: "Joe Caselle",           gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Anthony Fassari",         short: "Anthony Fassari",       gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Brian McCarthy",          short: "Brian McCarthy",        gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Tom Van Ormer",           short: "Tom Van Ormer",         gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Jason Henderson",         short: "Jason Henderson",       gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Doug Colliau",            short: "Doug Colliau",          gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Matt Mingrone",           short: "Matt Mingrone",         gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Christian Fassari",       short: "Christian Fassari",     gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Joseph Pehanick",         short: "J.J. Pehanick",         gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Geoff White",             short: "Geoff White",           gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Kevin Shinar",            short: "Kevin Shinar",          gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Greg Hawley",             short: "Greg Hawley",           gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Jim Stankiewicz",         short: "Jim Stankiewicz",       gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Joseph M Pehanick",       short: "Joe M. Pehanick",       gbc: false, paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Tom Counts",              short: "Tom Counts",            gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "George Pehanick",         short: "George Pehanick",       gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
 ];
 
 // Name normalization — DataGolf uses different casings and "Last, First" format
@@ -1460,7 +1461,7 @@ function snapshotWinProbs() {
 // Set to true once all US Open picks are in and you want the tracker
 // to start pulling DataGolf pre-tournament odds + live in-play data.
 // When false: tracker shows OWGR-only field display, no API calls made.
-const API_ENABLED = true;  // ✓ Activated: 18 betters submitted picks · Rod Walters out for US Open
+const API_ENABLED = false;  // ⏸ Intermission — turns back on for The Open R1
 
 const TOURNAMENT_KEY = "us_open_2026";
 const LS_GOLFER_KEY = `gbc_golfer_history_${TOURNAMENT_KEY}`;
@@ -1923,6 +1924,34 @@ function autoUpdateRecords() {
 }
 
 function renderLeaderboard() {
+  // INTERMISSION: if all betters have noPicksThisEvent, hide the leaderboard table
+  // and show a placeholder message instead. Picks will reopen for next event.
+  const allNoPicks = BETTERS.every(b => b.noPicksThisEvent);
+  const lbTable = document.getElementById("lbTable");
+  const lbBody = document.getElementById("lbBody");
+  const lbCard = document.getElementById("bettersLeaderboard");
+  if (allNoPicks) {
+    if (lbBody) lbBody.innerHTML = "";
+    if (lbTable) lbTable.style.display = "none";
+    const existing = document.getElementById("intermissionBanner");
+    if (!existing && lbCard) {
+      const banner = document.createElement("div");
+      banner.id = "intermissionBanner";
+      banner.style.cssText = "text-align:center;padding:40px 24px;background:#f8f9fa;border:1px dashed #d1d5db;border-radius:10px;margin-top:12px";
+      banner.innerHTML = `
+        <div style="font-size:36px;margin-bottom:12px">⛳</div>
+        <div style="font-family:Georgia,serif;font-size:18px;font-weight:700;color:#0f2540;margin-bottom:6px">Leaderboard paused — between majors</div>
+        <div style="color:#6b7280;font-size:13px;max-width:480px;margin:0 auto">US Open complete (Tom Van Ormer wins at +2). The Open at Royal Birkdale up next — picks open <strong>Tuesday July 14 at 7 AM PST</strong>.</div>
+        <div style="margin-top:18px;font-size:12px;color:#9ca3af">Live scoring resumes when R1 tees off at Royal Birkdale.</div>
+      `;
+      lbCard.appendChild(banner);
+    }
+    return;
+  }
+  // Normal path: remove any intermission banner, show table again
+  const banner = document.getElementById("intermissionBanner");
+  if (banner) banner.remove();
+  if (lbTable) lbTable.style.display = "table";
   const rows = BETTERS.map(b => {
     const calc = calcBetter(b);
     return { better: b, ...calc };
@@ -3064,7 +3093,7 @@ function tickPGACountdown() {
 }
 
 // ── PICK SHEET REVEAL GATE ───────────────────────────────────
-const PICKS_REVEAL_TIME = new Date('2026-06-17T17:00:00-07:00');
+const PICKS_REVEAL_TIME = new Date('2026-07-15T17:00:00-07:00');
 
 function checkPickReveal() {
   const locked = document.getElementById('picksRevealLocked');
@@ -3095,8 +3124,8 @@ function tickPickRevealCountdown() {
 // ── PICK SUBMISSION ──────────────────────────────────────────
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhK8CxGg0Tpj_XFsYWWwqxvLMYK3Fn4v6iyLv9GUW5pF8yJHduNOGcRk0WeDPQJbnsLw/exec';
 // US Open 2026 pick window: Mon Jun 15 7AM PST → Wed Jun 17 5PM PST
-const PICKS_OPEN_TIME  = new Date('2026-06-16T07:00:00-07:00');
-const PICKS_CLOSE_TIME = new Date('2026-06-17T17:00:00-07:00');
+const PICKS_OPEN_TIME  = new Date('2026-07-14T07:00:00-07:00');
+const PICKS_CLOSE_TIME = new Date('2026-07-15T17:00:00-07:00');
 let existingPicks = [];
 
 // PGA_FIELD constant — now holds the 2026 US Open field at Shinnecock Hills
@@ -3414,7 +3443,7 @@ function showPickSuccess(payload) {
     <div style="max-width:520px;margin:0 auto;text-align:center;background:white;border:2px solid var(--gold);border-radius:14px;padding:48px 28px;box-shadow:0 8px 24px rgba(15,37,64,0.12)">
       <div style="font-size:56px;margin-bottom:12px">🏆</div>
       <div style="font-family:Georgia,serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:6px">You're in!</div>
-      <div style="color:var(--text-muted);font-size:14px;margin-bottom:6px">Picks submitted for the 2026 US Open</div>
+      <div style="color:var(--text-muted);font-size:14px;margin-bottom:6px">Picks submitted for the 2026 The Open</div>
       <div style="display:inline-block;background:var(--navy);color:#c8a84b;font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:6px;margin-bottom:22px">${confNum}</div>
 
       <div style="background:#f8f9fa;border:1px solid #e5e7eb;border-radius:10px;padding:18px;text-align:left;font-size:13px;margin-bottom:18px">
