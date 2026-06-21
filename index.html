@@ -2177,9 +2177,8 @@ function renderLeaderboard() {
       const sampled = {};
       Object.keys(golferDist).forEach(key => { sampled[key] = sampleScore(key); });
 
-      let bestScore = Infinity;
-      let poolWinner = null;
-
+      // Collect every active better's total + pick-order tiebreaker scores for this sim
+      const simResults = [];
       BETTERS.forEach(b => {
         const calc = calcBetter(b);
         if (calc.twoMC && !b.gbc) return;
@@ -2193,13 +2192,33 @@ function renderLeaderboard() {
           total += sampled[key] !== undefined ? sampled[key] : sampleScore(key);
         });
 
-        if (total < bestScore) {
-          bestScore = total;
-          poolWinner = b.name;
+        // Tiebreaker keys: each better's picks in ORIGINAL submission order (P1→P2→P3→Alt).
+        // Lower wins. MC golfers count as +99 so they sort last in tiebreak.
+        const pickScores = [];
+        for (let pi = 0; pi < 4; pi++) {
+          const pickName = b.picks?.[pi];
+          if (!pickName) { pickScores.push(999); continue; }
+          const key = normName(pickName).toLowerCase();
+          const g = golferScores[key];
+          if (!g) { pickScores.push(999); continue; }
+          if (g.isMC) { pickScores.push(99); continue; }
+          pickScores.push(sampled[key] !== undefined ? sampled[key] : g.toPar);
         }
+
+        simResults.push({ name: b.name, total, pickScores });
       });
 
-      if (poolWinner) wins[poolWinner]++;
+      // Find the winner using same tiebreaker as live leaderboard:
+      // total ascending, then P1 → P2 → P3 → Alt ascending.
+      simResults.sort((a, b) => {
+        if (a.total !== b.total) return a.total - b.total;
+        for (let pi = 0; pi < 4; pi++) {
+          if (a.pickScores[pi] !== b.pickScores[pi]) return a.pickScores[pi] - b.pickScores[pi];
+        }
+        return 0;
+      });
+
+      if (simResults.length > 0) wins[simResults[0].name]++;
     }
 
     // Snapshot better pool win% history
