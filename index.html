@@ -210,7 +210,7 @@
       </svg>
       <div>
         <div class="logo-text">Golf Betters Cup</div>
-        <div class="logo-sub">2026 Major Season · US Open Next</div>
+        <div class="logo-sub">2026 Major Season · The Open Next</div>
       </div>
     </div>
     <div class="header-meta">
@@ -593,6 +593,7 @@
 
       <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:20px">
         <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">🇺🇸 US Open</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Tom Van Ormer <span style="font-size:11px;color:#6b7280">+2</span></span><span style="font-weight:600;color:#6b7280">2026</span></div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Anthony Fassari <span style="font-size:11px;color:#6b7280">+12</span></span><span style="font-weight:600;color:#6b7280">2025</span></div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Joe M. Pehanick <span style="font-size:11px;color:#6b7280">-5</span></span><span style="font-weight:600;color:#6b7280">2024</span></div>
         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px"><span>Mike Carpenter <span style="font-size:11px;color:#6b7280">-15</span></span><span style="font-weight:600;color:#6b7280">2023</span></div>
@@ -677,12 +678,13 @@
           <div class="sched-header">
             <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#0a2240"/><rect x="8" y="10" width="32" height="4" fill="#b22234"/><rect x="8" y="18" width="32" height="4" fill="#b22234"/><rect x="8" y="26" width="32" height="4" fill="#b22234"/><rect x="8" y="34" width="32" height="4" fill="#b22234"/><rect x="8" y="10" width="14" height="12" fill="#3c3b6e"/><circle cx="12" cy="14" r="1.2" fill="white"/><circle cx="16" cy="14" r="1.2" fill="white"/><circle cx="20" cy="14" r="1.2" fill="white"/><circle cx="14" cy="17" r="1.2" fill="white"/><circle cx="18" cy="17" r="1.2" fill="white"/></svg>
             <div style="flex:1;min-width:0"><div class="sched-name">US Open</div><div class="sched-course">Shinnecock Hills · Southampton, NY</div></div>
-            <span class="sched-status" style="background:#fef9c3;color:#854d0e">Next up</span>
+            <span class="sched-status" style="background:#dcfce7;color:#166534">✓ Complete</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Jun 18–21, 2026</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Tue Jun 16 · 7 AM PST</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks close</span><span class="sched-row-val">Wed Jun 17 · 5 PM PST</span></div>
-          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#b45309;font-weight:600">⏳ Picks open · Awaiting submissions</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Winner</span><span class="sched-row-val" style="color:#166534">Tom Van Ormer (+2)</span></div>
+          <div class="sched-row"><span class="sched-row-lbl">Status</span><span class="sched-row-val" style="color:#166534">✓ Complete · 18 betters</span></div>
           <div class="sched-countdown"><span class="sched-cd-lbl">Picks open in</span><span class="sched-cd-val" id="sched-cd-uso">–</span></div>
         </div>
       </div>
@@ -696,7 +698,7 @@
           <div class="sched-header">
             <svg class="sched-badge" viewBox="0 0 48 48"><rect width="48" height="48" rx="8" fill="#2d1b4e"/><path d="M20 12 L28 12 L30 22 Q34 24 34 28 Q34 34 24 36 Q14 34 14 28 Q14 24 18 22 Z" fill="#b8970a"/><rect x="22" y="8" width="4" height="5" rx="1" fill="#b8970a"/><rect x="20" y="36" width="8" height="3" rx="1" fill="#b8970a"/><rect x="17" y="38" width="14" height="2" rx="1" fill="#b8970a"/></svg>
             <div style="flex:1;min-width:0"><div class="sched-name">The Open Championship</div><div class="sched-course">Royal Birkdale · Southport, England</div></div>
-            <span class="sched-status" style="background:var(--gray-light);color:var(--text-muted)">Upcoming</span>
+            <span class="sched-status" style="background:#fef9c3;color:#854d0e">Next up</span>
           </div>
           <div class="sched-row"><span class="sched-row-lbl">Tournament</span><span class="sched-row-val">Jul 16–19, 2026</span></div>
           <div class="sched-row"><span class="sched-row-lbl">Picks open</span><span class="sched-row-val">Mon Jul 13 · 7 AM PST</span></div>
@@ -810,30 +812,29 @@ function normName(n) {
 // ============================================================
 const GBC_DATA = {
   2026: {
-    label: "GBC 2026 — US Open Live",
-    sub: "Masters & PGA Championship complete · US Open in play · The Open TBD",
+    label: "GBC 2026 — Intermission (US Open Complete)",
+    sub: "Masters, PGA Championship & US Open complete · The Open at Royal Birkdale TBD",
     winners: ["TBD","TBD","TBD"],
     pool: null,
     live: false,
-    liveGBC: true,
+    liveGBC: false,
     rows: [
-      // Total = Masters + PGA Championship final score
-      // GBC roster: David Andres Morgan removed (forfeited PGA by not submitting picks)
-      { name:"Brian McCarthy",       total:-38, masters:-26, pga:-12, usOpen:null, theOpen:null },
-      { name:"Joe Caselle",          total:-39, masters:-28, pga:-11, usOpen:null, theOpen:null },
-      { name:"Tom Counts",           total:-40, masters:-30, pga:-10, usOpen:null, theOpen:null },
-      { name:"Anthony Fassari",      total:-31, masters:-24, pga:-7,  usOpen:null, theOpen:null },
-      { name:"Joseph Jamie Pehanick",total:-29, masters:-23, pga:-6,  usOpen:null, theOpen:null },
-      { name:"Scott Stevens",        total:-30, masters:-22, pga:-8,  usOpen:null, theOpen:null },
-      { name:"Doug Colliau",         total:-17, masters:-15, pga:-2,  usOpen:null, theOpen:null },
-      { name:"Jim Stankiwicz",       total:-22, masters:-14, pga:-8,  usOpen:null, theOpen:null },
-      { name:"Matt Mingrone",        total:-20, masters:-13, pga:-7,  usOpen:null, theOpen:null },
-      { name:"Kevin Shinar",         total:-22, masters:-13, pga:-9,  usOpen:null, theOpen:null },
-      { name:"George Pehanick",      total:-18, masters:-12, pga:-6,  usOpen:null, theOpen:null },
-      { name:"Tom Van Ormer",        total:-14, masters:-11, pga:-3,  usOpen:null, theOpen:null },
-      { name:"Geoff White",          total:-12, masters:-10, pga:-2,  usOpen:null, theOpen:null },
-      { name:"Christian Fassari",    total:-14, masters:-8,  pga:-6,  usOpen:null, theOpen:null },
-      { name:"Rod Walters",          total:-14, masters:-6,  pga:-8,  usOpen:null, theOpen:null },
+      // Total = Masters + PGA + US Open (The Open TBD)
+      // US Open 2026 GBC Winner: Tom Van Ormer (+2 at Shinnecock Hills)
+      { name:"Joe Caselle",                 total:-33, masters:-28, pga:-11, usOpen:+6,  theOpen:null },
+      { name:"Tom Counts",                  total:-32, masters:-30, pga:-10, usOpen:+8,  theOpen:null },
+      { name:"Brian McCarthy",              total:-30, masters:-26, pga:-12, usOpen:+8,  theOpen:null },
+      { name:"Joseph Jamie Pehanick",       total:-24, masters:-23, pga:-6, usOpen:+5,  theOpen:null },
+      { name:"Scott Stevens",               total:-24, masters:-22, pga:-8, usOpen:+6,  theOpen:null },
+      { name:"Anthony Fassari",             total:-22, masters:-24, pga:-7, usOpen:+9,  theOpen:null },
+      { name:"Jim Stankiwicz",              total:-17, masters:-14, pga:-8, usOpen:+5,  theOpen:null },
+      { name:"Tom Van Ormer",               total:-12, masters:-11, pga:-3, usOpen:+2,  theOpen:null },
+      { name:"Matt Mingrone",               total:-10, masters:-13, pga:-7, usOpen:+10,  theOpen:null },
+      { name:"Kevin Shinar",                total:-10, masters:-13, pga:-9, usOpen:+12,  theOpen:null },
+      { name:"George Pehanick",             total:-8, masters:-12, pga:-6, usOpen:+10,  theOpen:null },
+      { name:"Christian Fassari",           total:-2, masters:-8, pga:-6, usOpen:+12,  theOpen:null },
+      { name:"Doug Colliau",                total:+2, masters:-15, pga:-2, usOpen:+19,  theOpen:null },
+      { name:"Geoff White",                 total:+10, masters:-10, pga:-2, usOpen:+22,  theOpen:null },
     ],
   },
   2025: {
@@ -937,6 +938,7 @@ const RECORDS = {
     {y:2023,n:"Joseph J. Pehanick",s:"-16"},
   ],
   "US Open": [
+    {y:2026,n:"Tom Van Ormer",s:"+2"},
     {y:2025,n:"Anthony Fassari",s:"+12"},
     {y:2024,n:"Joe M. Pehanick",s:"-5"},
     {y:2023,n:"Mike Carpenter",s:"-15"},
@@ -2638,7 +2640,7 @@ function renderGBCSeason() {
     statRow.innerHTML = `
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">2 of 4</div><div class="stat-sub">US Open in play</div></div>
+      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">3 of 4</div><div class="stat-sub">The Open up next</div></div>
       <div class="stat-card"><div class="stat-label">The Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">Royal Birkdale · Jul 16–19</div></div>`;
   } else {
     const [w1,w2,w3] = data.winners;
@@ -2653,72 +2655,23 @@ function renderGBCSeason() {
   tbody.innerHTML = "";
 
   if (yr === 2026) {
-    // Live mode (US Open era): PGA scores are now HISTORICAL/FIXED (read from GBC_DATA),
-    // US Open score is the live one computed from each better's current picks.
-    // Total = Masters + PGA (fixed) + US Open (live, when available)
-    const mastersByName = {};
-    const pgaByName = {};
-    data.rows.forEach(r => {
-      mastersByName[r.name] = r.masters;
-      pgaByName[r.name] = r.pga;
-    });
+    // INTERMISSION mode (after US Open, before The Open):
+    // All 3 completed majors read directly from GBC_DATA. The Open shown as TBD.
+    // Sorted by total ascending (lowest score wins).
+    const sortedRows = [...data.rows].sort((a, b) => (a.total ?? 99) - (b.total ?? 99));
 
-    // Alias map: BETTERS name → GBC_DATA name (handles name variations between datasets)
-    const GBC_NAME_ALIASES = {
-      "Joseph Pehanick": "Joseph Jamie Pehanick",
-      "Jim Stankiewicz": "Jim Stankiwicz",
-    };
-
-    // Build live GBC roster from BETTERS (filter to GBC members)
-    const gbcRoster = BETTERS.filter(b => b.gbc).map(b => {
-      const gbcName = GBC_NAME_ALIASES[b.name] || b.name;
-      const masters = mastersByName[gbcName] ?? null;
-      const pga = pgaByName[gbcName] ?? null;
-
-      // US Open score: DQ if no picks submitted, else use live calcBetter total
-      let usOpen = null;
-      let usOpenDQ = false;
-      if (b.noPicksThisEvent) {
-        usOpenDQ = true; // Pre-submission state OR forfeited this event
-      } else {
-        const calc = calcBetter(b);
-        // Only show US Open score once tournament has live data (not pre-tournament)
-        const hasLiveData = Object.keys(golferScores).length > 0;
-        if (hasLiveData && calc.totalScore !== null && calc.totalScore !== undefined) {
-          usOpen = calc.totalScore;
-        }
-      }
-
-      // Total = Masters + PGA + US Open (if all known)
-      let total = null;
-      if (masters !== null) {
-        total = masters;
-        if (pga !== null) total += pga;
-        if (usOpen !== null) total += usOpen;
-      }
-
-      return { name: b.name, masters, pga, usOpen, usOpenDQ, total };
-    });
-
-    // Sort by running total ascending (lowest score wins).
-    // US Open DQ doesn't push to bottom — they still have Masters + PGA totals counted.
-    gbcRoster.sort((a, b) => (a.total ?? 99) - (b.total ?? 99));
-
-    gbcRoster.forEach((row, i) => {
+    sortedRows.forEach((row, i) => {
       const tr = document.createElement("tr");
       const mDisp = row.masters !== null ? fmtScore(row.masters) : '–';
       const mCls = row.masters !== null ? scoreCls(row.masters) : 'even';
       const pDisp = row.pga !== null ? fmtScore(row.pga) : '–';
       const pCls = row.pga !== null ? scoreCls(row.pga) : 'even';
+      const usDisp = row.usOpen !== null ? fmtScore(row.usOpen) : '–';
+      const usCls = row.usOpen !== null ? scoreCls(row.usOpen) : 'even';
       const tDisp = row.total !== null ? fmtScore(row.total) : '–';
       const tCls = row.total !== null ? scoreCls(row.total) : 'even';
-      const usDisp = row.usOpenDQ
-        ? '<span style="color:var(--text-muted);font-size:11px">Awaiting picks</span>'
-        : (row.usOpen !== null
-            ? `<span class="${scoreCls(row.usOpen)}">${fmtScore(row.usOpen)}</span>`
-            : '<span style="color:var(--text-muted)">In Play</span>');
 
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${pCls}">${pDisp}</td><td class="num">${usDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
+      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}" style="font-weight:700">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${pCls}">${pDisp}</td><td class="num ${usCls}">${usDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
       tbody.appendChild(tr);
     });
   } else {
