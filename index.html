@@ -1930,6 +1930,18 @@ function renderLeaderboard() {
   const tournamentStarted = Object.values(golferScores).some(g => g.toPar !== 0 || (g.thru !== null && g.thru > 0));
 
   if (tournamentStarted) {
+    // Helper: get the toPar score for a better's pick at a given index,
+    // treating MC golfers as a large positive number so they sort last.
+    // Uses ORIGINAL pick order (better.picks[i]) — Pick 1 weighted most heavily.
+    const pickScore = (better, idx) => {
+      const name = better.picks?.[idx];
+      if (!name) return 999;
+      const g = golferScores[normName(name).toLowerCase()] || golferScores[name];
+      if (!g) return 999;          // golfer not in data yet
+      if (g.isMC) return 99;       // MC counts as worse than any made-cut score
+      return g.toPar;
+    };
+
     rows.sort((a, b) => {
       const aOut = a.twoMC && !a.better.gbc;
       const bOut = b.twoMC && !b.better.gbc;
@@ -1938,10 +1950,24 @@ function renderLeaderboard() {
       if (!aOut && bOut) return -1;
       // Both at bottom — sort by score among them
       if (aOut && bOut) return (a.totalScore ?? 999) - (b.totalScore ?? 999);
-      // Everyone else sorts by score
+      // Null totals go to bottom
       if (a.totalScore === null && b.totalScore !== null) return 1;
       if (a.totalScore !== null && b.totalScore === null) return -1;
-      return (a.totalScore ?? 0) - (b.totalScore ?? 0);
+
+      // Primary sort: total score (lower is better in golf)
+      const totalDiff = (a.totalScore ?? 0) - (b.totalScore ?? 0);
+      if (totalDiff !== 0) return totalDiff;
+
+      // TIEBREAKER: walk picks in original order (P1 → P2 → P3 → ALT)
+      // Lower score at the earliest differing pick wins the tie.
+      for (let i = 0; i < 4; i++) {
+        const aPick = pickScore(a.better, i);
+        const bPick = pickScore(b.better, i);
+        if (aPick !== bPick) return aPick - bPick;
+      }
+      // Truly identical — fall back to alphabetical by last name for stability
+      const lastName = b => b.better.name.trim().split(" ").pop().toLowerCase();
+      return lastName(a).localeCompare(lastName(b));
     });
   } else {
     // Pre-tournament: sort alphabetically by last name
