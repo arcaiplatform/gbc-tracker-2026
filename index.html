@@ -241,17 +241,17 @@
 
     <div id="statusBar" class="status-bar">
       <div>
-        <div class="status-text" id="statusText">US Open 2026 — Picks Open</div>
-        <div class="status-sub" id="statusSub">Shinnecock Hills GC · Southampton, NY · June 18–21 · Live scoring begins Thursday</div>
+        <div class="status-text" id="statusText">2026 Season — Intermission</div>
+        <div class="status-sub" id="statusSub">US Open complete · Tom Van Ormer wins at +2 · The Open at Royal Birkdale up next</div>
       </div>
       <div style="font-size:11px;color:var(--text-muted)" id="roundInfo"></div>
     </div>
 
     <div class="stat-row" id="statRow">
-      <div class="stat-card"><div class="stat-label">Betters</div><div class="stat-value">20</div><div class="stat-sub">Picks locked</div></div>
-      <div class="stat-card"><div class="stat-label">Pool</div><div class="stat-value">$4,000</div><div class="stat-sub">20 entries × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Tournament</div><div class="stat-value" style="font-size:14px">US Open</div><div class="stat-sub">Shinnecock · Jun 18–21</div></div>
-      <div class="stat-card"><div class="stat-label">Round 1 Tees Off</div><div class="stat-value" style="font-size:14px;color:#185fa5" id="r1Countdown">–</div><div class="stat-sub">Thu Jun 18 · 7 AM ET</div></div>
+      <div class="stat-card"><div class="stat-label">US Open Winner</div><div class="stat-value" style="font-size:14px;color:#166534">Tom Van Ormer</div><div class="stat-sub">+2 · Shinnecock · Jun 18–21</div></div>
+      <div class="stat-card"><div class="stat-label">Season Leader</div><div class="stat-value" style="font-size:14px">Joe Caselle</div><div class="stat-sub">-33 · 3 of 4 majors</div></div>
+      <div class="stat-card"><div class="stat-label">Next Major</div><div class="stat-value" style="font-size:14px">The Open</div><div class="stat-sub">Royal Birkdale · Jul 16–19</div></div>
+      <div class="stat-card"><div class="stat-label">The Open R1</div><div class="stat-value" style="font-size:14px;color:#185fa5" id="r1Countdown">–</div><div class="stat-sub">Thu Jul 16 · 6:30 AM BST</div></div>
     </div>
 
     <!-- LOCKED — shown before Tue Jun 16 7AM PST -->
@@ -3052,8 +3052,8 @@ schedCountdown('2026-07-13', 'sched-cd-open');
 function tickPGACountdown() {
   const el = document.getElementById('r1Countdown') || document.getElementById('pgaCountdown');
   if (!el) return;
-  // Round 1 tees off Thu Jun 18 at 7:00 AM ET (= 4:00 AM PST)
-  const target = new Date('2026-06-18T07:00:00-04:00').getTime();
+  // The Open R1 tees off Thu Jul 16 at 6:30 AM BST (= 5:30 UTC = 1:30 AM ET)
+  const target = new Date('2026-07-16T05:30:00Z').getTime();
   const diff = target - Date.now();
   if (diff <= 0) { el.textContent = 'LIVE'; el.style.color = '#16a34a'; return; }
   const d = Math.floor(diff / 86400000);
