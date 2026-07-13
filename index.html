@@ -403,7 +403,7 @@
 
     <div class="card">
       <div class="card-header">
-        <div><div class="card-title">US Open — Golfer Scores</div><div class="card-sub">Live scores from DataGolf · Used to calculate betters' standings</div></div>
+        <div><div class="card-title">The Open — Golfer Scores</div><div class="card-sub">Live scores from DataGolf · Used to calculate betters' standings</div></div>
         <input class="search-input" style="width:200px;flex:none" placeholder="Search golfer..." oninput="filterGolfers(this.value)" />
       </div>
       <table id="golferTable">
@@ -433,7 +433,7 @@
         <div style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Reveals in</div>
         <div id="pickRevealCountdown" style="font-size:28px;font-weight:700;color:#c8a84b;font-family:Georgia,serif">–</div>
       </div>
-      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">US Open · Shinnecock Hills GC · June 18–21, 2026</div>
+      <div style="margin-top:20px;font-size:12px;color:var(--text-muted)">The Open · Royal Birkdale · July 16–19, 2026</div>
     </div>
 
     <!-- REVEALED after Wed Jun 17 5PM PST -->
@@ -484,8 +484,8 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">US Open · Field & OWGR Rankings</div>
-          <div class="card-sub">Full field · Shinnecock Hills · ★ = OWGR Top 10 · sorted by DataGolf win% when live, OWGR rank pre-tournament</div>
+          <div class="card-title">The Open · Field & OWGR Rankings</div>
+          <div class="card-sub">Full field · Royal Birkdale · ★ = OWGR Top 10 · sorted by DataGolf win% when live, OWGR rank pre-tournament</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="fieldFilterBtns">
           <button onclick="setFieldFilter('all',this)" class="flt-btn flt-active">Full Field</button>
@@ -528,7 +528,7 @@
 
     <div class="card">
       <div class="card-header">
-        <div class="card-title" id="gbcTableTitle">GBC 2026 Standings — US Open Live</div>
+        <div class="card-title" id="gbcTableTitle">GBC 2026 Standings — The Open Live</div>
       </div>
       <table>
         <thead>
@@ -555,7 +555,7 @@
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Historical major champions and season-long winners</div>
       </div>
       <button onclick="exportCurrentEvent()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
-        ⬇ Export Current Event (US Open 2026)
+        ⬇ Export Current Event (The Open 2026)
       </button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px" id="recordsGrid">
@@ -1067,7 +1067,7 @@ const FINAL_PGA_2026 = {
 };
 
 function seedFinalScores() {
-  // US Open mode — do NOT seed Masters/PGA scores into live golferScores
+  // The Open mode — do NOT seed Masters/PGA/US Open scores into live golferScores
   // The Masters data is preserved in FINAL_MASTERS_2026 for Record Book lookup only
   console.log('US Open mode — awaiting live DataGolf data, prior tournament seeds skipped');
 }
@@ -1085,8 +1085,8 @@ async function fetchWithProxy(url) {
     throw new Error("API_ENABLED is false — set to true after picks close to start fetching DataGolf data");
   }
   // US Open 2026 — DataGolf sources only. No Masters fallback (would pull stale Masters data).
-  // Pre-tournament endpoint is used until R1 tees off Thursday June 18 7AM ET.
-  const TOURNAMENT_START_FOR_FETCH = new Date('2026-06-18T11:00:00Z').getTime();
+  // Pre-tournament endpoint is used until R1 tees off Thursday July 16 6:30 AM BST.
+  const TOURNAMENT_START_FOR_FETCH = new Date('2026-07-16T05:30:00Z').getTime();
   const isTournamentLive = Date.now() >= TOURNAMENT_START_FOR_FETCH;
 
   // Try both in case primary fails — but prefer the right one for current state
@@ -1130,8 +1130,8 @@ async function loadScores() {
   if (btn) { btn.textContent = "↻ Loading..."; btn.disabled = true; }
   document.getElementById("lastUpdated").textContent = "Refreshing...";
 
-  // Tournament start: Thursday June 18, 7 AM ET (= 11:00 UTC)
-  const TOURNAMENT_START = new Date('2026-06-18T11:00:00Z').getTime();
+  // Tournament start: Thursday July 16, 6:30 AM BST (= 05:30 UTC)
+  const TOURNAMENT_START = new Date('2026-07-16T05:30:00Z').getTime();
   const isTournamentLive = Date.now() >= TOURNAMENT_START;
 
   try {
@@ -1225,7 +1225,7 @@ function parseESPN(json) {
       document.getElementById("statusBar").className = "status-bar";
 
       // Note: Masters-era CONFIRMED_MC overrides removed.
-      // The US Open cut happens after R2 (Friday June 19 evening).
+      // The Open cut happens after R2 (Friday July 17 evening).
       // DataGolf will set current_pos="MC" automatically when cuts are official.
       return;
     }
@@ -1463,7 +1463,7 @@ function snapshotWinProbs() {
 // When false: tracker shows OWGR-only field display, no API calls made.
 const API_ENABLED = false;  // ⏸ Intermission — turns back on for The Open R1
 
-const TOURNAMENT_KEY = "us_open_2026";
+const TOURNAMENT_KEY = "the_open_2026";
 const LS_GOLFER_KEY = `gbc_golfer_history_${TOURNAMENT_KEY}`;
 const LS_BETTER_KEY = `gbc_better_history_${TOURNAMENT_KEY}`;
 
@@ -1845,13 +1845,13 @@ function tiebreak(tiedBetters) {
 }
 
 function checkTournamentComplete() {
-  // HARD GATE: tournament cannot be complete before Sunday June 21 evening
+  // HARD GATE: tournament cannot be complete before Sunday July 19 evening
   // R4 final groups typically finish around 7-9 PM ET (= 23:00-01:00 UTC Sunday/Monday)
-  const TOURNAMENT_EARLIEST_FINISH = new Date('2026-06-21T22:00:00Z').getTime();
+  const TOURNAMENT_EARLIEST_FINISH = new Date('2026-07-19T20:00:00Z').getTime();
   if (Date.now() < TOURNAMENT_EARLIEST_FINISH) return false;
 
   const activeGolfers = Object.values(golferScores).filter(g => !g.isMC);
-  // Require a meaningful field size — US Open has ~65 post-cut golfers.
+  // Require a meaningful field size — The Open has ~70 post-cut golfers.
   // If we have <30 active golfers in our data, something is wrong (data not loaded yet)
   if (activeGolfers.length < 30) return false;
   // Only complete when ALL active golfers have finished R4 (thru=18)
@@ -3128,165 +3128,164 @@ const PICKS_OPEN_TIME  = new Date('2026-07-14T07:00:00-07:00');
 const PICKS_CLOSE_TIME = new Date('2026-07-15T17:00:00-07:00');
 let existingPicks = [];
 
-// PGA_FIELD constant — now holds the 2026 US Open field at Shinnecock Hills
+// PGA_FIELD constant — now holds the 2026 Open Championship field at Royal Birkdale
 // (Variable name kept as PGA_FIELD for backwards compat with rendering code)
+// 156 total = 152 known + 3 Scottish Open TBD + 1 Last-Chance Qualifier TBD
 const PGA_FIELD = [
-  // ★ OWGR Top 10 (max 2 allowed in main picks)
+  // ★ OWGR Top 10 (max 2 allowed across all 4 picks incl. alt)
   {name:"Scottie Scheffler",               owgr:true,  rank:1},
   {name:"Rory McIlroy",                    owgr:true,  rank:2},
-  {name:"Cameron Young",                   owgr:true,  rank:3},
-  {name:"Matt Fitzpatrick",                owgr:true,  rank:4},
+  {name:"Matt Fitzpatrick",                owgr:true,  rank:3},
+  {name:"Cameron Young",                   owgr:true,  rank:4},
   {name:"Russell Henley",                  owgr:true,  rank:5},
-  {name:"Justin Rose",                     owgr:true,  rank:6},
-  {name:"Tommy Fleetwood",                 owgr:true,  rank:7},
-  {name:"Jon Rahm",                        owgr:true,  rank:8},
-  {name:"J.J. Spaun",                      owgr:true,  rank:9},
-  {name:"Collin Morikawa",                 owgr:true,  rank:10},
-  // Full field (sorted by OWGR rank, then alphabetical for unranked)
-  {name:"Chris Gotterup",                  owgr:false, rank:11},
-  {name:"Xander Schauffele",               owgr:false, rank:12},
-  {name:"Aaron Rai",                       owgr:false, rank:13},
-  {name:"Ludvig Aberg",                    owgr:false, rank:14},
-  {name:"Ben Griffin",                     owgr:false, rank:15},
-  {name:"Justin Thomas",                   owgr:false, rank:16},
-  {name:"Robert MacIntyre",                owgr:false, rank:17},
-  {name:"Si Woo Kim",                      owgr:false, rank:18},
-  {name:"Sepp Straka",                     owgr:false, rank:19},
-  {name:"Alex Noren",                      owgr:false, rank:20},
-  {name:"Tyrrell Hatton",                  owgr:false, rank:21},
-  {name:"Harris English",                  owgr:false, rank:22},
-  {name:"Ryan Gerard",                     owgr:false, rank:23},
-  {name:"Kristoffer Reitan",               owgr:false, rank:24},
-  {name:"Hideki Matsuyama",                owgr:false, rank:25},
+  {name:"Chris Gotterup",                  owgr:true,  rank:6},
+  {name:"Collin Morikawa",                 owgr:true,  rank:7},
+  {name:"Wyndham Clark",                   owgr:true,  rank:8},
+  {name:"Tommy Fleetwood",                 owgr:true,  rank:9},
+  {name:"Justin Rose",                     owgr:true,  rank:10},
+  // Full field (sorted by OWGR rank)
+  {name:"Jon Rahm",                        owgr:false, rank:11},
+  {name:"Viktor Hovland",                  owgr:false, rank:12},
+  {name:"J.J. Spaun",                      owgr:false, rank:13},
+  {name:"Xander Schauffele",               owgr:false, rank:14},
+  {name:"Robert MacIntyre",                owgr:false, rank:15},
+  {name:"Ben Griffin",                     owgr:false, rank:16},
+  {name:"Aaron Rai",                       owgr:false, rank:17},
+  {name:"Sam Burns",                       owgr:false, rank:18},
+  {name:"Justin Thomas",                   owgr:false, rank:19},
+  {name:"Ludvig Aberg",                    owgr:false, rank:20},
+  {name:"Si Woo Kim",                      owgr:false, rank:21},
+  {name:"Tyrrell Hatton",                  owgr:false, rank:22},
+  {name:"Sepp Straka",                     owgr:false, rank:23},
+  {name:"Min Woo Lee",                     owgr:false, rank:24},
+  {name:"Alex Noren",                      owgr:false, rank:25},
   {name:"Patrick Reed",                    owgr:false, rank:26},
-  {name:"Jacob Bridgeman",                 owgr:false, rank:27},
-  {name:"Akshay Bhatia",                   owgr:false, rank:28},
-  {name:"Sam Burns",                       owgr:false, rank:29},
-  {name:"Bryson DeChambeau",               owgr:false, rank:30},
-  {name:"Kurt Kitayama",                   owgr:false, rank:31},
-  {name:"Nicolai Hojgaard",                owgr:false, rank:32},
-  {name:"Viktor Hovland",                  owgr:false, rank:33},
-  {name:"Patrick Cantlay",                 owgr:false, rank:34},
-  {name:"Maverick McNealy",                owgr:false, rank:35},
-  {name:"Min Woo Lee",                     owgr:false, rank:36},
-  {name:"Wyndham Clark",                   owgr:false, rank:37},
-  {name:"Keegan Bradley",                  owgr:false, rank:38},
-  {name:"J.T. Poston",                     owgr:false, rank:39},
-  {name:"Alex Smalley",                    owgr:false, rank:40},
-  {name:"Rickie Fowler",                   owgr:false, rank:41},
-  {name:"Jake Knapp",                      owgr:false, rank:42},
-  {name:"Shane Lowry",                     owgr:false, rank:43},
-  {name:"Gary Woodland",                   owgr:false, rank:44},
-  {name:"Jason Day",                       owgr:false, rank:45},
-  {name:"Daniel Berger",                   owgr:false, rank:46},
-  {name:"Michael Kim",                     owgr:false, rank:48},
-  {name:"Nicolas Echavarria",              owgr:false, rank:49},
-  {name:"Adam Scott",                      owgr:false, rank:50},
+  {name:"Kristoffer Reitan",               owgr:false, rank:27},
+  {name:"Ryan Gerard",                     owgr:false, rank:28},
+  {name:"Akshay Bhatia",                   owgr:false, rank:29},
+  {name:"Jacob Bridgeman",                 owgr:false, rank:30},
+  {name:"Hideki Matsuyama",                owgr:false, rank:31},
+  {name:"Harris English",                  owgr:false, rank:32},
+  {name:"Tom Kim",                         owgr:false, rank:33},
+  {name:"J.T. Poston",                     owgr:false, rank:34},
+  {name:"Nicolai Hojgaard",                owgr:false, rank:35},
+  {name:"Kurt Kitayama",                   owgr:false, rank:36},
+  {name:"Bryson DeChambeau",               owgr:false, rank:37},
+  {name:"Patrick Cantlay",                 owgr:false, rank:38},
+  {name:"Maverick McNealy",                owgr:false, rank:39},
+  {name:"Bud Cauley",                      owgr:false, rank:40},
+  {name:"Keegan Bradley",                  owgr:false, rank:41},
+  {name:"Rickie Fowler",                   owgr:false, rank:42},
+  {name:"Gary Woodland",                   owgr:false, rank:43},
+  {name:"Alex Smalley",                    owgr:false, rank:44},
+  {name:"Jake Knapp",                      owgr:false, rank:45},
+  {name:"Shane Lowry",                     owgr:false, rank:46},
+  {name:"Joaquin Niemann",                 owgr:false, rank:48},
+  {name:"Daniel Berger",                   owgr:false, rank:49},
+  {name:"Marco Penge",                     owgr:false, rank:50},
   {name:"Jordan Spieth",                   owgr:false, rank:51},
-  {name:"Matt McCarty",                    owgr:false, rank:52},
-  {name:"Corey Conners",                   owgr:false, rank:54},
-  {name:"Michael Brennan",                 owgr:false, rank:55},
-  {name:"David Puig",                      owgr:false, rank:56},
-  {name:"Pierceson Coody",                 owgr:false, rank:57},
-  {name:"Andrew Novak",                    owgr:false, rank:58},
-  {name:"Brian Harman",                    owgr:false, rank:59},
-  {name:"Ryan Fox",                        owgr:false, rank:60},
-  {name:"Ryo Hisatsune",                   owgr:false, rank:61},
-  {name:"Nick Taylor",                     owgr:false, rank:62},
-  {name:"Harry Hall",                      owgr:false, rank:66},
-  {name:"Max Greyserman",                  owgr:false, rank:67},
-  {name:"Bud Cauley",                      owgr:false, rank:68},
-  {name:"Jayden Schaper",                  owgr:false, rank:69},
-  {name:"Matti Schmid",                    owgr:false, rank:70},
-  {name:"Sungjae Im",                      owgr:false, rank:72},
-  {name:"Alex Fitzpatrick",                owgr:false, rank:73},
-  {name:"Joaquin Niemann",                 owgr:false, rank:79},
-  {name:"Patrick Rodgers",                 owgr:false, rank:81},
-  {name:"Sahith Theegala",                 owgr:false, rank:83},
-  {name:"Andrew Putnam",                   owgr:false, rank:84},
-  {name:"Lucas Herbert",                   owgr:false, rank:89},
-  {name:"Max McGreevy",                    owgr:false, rank:98},
-  {name:"John Parry",                      owgr:false, rank:99},
-  {name:"Keith Mitchell",                  owgr:false, rank:100},
-  {name:"Chris Kirk",                      owgr:false, rank:104},
-  {name:"Brooks Koepka",                   owgr:false, rank:109},
-  {name:"Sudarshan Yellamaraju",           owgr:false, rank:110},
-  {name:"Adrien Saddier",                  owgr:false, rank:113},
-  {name:"Emiliano Grillo",                 owgr:false, rank:120},
-  {name:"Kevin Roy",                       owgr:false, rank:131},
-  {name:"Cameron Smith",                   owgr:false, rank:132},
-  {name:"Davis Thompson",                  owgr:false, rank:134},
-  {name:"William Mouw",                    owgr:false, rank:138},
-  {name:"Billy Horschel",                  owgr:false, rank:146},
-  {name:"Laurie Canter",                   owgr:false, rank:148},
-  {name:"Tom Kim",                         owgr:false, rank:152},
-  {name:"Adrien Dumont de Chassart",       owgr:false, rank:166},
-  {name:"Jackson Suber",                   owgr:false, rank:167},
-  {name:"Peter Uihlein",                   owgr:false, rank:176},
-  {name:"Hennie Du Plessis",               owgr:false, rank:183},
-  {name:"Carlos Ortiz",                    owgr:false, rank:185},
-  {name:"Neal Shipley",                    owgr:false, rank:190},
-  {name:"Ben Kohles",                      owgr:false, rank:191},
-  {name:"Zac Blair",                       owgr:false, rank:206},
-  {name:"Nathan Kimsey",                   owgr:false, rank:213},
-  {name:"Ugo Coussaud",                    owgr:false, rank:215},
-  {name:"Taylor Montgomery",               owgr:false, rank:219},
-  {name:"Cooper Dossey",                   owgr:false, rank:233},
-  {name:"Dustin Johnson",                  owgr:false, rank:242},
-  {name:"Mason Howell",                    owgr:false, rank:250},
-  {name:"Jackson Herrington",              owgr:false, rank:251},
-  {name:"Hamilton Coleman",                owgr:false, rank:252},
-  {name:"Brandon Holtz",                   owgr:false, rank:253},
-  {name:"Johnny Keefer",                   owgr:false, rank:254},
-  {name:"Ethan Fang",                      owgr:false, rank:255},
-  {name:"Preston Stout",                   owgr:false, rank:256},
-  {name:"Mateo Pulcini",                   owgr:false, rank:257},
-  {name:"Sam Stevens",                     owgr:false, rank:258},
-  {name:"Rocco Repetto Taylor",            owgr:false, rank:259},
-  {name:"Angel Hidalgo",                   owgr:false, rank:260},
-  {name:"Ryder Cowan",                     owgr:false, rank:261},
-  {name:"Miles Russell",                   owgr:false, rank:262},
-  {name:"Arni Sveinsson",                  owgr:false, rank:263},
-  {name:"Ben Silverman",                   owgr:false, rank:263},
-  {name:"Carl Yuan",                       owgr:false, rank:264},
-  {name:"Ben James",                       owgr:false, rank:265},
-  {name:"Eric Lee",                        owgr:false, rank:266},
-  {name:"T.K. Kim",                        owgr:false, rank:267},
-  {name:"Giuseppe Puebla",                 owgr:false, rank:268},
-  {name:"Logan Reilly",                    owgr:false, rank:269},
-  {name:"Niklas Norgaard",                 owgr:false, rank:270},
-  {name:"Vaughn Harber",                   owgr:false, rank:270},
-  {name:"Jackson Ormond",                  owgr:false, rank:271},
-  {name:"Chase Kyes",                      owgr:false, rank:272},
-  {name:"Matthew Jordan",                  owgr:false, rank:273},
-  {name:"Matthew Robles",                  owgr:false, rank:273},
-  {name:"Marek Fleming",                   owgr:false, rank:274},
-  {name:"Bryan Lee",                       owgr:false, rank:275},
-  {name:"Jack Schoenberger",               owgr:false, rank:276},
-  {name:"Spencer Tibbits",                 owgr:false, rank:277},
-  {name:"Caleb Surratt",                   owgr:false, rank:280},
-  {name:"James Nicholas",                  owgr:false, rank:289},
-  {name:"Harry Higgs",                     owgr:false, rank:356},
-  {name:"Cole Hammer",                     owgr:false, rank:359},
-  {name:"Alejandro Tosti",                 owgr:false, rank:377},
-  {name:"Ryuichi Oiwa",                    owgr:false, rank:386},
-  {name:"Dylan Wu",                        owgr:false, rank:395},
-  {name:"Taihei Sato",                     owgr:false, rank:398},
-  {name:"Filippo Celli",                   owgr:false, rank:431},
-  {name:"Marcelo Rozo",                    owgr:false, rank:518},
-  {name:"Padraig Harrington",              owgr:false, rank:533},
-  {name:"Nick Hardy",                      owgr:false, rank:556},
-  {name:"Brandon Wu",                      owgr:false, rank:683},
-  {name:"Jackson Van Paris",               owgr:false, rank:697},
-  {name:"Jimmy Stanger",                   owgr:false, rank:706},
-  {name:"Kaito Onishi",                    owgr:false, rank:790},
-  {name:"Graeme McDowell",                 owgr:false, rank:938},
-  {name:"Jake Peacock",                    owgr:false, rank:1063},
-  {name:"Greyson Leach",                   owgr:false, rank:1211},
-  {name:"Jake Sollon",                     owgr:false, rank:1269},
-  {name:"Robbie Higgins",                  owgr:false, rank:1290},
-  {name:"Manav Shah",                      owgr:false, rank:1344},
-  {name:"J.B. Holmes",                     owgr:false, rank:2923}
+  {name:"Nicolas Echavarria",              owgr:false, rank:52},
+  {name:"Corey Conners",                   owgr:false, rank:53},
+  {name:"Jason Day",                       owgr:false, rank:54},
+  {name:"Michael Kim",                     owgr:false, rank:55},
+  {name:"Ryan Fox",                        owgr:false, rank:56},
+  {name:"Adam Scott",                      owgr:false, rank:57},
+  {name:"Eugenio Chacarra",                owgr:false, rank:59},
+  {name:"Michael Brennan",                 owgr:false, rank:60},
+  {name:"Pierceson Coody",                 owgr:false, rank:61},
+  {name:"Ryo Hisatsune",                   owgr:false, rank:62},
+  {name:"Matt McCarty",                    owgr:false, rank:63},
+  {name:"Brian Harman",                    owgr:false, rank:64},
+  {name:"Alex Fitzpatrick",                owgr:false, rank:65},
+  {name:"David Puig",                      owgr:false, rank:66},
+  {name:"Nick Taylor",                     owgr:false, rank:67},
+  {name:"Keith Mitchell",                  owgr:false, rank:68},
+  {name:"Andrew Novak",                    owgr:false, rank:69},
+  {name:"Eric Cole",                       owgr:false, rank:71},
+  {name:"Matt Wallace",                    owgr:false, rank:72},
+  {name:"Sami Valimaki",                   owgr:false, rank:73},
+  {name:"Max Homa",                        owgr:false, rank:74},
+  {name:"Harry Hall",                      owgr:false, rank:76},
+  {name:"Max Greyserman",                  owgr:false, rank:77},
+  {name:"Jordan Smith",                    owgr:false, rank:78},
+  {name:"Thomas Detry",                    owgr:false, rank:80},
+  {name:"Sahith Theegala",                 owgr:false, rank:81},
+  {name:"Casey Jarvis",                    owgr:false, rank:82},
+  {name:"Jayden Schaper",                  owgr:false, rank:85},
+  {name:"Sungjae Im",                      owgr:false, rank:86},
+  {name:"Rasmus Hojgaard",                 owgr:false, rank:88},
+  {name:"Keita Nakajima",                  owgr:false, rank:90},
+  {name:"Rasmus Neergaard-Petersen",       owgr:false, rank:91},
+  {name:"Shaun Norris",                    owgr:false, rank:94},
+  {name:"John Parry",                      owgr:false, rank:95},
+  {name:"Lucas Herbert",                   owgr:false, rank:97},
+  {name:"Daniel Hillier",                  owgr:false, rank:105},
+  {name:"Haotong Li",                      owgr:false, rank:106},
+  {name:"Kota Kaneko",                     owgr:false, rank:109},
+  {name:"Angel Ayora",                     owgr:false, rank:111},
+  {name:"Jackson Suber",                   owgr:false, rank:115},
+  {name:"Brooks Koepka",                   owgr:false, rank:118},
+  {name:"Hennie Du Plessis",               owgr:false, rank:120},
+  {name:"Andy Sullivan",                   owgr:false, rank:122},
+  {name:"Adrien Saddier",                  owgr:false, rank:128},
+  {name:"Jose Luis Ballester",             owgr:false, rank:132},
+  {name:"Tom McKibbin",                    owgr:false, rank:135},
+  {name:"Cameron Smith",                   owgr:false, rank:140},
+  {name:"Laurie Canter",                   owgr:false, rank:143},
+  {name:"Travis Smyth",                    owgr:false, rank:145},
+  {name:"Michael Hollick",                 owgr:false, rank:149},
+  {name:"Scott Vincent",                   owgr:false, rank:152},
+  {name:"Dan Bradbury",                    owgr:false, rank:153},
+  {name:"Bernd Wiesberger",                owgr:false, rank:155},
+  {name:"Jesper Svensson",                 owgr:false, rank:165},
+  {name:"Billy Horschel",                  owgr:false, rank:168},
+  {name:"Martin Couvra",                   owgr:false, rank:169},
+  {name:"Kazuki Higa",                     owgr:false, rank:177},
+  {name:"Peter Uihlein",                   owgr:false, rank:189},
+  {name:"Alistair Docherty",               owgr:false, rank:198},
+  {name:"Kazuma Kobori",                   owgr:false, rank:211},
+  {name:"Antoine Rozner",                  owgr:false, rank:216},
+  {name:"Francesco Laporta",               owgr:false, rank:222},
+  {name:"MJ Daffue",                       owgr:false, rank:227},
+  {name:"Francesco Molinari",              owgr:false, rank:243},
+  {name:"Ren Yonezawa",                    owgr:false, rank:249},
+  {name:"Frederic LaCroix",                owgr:false, rank:254},
+  {name:"Cameron John",                    owgr:false, rank:256},
+  {name:"James Nicholas",                  owgr:false, rank:292},
+  {name:"Caleb Surratt",                   owgr:false, rank:293},
+  {name:"Matthew Jordan",                  owgr:false, rank:304},
+  {name:"Naoyuki Kataoka",                 owgr:false, rank:387},
+  {name:"Sam Bairstow",                    owgr:false, rank:389},
+  {name:"Austen Truslow",                  owgr:false, rank:396},
+  {name:"David Duval",                     owgr:false, rank:401},
+  {name:"Daniel Brown",                    owgr:false, rank:402},
+  {name:"Joakin Lagergren",                owgr:false, rank:403},
+  {name:"Mason Howell",                    owgr:false, rank:404},
+  {name:"Fifa Laopakdee",                  owgr:false, rank:405},
+  {name:"Mateo Pulcini",                   owgr:false, rank:406},
+  {name:"Tim Wiedemeyer",                  owgr:false, rank:407},
+  {name:"Lev Grinberg",                    owgr:false, rank:408},
+  {name:"Alejandro De Castro Piera",       owgr:false, rank:409},
+  {name:"David Howard",                    owgr:false, rank:410},
+  {name:"Jeongwoo Ham",                    owgr:false, rank:410},
+  {name:"Jack McDonald",                   owgr:false, rank:411},
+  {name:"Nevill Ruiter",                   owgr:false, rank:412},
+  {name:"Baard Bjoernevik Skogen",         owgr:false, rank:413},
+  {name:"Tom Sloman",                      owgr:false, rank:414},
+  {name:"Sam Stevens",                     owgr:false, rank:415},
+  {name:"Louis Oosthuizen",                owgr:false, rank:419},
+  {name:"Matthew Southgate",               owgr:false, rank:453},
+  {name:"Ryutaro Nagano",                  owgr:false, rank:491},
+  {name:"Jiho Yang",                       owgr:false, rank:525},
+  {name:"Padraig Harrington",              owgr:false, rank:569},
+  {name:"Jack Buchanan",                   owgr:false, rank:702},
+  {name:"Marcus Plunkett",                 owgr:false, rank:777},
+  {name:"Matthew Baldwin",                 owgr:false, rank:792},
+  {name:"Tiger Christensen",               owgr:false, rank:1065},
+  {name:"Henrik Stenson",                  owgr:false, rank:1399},
+  {name:"Stewart Cink",                    owgr:false, rank:2003},
+  {name:"Stuart Grehan",                   owgr:false, rank:3482},
+  {name:"Darren Clarke",                   owgr:false, rank:4604}
 ];
 
 // ── PICK FORM LOGIC ──────────────────────────────────────────
