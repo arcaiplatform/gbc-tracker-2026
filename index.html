@@ -741,6 +741,24 @@
       <div class="section-heading">📅 Golf Betters Cup (GBC)</div>
       <p style="font-size:13px;color:var(--text-muted);line-height:1.7">The GBC is a season-long competition for players who enter <strong>all four majors</strong> — the Masters, PGA Championship, US Open, and The Open. Your GBC score is the <strong>cumulative total</strong> of your final scores across all four events. Same entry fee ($200/major) and payout structure applies to the GBC at year-end.</p>
     </div>
+
+    <div class="rules-section">
+      <div class="section-heading">🏆 GBC Tiebreaker — Countback</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px">If two or more GBC members finish the season tied on total score, the tie is resolved by <strong>countback of GBC finish positions across the four majors</strong>. Golf-style: T1s share rank 1, next distinct score is rank 3, etc. Only finishes among GBC members count (non-GBC winners don't shift GBC positions).</p>
+      <ul class="rules-list">
+        <li><span class="rule-icon">1</span><span><strong>Most 1st place finishes</strong> across the 4 majors wins.</span></li>
+        <li><span class="rule-icon">2</span><span>If still tied → <strong>most 2nd place finishes.</strong></span></li>
+        <li><span class="rule-icon">3</span><span>If still tied → <strong>most 3rd place finishes.</strong></span></li>
+        <li><span class="rule-icon">4</span><span>Continue down the finish positions (4th, 5th, ...) until resolved.</span></li>
+        <li><span class="rule-icon">5</span><span>If a member skipped a major (no picks submitted), they earn <strong>no finish position</strong> from that event — the countback effectively counts against them.</span></li>
+      </ul>
+      <div style="margin-top:14px;padding:14px 16px;background:#f8f9fa;border-left:3px solid var(--gold);border-radius:6px;font-size:13px;line-height:1.65;color:var(--text)">
+        <div style="font-weight:700;color:var(--navy);margin-bottom:8px">Example</div>
+        Two members tied at –38 across all 4 majors. Member A won one major and finished 4th, 6th, 9th in the others. Member B never won but finished 2nd, 3rd, 3rd, 5th.<br>
+        → <strong>Member A wins the tiebreaker</strong> on the first countback step (1 first place vs. 0). Winning matters.
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text-muted);font-style:italic">Rationale: rewards peak performance and winning over pure consistency. Almost always resolves within 2 steps.</div>
+    </div>
   </section>
 
 </main>
@@ -2687,7 +2705,41 @@ function renderGBCSeason() {
     // INTERMISSION mode (after US Open, before The Open):
     // All 3 completed majors read directly from GBC_DATA. The Open shown as TBD.
     // Sorted by total ascending (lowest score wins).
-    const sortedRows = [...data.rows].sort((a, b) => (a.total ?? 99) - (b.total ?? 99));
+    // TIEBREAKER: countback by GBC finish positions across the 4 majors —
+    // most 1st places wins, then most 2nds, then 3rds, etc.
+    // Golf-style ranking (T1s share rank 1, next distinct = rank 3, etc.)
+
+    // Compute each GBC member's finish position for each major (among GBC only)
+    const finishesByMember = {};
+    data.rows.forEach(r => { finishesByMember[r.name] = []; });
+    const majors = ['masters', 'pga', 'usOpen', 'theOpen'];
+    majors.forEach(major => {
+      const scored = data.rows
+        .filter(r => r[major] !== null && r[major] !== undefined)
+        .map(r => ({ name: r.name, score: r[major] }));
+      scored.sort((a, b) => a.score - b.score);
+      let currentRank = 1;
+      for (let i = 0; i < scored.length; i++) {
+        if (i > 0 && scored[i].score !== scored[i-1].score) currentRank = i + 1;
+        finishesByMember[scored[i].name].push(currentRank);
+      }
+    });
+
+    const maxRank = data.rows.length;
+    const sortedRows = [...data.rows].sort((a, b) => {
+      const totalDiff = (a.total ?? 99) - (b.total ?? 99);
+      if (totalDiff !== 0) return totalDiff;
+
+      // TIEBREAKER: countback — most 1sts, then 2nds, then 3rds, etc.
+      const aF = finishesByMember[a.name] || [];
+      const bF = finishesByMember[b.name] || [];
+      for (let pos = 1; pos <= maxRank; pos++) {
+        const aCount = aF.filter(p => p === pos).length;
+        const bCount = bF.filter(p => p === pos).length;
+        if (aCount !== bCount) return bCount - aCount;  // MORE wins → ranked higher
+      }
+      return 0;
+    });
 
     sortedRows.forEach((row, i) => {
       const tr = document.createElement("tr");
