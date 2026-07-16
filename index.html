@@ -740,6 +740,7 @@
     <div class="rules-section">
       <div class="section-heading">📅 Golf Betters Cup (GBC)</div>
       <p style="font-size:13px;color:var(--text-muted);line-height:1.7">The GBC is a season-long competition for players who enter <strong>all four majors</strong> — the Masters, PGA Championship, US Open, and The Open. Your GBC score is the <strong>cumulative total</strong> of your final scores across all four events. Same entry fee ($200/major) and payout structure applies to the GBC at year-end.</p>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:12px"><strong style="color:#991b1b">You must finish all 4 majors to be eligible for GBC standings.</strong> Skipping any event (no picks submitted) results in DNF status — you're dropped to the bottom of the season leaderboard and cannot compete for the season crown, regardless of running total from completed events.</p>
     </div>
 
     <div class="rules-section">
@@ -2775,6 +2776,14 @@ function renderGBCSeason() {
 
     const maxRank = liveRows.length;
     const sortedRows = [...liveRows].sort((a, b) => {
+      // GBC RULE: must finish all 4 majors to compete for the season crown.
+      // Non-finishers (didn't submit picks for The Open) go to the bottom regardless of running total.
+      if (a.theOpenDQ && !b.theOpenDQ) return 1;
+      if (!a.theOpenDQ && b.theOpenDQ) return -1;
+      // Both DQ'd — sort among them by historical total (informational)
+      if (a.theOpenDQ && b.theOpenDQ) return (a.total ?? 99) - (b.total ?? 99);
+
+      // Normal sort: total ascending (lower is better)
       const totalDiff = (a.total ?? 99) - (b.total ?? 99);
       if (totalDiff !== 0) return totalDiff;
 
@@ -2789,28 +2798,49 @@ function renderGBCSeason() {
       return 0;
     });
 
+    // Track ranking numbers separately: finishers get 1..N, DQs get "DNF"
+    let finisherRank = 0;
     sortedRows.forEach((row, i) => {
       const tr = document.createElement("tr");
+      const isDQ = row.theOpenDQ;
+      if (!isDQ) finisherRank++;
+
       const mDisp = row.masters !== null ? fmtScore(row.masters) : '–';
       const mCls = row.masters !== null ? scoreCls(row.masters) : 'even';
       const pDisp = row.pga !== null ? fmtScore(row.pga) : '–';
       const pCls = row.pga !== null ? scoreCls(row.pga) : 'even';
       const usDisp = row.usOpen !== null ? fmtScore(row.usOpen) : '–';
       const usCls = row.usOpen !== null ? scoreCls(row.usOpen) : 'even';
-      const tDisp = row.total !== null ? fmtScore(row.total) : '–';
-      const tCls = row.total !== null ? scoreCls(row.total) : 'even';
 
-      // The Open cell: DQ | in-progress | live score
+      // Total: hide for DQ'd (they can't win, no meaningful "total")
+      const tDisp = isDQ ? '—' : (row.total !== null ? fmtScore(row.total) : '–');
+      const tCls = isDQ ? 'even' : (row.total !== null ? scoreCls(row.total) : 'even');
+
       let openCell;
-      if (row.theOpenDQ) {
-        openCell = '<td class="num" style="color:var(--text-muted);font-size:11px;font-style:italic">Not competing</td>';
+      if (isDQ) {
+        openCell = '<td class="num" style="color:#991b1b;font-size:11px;font-weight:700;letter-spacing:0.5px">DNF</td>';
       } else if (row.theOpen !== null) {
         openCell = `<td class="num ${scoreCls(row.theOpen)}" style="font-weight:600">${fmtScore(row.theOpen)}</td>`;
       } else {
         openCell = '<td class="num even" style="color:var(--text-muted)">In Play</td>';
       }
 
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}" style="font-weight:700">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${pCls}">${pDisp}</td><td class="num ${usCls}">${usDisp}</td>${openCell}`;
+      // Rank cell: number for finishers, "—" for DQs
+      const rankCell = isDQ
+        ? '<td class="rank-num" style="color:var(--text-muted)">—</td>'
+        : `<td class="rank-num">${finisherRank}</td>`;
+
+      // DQ rows get dimmed styling
+      if (isDQ) {
+        tr.style.opacity = '0.55';
+        tr.style.background = '#fafafa';
+      }
+
+      const nameCell = isDQ
+        ? `<td class="better-name" style="text-decoration:line-through">${row.name}<span style="margin-left:8px;font-size:10px;font-weight:700;color:#991b1b;text-decoration:none;letter-spacing:0.5px">DID NOT FINISH</span></td>`
+        : `<td class="better-name">${row.name}</td>`;
+
+      tr.innerHTML = `${rankCell}${nameCell}<td class="num ${tCls}" style="font-weight:700">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${pCls}">${pDisp}</td><td class="num ${usCls}">${usDisp}</td>${openCell}`;
       tbody.appendChild(tr);
     });
   } else {
