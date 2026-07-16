@@ -783,7 +783,7 @@ const BETTERS = [
   { name: "Christian Fassari",       short: "Christian Fassari",     gbc: true,  paid: true,  picks: ["Rory McIlroy","Matt Fitzpatrick","Tom Kim","Min Woo Lee"] },
   { name: "Joseph Pehanick",         short: "J.J. Pehanick",         gbc: true,  paid: true,  picks: ["Rory McIlroy","Tommy Fleetwood","Viktor Hovland","Robert MacIntyre"] },
   { name: "Geoff White",             short: "Geoff White",           gbc: true,  paid: true,  picks: ["Matt Fitzpatrick","Chris Gotterup","Robert MacIntyre","Ludvig Aberg"] },
-  { name: "Kevin Shinar",            short: "Kevin Shinar",          gbc: true,  paid: false, picks: [], noPicksThisEvent: true },
+  { name: "Kevin Shinar",          short: "Kevin Shinar",         gbc: true,  paid: true,  picks: ["Matt Fitzpatrick","Ludvig Aberg","Chris Gotterup","Tom Kim"] },
   { name: "Greg Hawley",             short: "Greg Hawley",           gbc: false, paid: true,  picks: ["Chris Gotterup","Rory McIlroy","Xander Schauffele","Tyrrell Hatton"] },
   { name: "Jim Stankiewicz",         short: "Jim Stankiewicz",       gbc: true,  paid: true,  picks: ["Rory McIlroy","Matt Fitzpatrick","Sam Burns","Ludvig Aberg"] },
   { name: "Joseph M Pehanick",       short: "Joe M. Pehanick",       gbc: false, paid: true,  picks: ["Rory McIlroy","Robert MacIntyre","Matt Fitzpatrick","Tyrrell Hatton"] },
@@ -1179,7 +1179,7 @@ async function loadScores() {
     } else {
       // Pre-tournament: don't populate golferScores (no live scores exist yet)
       golferScores = {};
-      document.getElementById("statusText").textContent = "US Open 2026 — Picks Open";
+      document.getElementById("statusText").textContent = "The Open 2026 — Picks Open";
       document.getElementById("statusSub").textContent = "Shinnecock Hills GC · Southampton, NY · June 18–21 · Live scoring begins Thursday";
       document.getElementById("statusBar").className = "status-bar";
     }
@@ -1195,7 +1195,7 @@ async function loadScores() {
     if (btn) { btn.textContent = "↻ Refresh"; btn.disabled = false; }
     document.getElementById("statusBar").className = "status-bar error-bar";
     if (!API_ENABLED) {
-      document.getElementById("statusText").textContent = "US Open 2026 — Picks Window";
+      document.getElementById("statusText").textContent = "The Open 2026 — Picks Window";
       document.getElementById("statusSub").textContent = "DataGolf API paused · turns on automatically when tracker is updated";
       document.getElementById("statusBar").className = "status-bar";
       document.getElementById("lastUpdated").textContent = "API off (picks in progress)";
@@ -1239,7 +1239,7 @@ function parseESPN(json) {
       });
       const round = players[0]?.round || '';
       document.getElementById("roundInfo").textContent = `Round ${round} · In Progress`;
-      document.getElementById("statusText").textContent = "US Open 2026 — LIVE";
+      document.getElementById("statusText").textContent = "The Open 2026 — LIVE";
       document.getElementById("statusSub").textContent = `Round ${round} · ${players.length} golfers · DataGolf Live`;
       document.getElementById("statusBar").className = "status-bar";
 
@@ -1480,7 +1480,7 @@ function snapshotWinProbs() {
 // Set to true once all US Open picks are in and you want the tracker
 // to start pulling DataGolf pre-tournament odds + live in-play data.
 // When false: tracker shows OWGR-only field display, no API calls made.
-const API_ENABLED = true;  // ✓ Activated for The Open — 17 betters in (Anthony Fassari, Kevin Shinar out)
+const API_ENABLED = true;  // ✓ Activated for The Open — 18 betters in (Anthony Fassari out)
 
 const TOURNAMENT_KEY = "the_open_2026";
 const LS_GOLFER_KEY = `gbc_golfer_history_${TOURNAMENT_KEY}`;
