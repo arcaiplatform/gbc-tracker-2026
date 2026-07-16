@@ -831,8 +831,8 @@ function normName(n) {
 // ============================================================
 const GBC_DATA = {
   2026: {
-    label: "GBC 2026 — Intermission (US Open Complete)",
-    sub: "Masters, PGA Championship & US Open complete · The Open at Royal Birkdale TBD",
+    label: "GBC 2026 — The Open Live",
+    sub: "Masters, PGA & US Open complete · The Open live at Royal Birkdale",
     winners: ["TBD","TBD","TBD"],
     pool: null,
     live: false,
@@ -2687,7 +2687,7 @@ function renderGBCSeason() {
     statRow.innerHTML = `
       <div class="stat-card"><div class="stat-label">GBC Players</div><div class="stat-value">${gbcBetters.length}</div><div class="stat-sub">entered all 4 majors</div></div>
       <div class="stat-card"><div class="stat-label">GBC Pool</div><div class="stat-value">$${gbcPool.toLocaleString()}</div><div class="stat-sub">${gbcBetters.length} players × $200</div></div>
-      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">3 of 4</div><div class="stat-sub">The Open up next</div></div>
+      <div class="stat-card"><div class="stat-label">Majors Played</div><div class="stat-value">4 of 4</div><div class="stat-sub">The Open in play</div></div>
       <div class="stat-card"><div class="stat-label">The Open</div><div class="stat-value" style="font-size:14px;color:#185fa5">${cdStr}</div><div class="stat-sub">Royal Birkdale · Jul 16–19</div></div>`;
   } else {
     const [w1,w2,w3] = data.winners;
@@ -2702,19 +2702,67 @@ function renderGBCSeason() {
   tbody.innerHTML = "";
 
   if (yr === 2026) {
-    // INTERMISSION mode (after US Open, before The Open):
-    // All 3 completed majors read directly from GBC_DATA. The Open shown as TBD.
-    // Sorted by total ascending (lowest score wins).
-    // TIEBREAKER: countback by GBC finish positions across the 4 majors —
+    // LIVE mode (The Open in play):
+    // Historical scores (Masters, PGA, US Open) read directly from GBC_DATA — LOCKED.
+    // The Open score computed LIVE via calcBetter() for each GBC member with picks.
+    // Running total = sum of all 4 majors (nulls skipped).
+    // TIEBREAKER: countback by GBC finish positions across all 4 majors —
     // most 1st places wins, then most 2nds, then 3rds, etc.
     // Golf-style ranking (T1s share rank 1, next distinct = rank 3, etc.)
 
-    // Compute each GBC member's finish position for each major (among GBC only)
+    // Alias map: BETTERS name → GBC_DATA name
+    const GBC_NAME_ALIASES = {
+      "Joseph Pehanick": "Joseph Jamie Pehanick",
+      "Jim Stankiewicz": "Jim Stankiwicz",
+    };
+
+    // Reverse alias: GBC_DATA name → BETTERS name (for lookup)
+    const GBC_TO_BETTERS = {};
+    Object.entries(GBC_NAME_ALIASES).forEach(([b, g]) => { GBC_TO_BETTERS[g] = b; });
+
+    // Compute live Open score for each GBC member from BETTERS + calcBetter()
+    // Also detect if API data is actually loaded
+    const hasLiveData = Object.keys(golferScores).length > 0;
+
+    // Build enriched rows: locked historicals + live theOpen
+    const liveRows = data.rows.map(gbcRow => {
+      const bettersName = GBC_TO_BETTERS[gbcRow.name] || gbcRow.name;
+      const better = BETTERS.find(b => b.name === bettersName);
+
+      let theOpen = null;
+      let theOpenDQ = false;
+      if (!better || better.noPicksThisEvent || !better.picks || better.picks.length === 0) {
+        theOpenDQ = true;  // Not competing this event (e.g., Anthony Fassari)
+      } else if (hasLiveData) {
+        const calc = calcBetter(better);
+        if (calc.totalScore !== null && calc.totalScore !== undefined) {
+          theOpen = calc.totalScore;
+        }
+      }
+
+      // Recompute total: sum of all 4 majors, treating null as 0 for the sum
+      // BUT only include majors that have actually been played by this person
+      const parts = [gbcRow.masters, gbcRow.pga, gbcRow.usOpen, theOpen];
+      const playedParts = parts.filter(p => p !== null && p !== undefined);
+      const total = playedParts.length > 0 ? playedParts.reduce((s, v) => s + v, 0) : null;
+
+      return {
+        name: gbcRow.name,
+        masters: gbcRow.masters,
+        pga: gbcRow.pga,
+        usOpen: gbcRow.usOpen,
+        theOpen,
+        theOpenDQ,
+        total,
+      };
+    });
+
+    // Compute finish position vectors (GBC-only ranks per major, including live Open)
     const finishesByMember = {};
-    data.rows.forEach(r => { finishesByMember[r.name] = []; });
+    liveRows.forEach(r => { finishesByMember[r.name] = []; });
     const majors = ['masters', 'pga', 'usOpen', 'theOpen'];
     majors.forEach(major => {
-      const scored = data.rows
+      const scored = liveRows
         .filter(r => r[major] !== null && r[major] !== undefined)
         .map(r => ({ name: r.name, score: r[major] }));
       scored.sort((a, b) => a.score - b.score);
@@ -2725,8 +2773,8 @@ function renderGBCSeason() {
       }
     });
 
-    const maxRank = data.rows.length;
-    const sortedRows = [...data.rows].sort((a, b) => {
+    const maxRank = liveRows.length;
+    const sortedRows = [...liveRows].sort((a, b) => {
       const totalDiff = (a.total ?? 99) - (b.total ?? 99);
       if (totalDiff !== 0) return totalDiff;
 
@@ -2736,7 +2784,7 @@ function renderGBCSeason() {
       for (let pos = 1; pos <= maxRank; pos++) {
         const aCount = aF.filter(p => p === pos).length;
         const bCount = bF.filter(p => p === pos).length;
-        if (aCount !== bCount) return bCount - aCount;  // MORE wins → ranked higher
+        if (aCount !== bCount) return bCount - aCount;
       }
       return 0;
     });
@@ -2752,7 +2800,17 @@ function renderGBCSeason() {
       const tDisp = row.total !== null ? fmtScore(row.total) : '–';
       const tCls = row.total !== null ? scoreCls(row.total) : 'even';
 
-      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}" style="font-weight:700">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${pCls}">${pDisp}</td><td class="num ${usCls}">${usDisp}</td><td class="num even" style="color:var(--text-muted)">TBD</td>`;
+      // The Open cell: DQ | in-progress | live score
+      let openCell;
+      if (row.theOpenDQ) {
+        openCell = '<td class="num" style="color:var(--text-muted);font-size:11px;font-style:italic">Not competing</td>';
+      } else if (row.theOpen !== null) {
+        openCell = `<td class="num ${scoreCls(row.theOpen)}" style="font-weight:600">${fmtScore(row.theOpen)}</td>`;
+      } else {
+        openCell = '<td class="num even" style="color:var(--text-muted)">In Play</td>';
+      }
+
+      tr.innerHTML = `<td class="rank-num">${i+1}</td><td class="better-name">${row.name}</td><td class="num ${tCls}" style="font-weight:700">${tDisp}</td><td class="num ${mCls}">${mDisp}</td><td class="num ${pCls}">${pDisp}</td><td class="num ${usCls}">${usDisp}</td>${openCell}`;
       tbody.appendChild(tr);
     });
   } else {
